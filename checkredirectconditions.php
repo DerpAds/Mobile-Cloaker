@@ -1733,57 +1733,66 @@ function geoisplog($txt) {
 	}
 }
 
+$userAgent = $_SERVER['HTTP_USER_AGENT'];
 
-/* Update databases, if needed */
-updateDB();
-
-$ip  = getClientIP();
-$geo = getGEOInfo($ip);
-$isp = getISPInfo($ip);
-
-geoisplog(
-	'ip:"'.$ip.'",'.
-	'isp:"'.$isp['isp'].'",'.
-	'city:"'.$geo['city'].'",'.
-	'province:"'.$geo['province'].'",'.
-	'country:"'.$geo['country'].'",'.
-	'country_code:"'.$geo['country_code'].'",'.
-	'continent:"'.$geo['continent'].'",'.
-	'continent_code:"'.$geo['continent_code'].'",'.
-	'subdiv1:"'.$geo['subdiv1'].'",'.
-	'subdiv1_code:"'.$geo['subdiv1_code'].'",'.
-	'subdiv2:"'.$geo['subdiv2'].'",'.
-	'subdiv2_code:"'.$geo['subdiv2_code'].'"');
-
-$result = array(
-	'ip' => $ip,
-	'isp' => $isp['isp'],
-	'city' => $geo['city'],
-	'province' => $geo['province'],
-	'country' => $geo['country'],
-	'country_code' => $geo['country_code'],
-	'continent' => $geo['continent'],
-	'continent_code' => $geo['continent_code'],
-	'subdiv1' => $geo['subdiv1'],
-	'subdiv1_code' => $geo['subdiv1_code'],
-	'subdiv2' => $geo['subdiv2'],
-	'subdiv2_code' => $geo['subdiv2_code']
-	);
-	
-
-if (in_array($isp['isp'], $allowedIsps) &&
-	!in_array($geo['city'], $blacklistedCities) &&
-	!in_array($geo['province'], $blacklistedProvinces) &&
-	!in_array($geo['subdiv1_code'], $blacklistedSubDivs1) &&
-	!in_array($geo['subdiv2_code'], $blacklistedSubDivs2) &&
-	!in_array($geo['country'], $blacklistedCountries) &&
-	!in_array($geo['continent'], $blacklistedContinents))
+if (!preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $userAgent))
 {
-	$result = array('goClean' => false);
+	$result = array('goClean' => true);
 }
 else
 {
-	$result = array('goClean' => true);
+	/* Update databases, if needed */
+	updateDB();
+
+	$ip  = getClientIP();
+	$geo = getGEOInfo($ip);
+	$isp = getISPInfo($ip);
+
+	geoisplog(
+		'ip:"'.$ip.'",'.
+		'isp:"'.$isp['isp'].'",'.
+		'city:"'.$geo['city'].'",'.
+		'province:"'.$geo['province'].'",'.
+		'country:"'.$geo['country'].'",'.
+		'country_code:"'.$geo['country_code'].'",'.
+		'continent:"'.$geo['continent'].'",'.
+		'continent_code:"'.$geo['continent_code'].'",'.
+		'subdiv1:"'.$geo['subdiv1'].'",'.
+		'subdiv1_code:"'.$geo['subdiv1_code'].'",'.
+		'subdiv2:"'.$geo['subdiv2'].'",'.
+		'subdiv2_code:"'.$geo['subdiv2_code'].'"');
+
+	/*
+	$result = array(
+		'ip' => $ip,
+		'isp' => $isp['isp'],
+		'city' => $geo['city'],
+		'province' => $geo['province'],
+		'country' => $geo['country'],
+		'country_code' => $geo['country_code'],
+		'continent' => $geo['continent'],
+		'continent_code' => $geo['continent_code'],
+		'subdiv1' => $geo['subdiv1'],
+		'subdiv1_code' => $geo['subdiv1_code'],
+		'subdiv2' => $geo['subdiv2'],
+		'subdiv2_code' => $geo['subdiv2_code']
+		);
+	*/	
+
+	if (in_array($isp['isp'], $allowedIsps) &&
+		!in_array($geo['city'], $blacklistedCities) &&
+		!in_array($geo['province'], $blacklistedProvinces) &&
+		!in_array($geo['subdiv1_code'], $blacklistedSubDivs1) &&
+		!in_array($geo['subdiv2_code'], $blacklistedSubDivs2) &&
+		!in_array($geo['country'], $blacklistedCountries) &&
+		!in_array($geo['continent'], $blacklistedContinents))
+	{
+		$result = array('goClean' => false);
+	}
+	else
+	{
+		$result = array('goClean' => true);
+	}
 }
 	
 // Make sure to return a application/json answer, otherwise, 
