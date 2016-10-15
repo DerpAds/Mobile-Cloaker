@@ -1806,26 +1806,31 @@
 	if ($serveCleanAd)
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
-		$resultHtml = str_replace("{onload}", "", $resultHtml);
+		$resultHtml = str_replace("{onload}", " onload=\"alert('Server side: Not allowed to view redirect script.');\"", $resultHtml);
 	}
 	else
 	{
 		$scriptCode = "<script type=\"text/javascript\">
 						   function go() {
-						   		//if (window.self !== window.top) {
+						   		if (window.self !== window.top) {
 						   			if (navigator.plugins.length > 0)
 						   			{
-						   				//return;
+						   				alert('Desktop browser: Found plugins');
+						   				return;
 						   			}
 
-						   			//if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
-		  							//	(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
+						   			if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
+		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
 										setTimeout(function() {
 											window.location = '$redirectUrl';
 										}, 3000);
 									}
-						   		//}
+									else
+									{
+										alert('Desktop browser: No touch indicators found');
+									}
+						   		}
 						   	}
 					   </script>";
 		$onloadCode = " onload=\"go();\"";
@@ -1833,6 +1838,12 @@
 		$resultHtml = str_replace("{script}", $scriptCode, $resultHtml);
 		$resultHtml = str_replace("{onload}", $onloadCode, $resultHtml);
 	}
+
+	header("Expires: Mon, 01 Jan 1985 05:00:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-store, no-cache, must-revalidate");
+	header("Cache-Control: post-check=0, pre-check=0, max-age=0", false);
+	header("Pragma: no-cache");
 
 	echo $resultHtml;
 
