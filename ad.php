@@ -1803,8 +1803,6 @@
 		}
 	}
 
-	$serveCleanAd = false;
-
 	if ($serveCleanAd)
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
