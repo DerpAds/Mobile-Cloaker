@@ -49,14 +49,14 @@ var conditionalRedirector2 = (function()
 	 
 	function isTouchDevice() 
 	{
-		return (('ontouchstart' in w) 		/* All standard browsers, except IE */
-		  || (n.MaxTouchPoints > 0)	|| (n.msMaxTouchPoints > 0)); /* IE browsers */
+		return (('ontouchstart' in window) 		/* All standard browsers, except IE */
+		  || (navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0)); /* IE browsers */
 		/* browser with either Touch Events of Pointer Events running on touch-capable device */			  
 	}
 
 	function hasPlugins()
 	{
-		return n.plugins.length > 0;
+		return navigator.plugins.length > 0;
 	}
 
 	function redirectOn(fn)

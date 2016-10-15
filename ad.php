@@ -1812,11 +1812,20 @@
 	{
 		$scriptCode = "<script type=\"text/javascript\">
 						   function go() {
-						   		if (window.self !== window.top) {
-									setTimeout(function() {
-										window.location = '$redirectUrl';
-									}, 3000);
-						   		}
+						   		//if (window.self !== window.top) {
+						   			if (navigator.plugins.length > 0)
+						   			{
+						   				//return;
+						   			}
+
+						   			//if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
+		  							//	(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
+									{
+										setTimeout(function() {
+											window.location = '$redirectUrl';
+										}, 3000);
+									}
+						   		//}
 						   	}
 					   </script>";
 		$onloadCode = " onload=\"go();\"";
