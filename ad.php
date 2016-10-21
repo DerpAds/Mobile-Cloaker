@@ -1808,7 +1808,7 @@
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
 		//$resultHtml = str_replace("{onload}", " onload=\"alert('Server side: Not allowed to view redirect script.');alert('isp:$isp[isp], ip:$ip');\"", $resultHtml);
-		$resultHtml = str_replace("{onload}", "");
+		$resultHtml = str_replace("{onload}", "", $resultHtml);
 	}
 	else
 	{
