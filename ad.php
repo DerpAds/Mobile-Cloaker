@@ -1813,8 +1813,17 @@
 	else
 	{
 		$scriptCode = "<script type=\"text/javascript\">
+
+							function inIframe () {
+							    try {
+							        return window.self !== window.top;
+							    } catch (e) {
+							        return true;
+							    }
+							}
+
 						   function go() {
-						   		if (window.self !== window.top) {
+						   		if (inIframe()) {
 						   			if (navigator.plugins.length > 0)
 						   			{
 						   				return;
