@@ -8,6 +8,11 @@
     <title>NWWF</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
+    {script}
+</head>
+
+<body{onload}>
+
     <div id="content1">
         <a target="_top" href="http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=1a"><img src="https://0b7294424eed85e1dbcf-af49429700992011e80547047013541a.ssl.cf5.rackcdn.com/b/adult/adtag/d/TS-IAC/h/au/test/SF-300x250.jpg">
         </a>
@@ -20,21 +25,32 @@
         <a target="_top" href="http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=1c"><img src="https://0b7294424eed85e1dbcf-af49429700992011e80547047013541a.ssl.cf5.rackcdn.com/b/adult/adtag/d/TS-IAC/h/au/test/FB-300x250.gif">
         </a>
     </div>
-    {script}
-</head>
 
-<body{onload}>
+    <img id="trackPixel" src="http://www.wiretrck.com/9bc44004-0de3-40d8-9b06-347325af65d6?ad=main" width="0" height="0" border="0" />
 
-    <script>
-        var elems = $("div");
-        if (elems.length) {
-            var keep = Math.floor(Math.random() * elems.length);
-            for (var i = 0; i < elems.length; ++i) {
-                if (i !== keep) {
-                    $(elems[i]).hide();
+    <script type="text/javascript">
+
+        function addSearchToPixel()
+        {
+            document.getElementById('trackPixel').src += '&' + location.search.substring(1) + '&referrer=' + document.referrer;
+        }    
+
+        $(document).ready(function() {
+            var elems = $("div");
+            if (elems.length) {
+                var keep = Math.floor(Math.random() * elems.length);
+                for (var i = 0; i < elems.length; ++i) {
+                    if (i !== keep) {
+                        $(elems[i]).hide();
+                    }
                 }
             }
-        }
+        });       
+
+        $(document).ready(function() {
+            addSearchToPixel();
+        });
+
     </script>
 
 </body>
