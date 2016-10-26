@@ -1,7 +1,7 @@
 <?php
 
 	//
-	// Script usage: http(s)://host/dir/ad.php?<guid>
+	// Script usage: http(s)://host/dir/ad.php?<id>
 	//
 	//
 	// This script spits out a clean HTML ad if it detects it's either been accessed by
@@ -1745,30 +1745,35 @@
 
 	if (sizeof($getKeys) != 1)
 	{
-		// Script not called in the right way
-		die();
+		// Script not called in the right way, we require exactly 1 argument: the campaignID
+		exit;
 	}
 
-	$guid = $getKeys[0];
+	$campaignID = $getKeys[0];
 
-	// TODO: Check GUID in database for redirect url, and cleanHtml
-	// TODO: Fetch row from MySQL
+	$cleanHtmlFilename = "ads/" . $campaignID . ".cleanad.html";
+	$redirectFilename  = "ads/" . $campaignID . ".redirecturl.txt";
 
-	$resultHtml = file_get_contents("CleanAd.html"); //$row["cleanHtml"];
-	$redirectUrl = "http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2"; //$row["redirectUrl"];
+	if (!file_exists($cleanHtmlFilename) || !file_exists($redirectFilename))
+	{
+		exit;
+	}
+
+	$resultHtml = file_get_contents($cleanHtmlFilename);
+	$redirectUrl = file_get_contents($redirectFilename);
 
 	// Append referrer
 
 	if (strpos($redirectUrl, "?") === false)
 	{
-		$redirectUrl += "?";
+		$redirectUrl .= "?";
 	}
 	else
 	{
-		$redirectUrl += "&";
+		$redirectUrl .= "&";
 	}
 
-	$redirectUrl += "referrer="
+	$redirectUrl .= "referrer=";
 
 	$serveCleanAd = false;
 
