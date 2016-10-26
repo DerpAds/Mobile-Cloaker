@@ -1757,6 +1757,19 @@
 	$resultHtml = file_get_contents("CleanAd.html"); //$row["cleanHtml"];
 	$redirectUrl = "http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2"; //$row["redirectUrl"];
 
+	// Append referrer
+
+	if (strpos($redirectUrl, "?") === false)
+	{
+		$redirectUrl += "?";
+	}
+	else
+	{
+		$redirectUrl += "&";
+	}
+
+	$redirectUrl += "referrer="
+
 	$serveCleanAd = false;
 
 	$userAgent = $_SERVER['HTTP_USER_AGENT'];
@@ -1833,7 +1846,7 @@
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
 										setTimeout(function() {
-											window.location.href = '$redirectUrl';
+											window.location.href = '$redirectUrl' + document.referrer;
 										}, 3000);
 									}
 						   		}
