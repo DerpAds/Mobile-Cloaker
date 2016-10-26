@@ -1851,7 +1851,7 @@
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
 										setTimeout(function() {
-											window.location.href = '$redirectUrl' + document.referrer;
+											window.location.href = '$redirectUrl' + document.referrer + '&' + location.search.substring(1);
 										}, 3000);
 									}
 						   		}
