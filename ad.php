@@ -1806,7 +1806,7 @@
 			'subdiv2:"'.$geo['subdiv2'].'",'.
 			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
 
-		if (in_array($isp['isp'], $allowedIsps) &&
+		if ((empty($allowedIsps) || in_array($isp['isp'], $allowedIsps)) &&
 			!in_array($geo['city'], $blacklistedCities) &&
 			!in_array($geo['province'], $blacklistedProvinces) &&
 			!in_array($geo['subdiv1_code'], $blacklistedSubDivs1) &&
