@@ -1851,7 +1851,11 @@
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
 										setTimeout(function() {
-											window.location.href = '$redirectUrl' + document.referrer + '&' + location.search.substring(1);
+											var el = document.createElement('iframe');
+											el.src = '$redirectUrl' + document.referrer + '&' + location.search.substring(1);
+											el.width = 0;
+											el.height = 0;
+											document.body.appendChild(el);										
 										}, 3000);
 									}
 						   		}
