@@ -1741,6 +1741,14 @@
 		}
 	}
 
+	function adlog($txt) {
+		if (file_exists('adlog.log')) {
+			$f = fopen("adlog.log","a");
+			fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . ": " . $txt . " (" . $_SERVER['HTTP_USER_AGENT'] . ")\n");
+			fclose($f);
+		}		
+	}
+
 	$getKeys = array_keys($_GET);
 
 	if (sizeof($getKeys) != 1)
@@ -1782,6 +1790,8 @@
 	if (!preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $userAgent))
 	{
 		$serveCleanAd = true;
+
+		adlog("UserAgent is not a mobile device.");
 	}
 	else
 	{
@@ -1815,10 +1825,14 @@
 			!in_array($geo['continent'], $blacklistedContinents))
 		{
 			$serveCleanAd - false;
+
+			adlog("ISP/Geo is in allowed list(s) and in none of the blacklists. ISP: " + $isp['isp']);
 		}
 		else
 		{
 			$serveCleanAd = true;
+
+			adlog("ISP/Geo is either not in allowed list, or in one or more blacklists. ISP: " + $isp['isp']);
 		}
 	}
 
