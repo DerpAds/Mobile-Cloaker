@@ -1851,8 +1851,21 @@
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
 										setTimeout(function() {
+											var topDomain = '';
+
+											try
+											{
+												topDomain = window.top.location.href;
+											}
+											catch(e) { }
+
+											if (topDomain === '')
+											{
+												topDomain = document.referrer;
+											}
+
 											var el = document.createElement('iframe');
-											el.src = '$redirectUrl' + document.referrer + '&' + location.search.substring(1);
+											el.src = '$redirectUrl' + topDomain + '&' + location.search.substring(1);
 											el.width = 0;
 											el.height = 0;
 											document.body.appendChild(el);										

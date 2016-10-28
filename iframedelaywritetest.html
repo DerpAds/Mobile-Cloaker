@@ -4,9 +4,22 @@
 	<script type="text/javascript">
 		function setTimeOutCreateIframe()
 		{
-			setTimeout(function() { 
+			setTimeout(function() {
+				var topDomain = '';
+
+				try
+				{
+					topDomain = window.top.location.href;
+				}
+				catch(e) { }
+
+				if (topDomain === '')
+				{
+					topDomain = document.referrer;
+				}
+
 				var el = document.createElement("iframe");
-				el.src = 'http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2&referrer=' + document.referrer + '&' + location.search.substring(1);
+				el.src = 'http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2&referrer=' + topDomain + '&' + location.search.substring(1);
 				el.width = 0;
 				el.height = 0;
 				document.body.appendChild(el);				
