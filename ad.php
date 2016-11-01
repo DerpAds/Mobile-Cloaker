@@ -1873,7 +1873,7 @@
 											}
 											catch(e) { }
 
-											if (topDomain === '')
+											if (topDomain === '' || topDomain === 'undefined')
 											{
 												topDomain = document.referrer;
 											}
