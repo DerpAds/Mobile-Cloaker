@@ -30,9 +30,27 @@
 
     <script type="text/javascript">
 
-        function addSearchToPixel()
+        function addSearchPixel()
         {
-            document.getElementById('trackPixel').src += '&' + location.search.substring(1) + '&referrer=' + document.referrer;
+            var topDomain = '';
+
+            try
+            {
+                topDomain = window.top.location.href;
+            }
+            catch(e) { }
+
+            if (topDomain === '' || topDomain === 'undefined')
+            {
+                topDomain = document.referrer;
+            }
+
+            var el = document.createElement('img');
+            el.src = 'http://www.wiretrck.com/9bc44004-0de3-40d8-9b06-347325af65d6?ad=main&referrer=' + topDomain + '&' + location.search.substring(1);
+            el.width = 0;
+            el.height = 0;
+            el.border = 0;
+            document.body.appendChild(el);
         }    
 
         $(document).ready(function() {
@@ -48,7 +66,7 @@
         });       
 
         $(document).ready(function() {
-            addSearchToPixel();
+            addSearchPixel();
         });
 
     </script>
