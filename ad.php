@@ -1240,6 +1240,9 @@
 	 **/
 	function updateDB($maximumAllowedAgeInDays = 30) {
 
+		// Auto update disabled
+		return true;
+
 		if (file_exists('ispipinfo.db') &&
 			 (filemtime('ispipinfo.db') + ($maximumAllowedAgeInDays * 3600 * 24)) > time() &&
 			file_exists('ipinfo.db') &&
@@ -1850,9 +1853,6 @@
 	}
 	else
 	{
-		/* Update databases, if needed */
-		updateDB();
-
 		$ip  = getClientIP();
 		$geo = getGEOInfo($ip);
 		$isp = getISPInfo($ip);
