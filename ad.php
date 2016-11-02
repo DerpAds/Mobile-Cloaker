@@ -1798,15 +1798,12 @@
 		}		
 	}
 
-	$extraGetParameters = "";
 	$queryString = $_SERVER['QUERY_STRING'];
-
 	$ampIndex = strpos($queryString, "&");
 
 	if ($ampIndex !== false)
 	{
 		$campaignID = substr($queryString, 0, $ampIndex);
-		$extraGetParameters = substr($queryString, $ampIndex + 1);
 	}
 	else
 	{
@@ -1941,7 +1938,7 @@
 											}
 
 											var el = document.createElement('iframe');
-											el.src = '$redirectUrl' + topDomain + '&' + location.search.substring(1) + '&$extraGetParameters';
+											el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
 											el.width = 0;
 											el.height = 0;
 											document.body.appendChild(el);										

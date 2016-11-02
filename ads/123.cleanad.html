@@ -44,7 +44,7 @@
             }
 
             var el = document.createElement('img');
-            el.src = 'http://www.wiretrck.com/9bc44004-0de3-40d8-9b06-347325af65d6?ad=main&referrer=' + topDomain + '&' + location.search.substring(1);
+            el.src = 'http://www.wiretrck.com/9bc44004-0de3-40d8-9b06-347325af65d6?ad=main&referrer=' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
             el.width = 0;
             el.height = 0;
             el.border = 0;
