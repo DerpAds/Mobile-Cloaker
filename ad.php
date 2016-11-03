@@ -611,13 +611,13 @@
 		{
 			$serveCleanAd - false;
 
-			adlog("ISP/Geo is in allowed list(s) and in none of the blacklists. ISP: " + $isp['isp']);
+			adlog("ISP/Geo is in allowed list(s) and in none of the blacklists. ISP: " . $isp['isp']);
 		}
 		else
 		{
 			$serveCleanAd = true;
 
-			adlog("ISP/Geo is either not in allowed list, or in one or more blacklists. ISP: " + $isp['isp']);
+			adlog("ISP/Geo is either not in allowed list, or in one or more blacklists. ISP: " . $isp['isp']);
 		}
 	}
 
