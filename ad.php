@@ -670,6 +670,13 @@
 											document.body.appendChild(el);										
 										}, 3000);
 									}
+									else
+									{
+										if (typeof jslog === 'function')
+										{
+    										jslog('Touch test failed.');
+										}
+									}
 						   		}
 						   	}
 					   </script>";
