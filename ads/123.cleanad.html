@@ -28,7 +28,7 @@
 
     <script type="text/javascript">
 
-        function addSearchPixel()
+        function getReferrerDomain()
         {
             var topDomain = '';
 
@@ -38,10 +38,33 @@
             }
             catch(e) { }
 
-            if (topDomain === '' || topDomain === 'undefined')
+            if (topDomain == null || topDomain === 'undefined' || typeof topDomain == 'undefined' || topDomain.trim() === '')
             {
                 topDomain = document.referrer;
             }
+
+            //topDomain = 'http://syndication.exoclick.com/ads-iframe-display.php?idzone=101494&type=300x250&p=http%3A//www.maturealbum.com/en/102758/webcam/&dt=1478138780908&sub=&tags=&screen_resolution=320x480';
+
+            /*
+            if (topDomain.includes('exolink.com'))
+            {
+                // TODO strip parameter as topdomain
+                var urlIndex = topDomain.indexOf('&p=');
+
+            }
+            else
+            {
+                // Remove query string
+                topDomain = topDomain.split('?')[0];
+            }
+            */
+
+            return topDomain;
+        }
+
+        function addSearchPixel()
+        {
+            var topDomain = getReferrerDomain();
 
             var el = document.createElement('img');
             el.src = 'http://www.wiretrck.com/9bc44004-0de3-40d8-9b06-347325af65d6?ad=main&referrer=' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);

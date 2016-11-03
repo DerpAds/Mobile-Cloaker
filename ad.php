@@ -519,7 +519,7 @@
 	function adlog($txt) {
 		if (file_exists('adlog.log')) {
 			$f = fopen("adlog.log","a");
-			fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . ": " . $txt . " (" . $_SERVER['HTTP_USER_AGENT'] . ")\n");
+			fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . "(" . $_SERVER['HTTP_USER_AGENT'] . "): " . $txt . " \n");
 			fclose($f);
 		}		
 	}
@@ -658,7 +658,7 @@
 											}
 											catch(e) { }
 
-											if (topDomain === '' || topDomain === 'undefined')
+											if (topDomain == null || topDomain === 'undefined' || typeof topDomain == 'undefined' || topDomain.trim() === '')
 											{
 												topDomain = document.referrer;
 											}
