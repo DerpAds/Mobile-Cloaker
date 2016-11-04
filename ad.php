@@ -54,8 +54,8 @@
 	$blacklistedCountries 	= array();
 	$blacklistedContinents 	= array();
 
-	$sourceWeightListPerCountry = array("US" => array(array("xhamster", 0.8), array("google", 0.1), array("pornhub", 0.1)),
-								  		"MX" => array(array("xhamster", 0.8), array("google", 0.1), array("pornhub", 0.1)),
+	$sourceWeightListPerCountry = array("US" => array("xhamster" => 8, "google" => 1, "pornhub" => 1),
+								  		"MX" => array("xhamster" => 8, "google" => 1, "pornhub" => 1),
 								  	   );
 
 	/* 
@@ -526,11 +526,29 @@
 	    return null;
 	}
 
+	function weightedRand($sourceWeightList)
+	{
+	    $pos = mt_rand(1, array_sum(array_values($sourceWeightList)));           
+	    $sum = 0;
+
+	    foreach ($sourceWeightList as $source => $weight)
+	    {
+	        $sum += $weight;
+
+	        if ($sum >= $pos)
+	        {
+	            return $source;
+	        }
+	    }
+
+	    return null;
+	}	
+
 	function generateAutoRotateSourceParameter($sourceWeightList)
 	{
 		$result = "f_source=";
 
-		$result .= $sourceWeightList[0][0];
+		$result .= weightedRand($sourceWeightList);
 
 		return $result;
 	}
