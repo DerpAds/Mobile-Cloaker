@@ -37,17 +37,26 @@
 												 "Abovenet Communications",
 												 "Google",
 												 "Cable One"),
-								   "FR" => array("Pain au fromage",
-								   				 "Wine ISP")
-
+								   "MX" => array("Telmex","Mega Cable, S.A. de C.V.","Cablemas Telecomunicaciones SA de CV","CablevisiÃ³n, S.A. de C.V.","Iusacell","Television Internacional, S.A. de C.V.","Mexico Red de Telecomunicaciones, S. de R.L. de C.","Axtel","Cablevision S.A. de C.V.","Nextel Mexico","Telefonos del Noroeste, S.A. de C.V.","Movistar MÃ©xico","RadioMovil Dipsa, S.A. de C.V."),	//MX												 
+								   "FR" => array("Orange","Free SAS","SFR","OVH SAS","Bouygues Telecom","Free Mobile SAS","Bouygues Mobile","Numericable","Orange France Wireless"),	//FR									
+								   "UK" => array("BT","Three","EE Mobile","Telefonica O2 UK","Vodafone","Vodafone Limited"),	//UK									
+								   "AU" => array("Optus","Telstra Internet","Vodafone Australia","TPG Internet","iiNet Limited","Dodo Australia"),		//AU									
+								   "JP" => array("Kddi Corporation","Softbank BB Corp","NTT","Open Computer Network","NTT Docomo,INC.","K-Opticom Corporation","@Home Network Japan","So-net Entertainment Corporation","Biglobe","Jupiter Telecommunications Co.","TOKAI","VECTANT"),		//JP									
+								   "KR" => array("SK Telecom","Korea Telecom","SK Broadband","POWERCOM","Powercomm","LG Powercomm","LG DACOM Corporation","Pubnetplus","LG Telecom"),		//KR									
+								   "BR" => array("Virtua","Vivo","NET Virtua","Global Village Telecom","Oi Velox","Oi Internet","Tim Celular S.A.","Embratel","CTBC","Acom Comunicacoes S.A."),	//BR									
+								   "IN" => array("Airtel","Bharti Airtel Limited","Idea Cellular","Vodafone India","BSNL","Reliance Jio INFOCOMM","Airtel Broadband","Beam Telecom","Tata Mobile","Aircel","Reliance Communications","Hathway","Bharti Broadband")		//IN	
 	);
 
-	$blacklistedCities = array();
-	$blacklistedProvinces = array();
-	$blacklistedSubDivs1 = array();
-	$blacklistedSubDivs2 = array(); 
-	$blacklistedCountries = array();
-	$blacklistedContinents = array();
+	$blacklistedCities 		= array();
+	$blacklistedProvinces 	= array();
+	$blacklistedSubDivs1 	= array();
+	$blacklistedSubDivs2 	= array(); 
+	$blacklistedCountries 	= array();
+	$blacklistedContinents 	= array();
+
+	$sourceWeightListPerCountry = array("US" => array(array("xhamster", 0.8), array("google", 0.1), array("pornhub", 0.1)),
+								  		"MX" => array(array("xhamster", 0.8), array("google", 0.1), array("pornhub", 0.1)),
+								  	   );
 
 	/* 
 		Get ISP by IP info 
@@ -497,6 +506,40 @@
 		return $url;
 	}
 
+	function detectMobileOS()
+	{
+		 $osArray = array(
+	                        '/iphone/i'             =>  'iOS',
+	                        '/ipod/i'               =>  'iOS',
+	                        '/ipad/i'               =>  'iOS',
+	                        '/android/i'            =>  'Android',
+		                 );
+
+	    foreach ($osArray as $regex => $value)
+	    { 
+	        if (preg_match($regex, $user_agent))
+	        {
+	            return $value;
+	        }
+	    }
+
+	    return null;
+	}
+
+	function generateAutoRotateSourceParameter($sourceWeightList)
+	{
+		$result = "f_source=";
+
+		$result .= $sourceWeightList[0][0];
+
+		return $result;
+	}
+
+	function appendAutoRotateSourceParameter($url, $sourceWeightList)
+	{
+		return $url . "&" . generateAutoRotateSourceParameter($sourceWeightList);
+	}
+
 	function mylog($txt) {
 		/*
 		$f = fopen("ispiplog.log","a");
@@ -561,14 +604,21 @@
 		$adCountry = "US";
 	}
 
+	$sourceWeightList = array();
+
+	if (array_key_exists($adCountry, $sourceWeightListPerCountry))
+	{
+		$sourceWeightList = $sourceWeightListPerCountry[$adCountry];
+	}
+
 	// Append referrer
 	$redirectUrl = appendReferrerParameter($redirectUrl);
+	// Append auto generated source parameter
+	//$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
 
 	$serveCleanAd = false;
 
-	$userAgent = $_SERVER['HTTP_USER_AGENT'];
-
-	if (!preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $userAgent))
+	if (!preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $_SERVER['HTTP_USER_AGENT']))
 	{
 		$serveCleanAd = true;
 
