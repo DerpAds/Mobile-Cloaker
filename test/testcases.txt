@@ -1,0 +1,24 @@
+tests:
+
+itunes link:
+https://itunes.apple.com/us/app/uber/id368677368?mt=8
+
+
+HTTP + HTTPS
+X) 302 redirect to itunes
+X) window.location redirect to itunes
+X) window.top.location redirect to itunes
+X) iframed window.location redirect to itunes
+X) iframed window.top.location redirect to itunes
+X) iframed sandboxed window.top.location redirect to itunes
+X) iframe redirect to itunes
+4) click simulation to itunes
+X) Form submit redirect
+
+
+Copy xhamster
+Embed 4 methods of redirect
+
+HTTPS -> HTTP redirect
+
+test HTTPS -> HTTP -> HTTPS redirect
