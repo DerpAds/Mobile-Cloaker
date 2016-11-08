@@ -625,6 +625,8 @@
 	$redirectUrl = array_key_exists('RedirectUrl', $adConfig) ? $adConfig['RedirectUrl'] : "";
 	$redirectMethod = array_key_exists('Method', $adConfig) ? $adConfig['Method'] : "";
 	$adCountry = array_key_exists('CountryCode', $adConfig) ? $adConfig['CountryCode'] : "";
+	$blacklistedProvinces = array_key_exists('ProvinceBlackList', $adConfig) ? preg_split("/\|/", $adConfig['ProvinceBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$blacklistedCities = array_key_exists('CityBlackList', $adConfig) ? preg_split("/\|/", $adConfig['CityBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
 
 	if (empty($redirectUrl))
 	{
