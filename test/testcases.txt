@@ -12,13 +12,16 @@ X) iframed window.location redirect to itunes
 X) iframed window.top.location redirect to itunes
 X) iframed sandboxed window.top.location redirect to itunes
 X) iframe redirect to itunes
-4) click simulation to itunes
+~~4) click simulation to itunes
 X) Form submit redirect
 
 
-Copy xhamster
-Embed 4 methods of redirect
+X) Copy xhamster
+1) Add window.location to xhamster
+2) Add window.top.location to xhamster
+3) Add embedded iframe to xhamster
 
+Later:
 HTTPS -> HTTP redirect
 
 test HTTPS -> HTTP -> HTTPS redirect

