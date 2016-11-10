@@ -1,0 +1,85 @@
+<html>
+<head>
+	<script type="text/javascript">
+		function click()
+		{
+			console.log('here');
+			document.getElementById('link').click();
+			//clickLink(document.getElementById('link'));
+		}
+
+		function redirect()
+		{
+			window.top.location = 'https://itunes.apple.com/us/app/uber/id368677368?mt=8';
+		}
+
+		function createScript() {
+		    var s = document.createElement('script');
+		    s.type = 'text/javascript';
+		    var code = 'window.top.location = \'https://itunes.apple.com/us/app/uber/id368677368?mt=8\';';
+		    try {
+		      s.appendChild(parent.document.createTextNode(code));
+		      parent.document.body.appendChild(s);
+		    } catch (e) {
+		      s.text = code;
+		      parent.document.body.appendChild(s);
+		    }
+		  }		
+
+		function clickLink(link) {
+		    var cancelled = false;
+
+		    if (document.createEvent) {
+		        var event = document.createEvent("MouseEvents");
+		        event.initMouseEvent("click", true, true, window,
+		            0, 0, 0, 0, 0,
+		            false, false, false, false,
+		            0, null);
+		        cancelled = !link.dispatchEvent(event);
+		    }
+		    else if (link.fireEvent) {
+		        cancelled = !link.fireEvent("onclick");
+		    }
+
+		    if (!cancelled) {
+		        window.location = link.href;
+		    }
+		}
+
+		function registerMouseUp()
+		{
+			createScript();
+			document.onmouseup = redirect;
+			parent.document.onmouseup = redirect;
+		}
+
+		function click2()
+		{
+			var el = document.getElementById('link');
+			var evt = document.createEvent("MouseEvents");
+			evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			el.dispatchEvent(evt);			
+		}
+
+		function simulateEvent()
+		{
+		  var e = document.createEvent('HTMLEvents');
+		  e.initEvent('touchstart',true, true);
+		  document.dispatchEvent(e);
+		}
+
+		function submitform()
+		{
+			document.getElementById('form').submit();
+		}
+
+	</script>
+</head>
+<body onload="registerMouseUp();">
+	<a id="link" href="https://itunes.apple.com/us/app/uber/id368677368?mt=8" target="_blank">Adlink</a>
+
+	FORM:
+	<form id="form" action="https://itunes.apple.com/us/app/uber/id368677368?mt=8" method="GET">
+	</form>
+</body>
+</html>
