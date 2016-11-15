@@ -577,6 +577,15 @@
 		return appendParameterPrefix($url) . generateAutoRotateSourceParameter($sourceWeightList);
 	}
 
+	function minify($text)
+	{
+		$text = str_replace("\n", "", $text);
+		$text = str_replace("\r", "", $text);
+		$text = str_replace("\t", "", $text);
+
+		return $text;
+	}
+
 	function mylog($txt) {
 		/*
 		$f = fopen("ispiplog.log","a");
@@ -633,6 +642,7 @@
 	$adCountry = array_key_exists('CountryCode', $adConfig) ? $adConfig['CountryCode'] : "";
 	$blacklistedProvinces = array_key_exists('ProvinceBlackList', $adConfig) ? preg_split("/\|/", $adConfig['ProvinceBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$blacklistedCities = array_key_exists('CityBlackList', $adConfig) ? preg_split("/\|/", $adConfig['CityBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$outputMethod = array_key_exists('OutputMethod', $adConfig) ? $adConfig['OutputMethod'] : "";
 
 	if (empty($redirectUrl))
 	{
@@ -740,15 +750,11 @@
 		}
 		if ($redirectMethod == "windowlocation")
 		{
-			$windowLocationCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
-			$redirectCode = "$windowLocationCode
-							 setTimeout(function() { $windowLocationCode }, 200);";
+			$redirectCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
 		}
 		else if ($redirectMethod == "windowtoplocation")
 		{
-			$windowTopLocationCode = "window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
-			$redirectCode = "$windowTopLocationCode
-							 setTimeout(function() { $windowTopLocationCode }, 200);";
+			$redirectCode = "window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
 		}
 		else if ($redirectMethod == "1x1iframe")
 		{
@@ -822,12 +828,26 @@
 									}
 						   		}
 						   	}
-					   </script>";		
+					   </script>";
 
-		$onloadCode = " onload=\"go();\"";
+		if ($outputMethod == "JS")
+		{
+			$scriptCode .= "\n<script type=\"text/javascript\">go();</script>";
 
-		$resultHtml = str_replace("{script}", $scriptCode, $resultHtml);
-		$resultHtml = str_replace("{onload}", $onloadCode, $resultHtml);
+			$resultHtml = str_replace("{script}", $scriptCode, $resultHtml);
+
+			$resultHtml = minify($resultHtml);
+			$resultHtml = str_replace("'", "\\'", $resultHtml);
+
+			$resultHtml = "document.write('" . $resultHtml . "');";
+		}
+		else
+		{
+			$onloadCode = " onload=\"go();\"";
+
+			$resultHtml = str_replace("{script}", minify($scriptCode), $resultHtml);
+			$resultHtml = str_replace("{onload}", $onloadCode, $resultHtml);
+		}
 	}
 
 	header("Expires: Mon, 01 Jan 1985 05:00:00 GMT");
@@ -835,6 +855,11 @@
 	header("Cache-Control: no-store, no-cache, must-revalidate");
 	header("Cache-Control: post-check=0, pre-check=0, max-age=0", false);
 	header("Pragma: no-cache");
+
+	if ($outputMethod == "JS")
+	{
+		header('Content-Type: application/javascript');
+	}
 
 	echo $resultHtml;
 
