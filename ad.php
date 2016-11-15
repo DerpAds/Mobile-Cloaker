@@ -431,6 +431,20 @@
 		
 		// No information found
 		return false;
+	}
+
+	/**
+	 * Ensures an ip address is both a valid IP and does not fall within
+	 * a private network range.
+	 */
+	function validateIP($ip)
+	{
+	    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false)
+	    {
+	        return false;
+	    }
+
+	    return true;
 	}	
 
 	/*
@@ -446,7 +460,7 @@
 	                // trim for safety measures
 	                $ip = trim($ip);
 	                // attempt to validate IP
-	                if (validate_ip($ip)) {
+	                if (validateIP($ip)) {
 	                    return $ip;
 	                }
 	            }
@@ -454,20 +468,6 @@
 	    }
 
 	    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
-	}
-
-	/**
-	 * Ensures an ip address is both a valid IP and does not fall within
-	 * a private network range.
-	 */
-	function validate_ip($ip)
-	{
-	    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false)
-	    {
-	        return false;
-	    }
-
-	    return true;
 	}
 
 	function trimNewLine($string)
