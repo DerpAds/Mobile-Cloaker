@@ -69,18 +69,21 @@
 	**/
 	function getISPInfo($ip)
 	{
-		mylog('getISPInfo:'.$ip);
-		
 		// If data not available, we can´t do it
-		if (!file_exists('ispipinfo.db')) {
-			mylog('getISPInfo: missing DB');
+		if (!file_exists('ispipinfo.db'))
+		{
+			adlog('getISPInfo: missing DB');
+
 			return false;
 		}
 		
 		/* Use a lock to prevent parallel updates */
 		$fl = fopen('ispip.lock', 'c+b');
-		if (is_resource($fl)) {
-			if (!flock($fl, LOCK_SH /* Lock for reading */ )) { 
+
+		if (is_resource($fl))
+		{
+			if (!flock($fl, LOCK_SH /* Lock for reading */ ))
+			{ 
 				fclose($fl);
 				$fl = false;
 			}
@@ -104,7 +107,8 @@
 		
 		$lo = 0; 
 		$hi = $last - 1;
-		while ($lo <= $hi) {
+		while ($lo <= $hi)
+		{
 			/* Get index */
 			$mid = (int)(($hi - $lo) / 2) + $lo;
 			
@@ -114,7 +118,6 @@
 			
 			/* 'VCCvvvv' */
 			$cols = unpack('V1a/C1b/C1c/v1d/v1e/v1f/v1g',$r);
-			mylog('[#'.$mid.']: ip:'.long2ip((float)$ip).' => ip:'.long2ip((float)$cols['a']).'/'.$cols['b']);
 					
 			/* Compare the ip with the supplied one */
 			$cmp = (int)($ip-0x80000000) - (int)($cols['a']-0x80000000); /* fix for missing u32 type in php */
@@ -131,7 +134,8 @@
 		}
 		
 		/* Point to the proper entry */
-		if ($lo > 0) {
+		if ($lo > 0)
+		{
 			--$lo;
 		}
 		
@@ -140,10 +144,10 @@
 		$r = fread($f, 14);
 		fclose($f);
 		$cols = unpack('V1a/C1b/C1c/v1d/v1e/v1f/v1g',$r);
-		mylog('[#'.$lo.']: ip:'.long2ip((float)$ip).' => ip:'.long2ip((float)$cols['a']).'/'.$cols['b']);
 		$mask = ~((1 << (32-$cols["b"]))-1);
 		
-		if (((int)(($ip ^ $cols["a"]) & $mask)) == 0) {
+		if (((int)(($ip ^ $cols["a"]) & $mask)) == 0)
+		{
 			/* Match! - Return information! */
 			
 			$isp_code = $cols['d'] | (($cols['c'] & 0x0F) << 16);
@@ -178,7 +182,8 @@
 			fclose($f);
 
 			/* Release lock. Next CURL operation will be carried */
-			if ($fl !== false) {
+			if ($fl !== false)
+			{
 				flock($fl, LOCK_UN);
 				fclose($fl);
 			}	
@@ -193,7 +198,8 @@
 		}
 		
 		/* Release lock. Next CURL operation will be carried */
-		if ($fl !== false) {
+		if ($fl !== false)
+		{
 			flock($fl, LOCK_UN);
 			fclose($fl);
 		}	
@@ -209,7 +215,8 @@
 		
 		$lo = 0; 
 		$hi = $last - 1;
-		while ($lo <= $hi) {
+		while ($lo <= $hi)
+		{
 			/* Get index */
 			$mid = (int)(($hi - $lo) / 2) + $lo;
 			
@@ -223,11 +230,16 @@
 			
 			/* Compare with the record we are looking for */
 			$cmp = $continent_nr - $cols['a'];
-			if ($cmp == 0) {
+
+			if ($cmp == 0)
+			{
 				$cmp = $country_nr - $cols['b'];
-				if ($cmp == 0) {
+
+				if ($cmp == 0)
+				{
 					$cmp = strcmp($subdiv1_code, $cols['c']);
-					if ($cmp == 0) {
+					if ($cmp == 0)
+					{
 						$cmp = strcmp($subdiv2_code, $cols['d']);
 					}
 				}
@@ -235,18 +247,24 @@
 			}
 
 			/* Jump to the next register */
-			if ($cmp > 0) {
+			if ($cmp > 0)
+			{
 				$lo = $mid + 1;
-			} elseif ($cmp < 0) {
+			}
+			elseif ($cmp < 0)
+			{
 				$hi = $mid - 1;
-			} else {
+			}
+			else
+			{
 				$lo = $mid + 1;
 				break;
 			}
 		}
 		
 		/* Point to the proper entry */
-		if ($lo > 0) {
+		if ($lo > 0)
+		{
 			--$lo;
 		}
 		
@@ -261,11 +279,17 @@
 
 		/* Compare with the record we are looking for */
 		$cmp = $continent_nr - $cols['a'];
-		if ($cmp == 0) {
+
+		if ($cmp == 0)
+		{
 			$cmp = $country_nr - $cols['b'];
-			if ($cmp == 0) {
+
+			if ($cmp == 0)
+			{
 				$cmp = strcmp($subdiv1_code, $cols['c']);
-				if ($cmp == 0) {
+
+				if ($cmp == 0)
+				{
 					$cmp = strcmp($subdiv2_code, $cols['d']);
 				}
 			}
@@ -282,18 +306,20 @@
 	**/
 	function getGEOInfo($ip)
 	{
-		mylog('getGEOInfo:'.$ip);
-
 		// If data not available, fail call
-		if (!file_exists('ipinfo.db')) {
-			mylog('getGEOInfo: missing DB');
+		if (!file_exists('ipinfo.db'))
+		{
+			adlog('getGEOInfo: missing DB');
+
 			return false;
 		}
 		
 		/* Use a lock to prevent parallel updates */
 		$fl = fopen('geoip.lock', 'c+b');
-		if (is_resource($fl)) {
-			if (!flock($fl, LOCK_SH /* Lock for reading */ )) { 
+		if (is_resource($fl))
+		{
+			if (!flock($fl, LOCK_SH /* Lock for reading */ ))
+			{ 
 				fclose($fl);
 				$fl = false;
 			}
@@ -310,7 +336,9 @@
 		
 		$lo = 0; 
 		$hi = $last - 1;
-		while ($lo <= $hi) {
+
+		while ($lo <= $hi)
+		{
 			/* Get index */
 			$mid = (int)(($hi - $lo) / 2) + $lo;
 			
@@ -319,25 +347,28 @@
 			$r = fread($f, 24);
 			$cols = unpack('V1a/C1b/v1c/C1d/a8e/f1f/f1g',$r);
 			
-			mylog('[#'.$mid.']: ip:'.long2ip((float)$ip).' => ip:'.long2ip((float)$cols['a']).'/'.$cols['b']);
-
-			
 			/* Compare the ip with the supplied one */
 			$cmp = (int)($ip-0x80000000) - (int)($cols['a']-0x80000000); /* fix for missing u32 type in php */
 
 			/* Jump to the next register */
-			if ($cmp > 0) {
+			if ($cmp > 0)
+			{
 				$lo = $mid + 1;
-			} elseif ($cmp < 0) {
+			}
+			elseif ($cmp < 0)
+			{
 				$hi = $mid - 1;
-			} else {
+			}
+			else
+			{
 				$lo = $mid + 1;
 				break;
 			}
 		}
 		
 		/* Point to the proper entry */
-		if ($lo > 0) {
+		if ($lo > 0)
+		{
 			--$lo;
 		}
 		
@@ -347,11 +378,10 @@
 		fclose($f);
 		$cols = unpack("V1a/C1b/v1c/C1d/a8e/f1f/f1g",$r);
 		
-		mylog('[#'.$lo.']: ip:'.long2ip((float)$ip).' => ip:'.long2ip((float)$cols['a']).'/'.$cols['b']);
-		
 		$mask = ~((1 << (32-$cols["b"]))-1);
 		
-		if (((int)(($ip ^ $cols["a"]) & $mask)) == 0) {
+		if (((int)(($ip ^ $cols["a"]) & $mask)) == 0)
+		{
 			/* Match! - Return information! */
 			$city_code = $cols['c'] | ($cols['d'] << 16);
 			$zip = trim($cols['e']);
@@ -399,7 +429,8 @@
 			$subdiv2   = lookup_subdiv($continent_nr,$country_nr,$subdiv1_code,$subdiv2_code);
 			
 			/* Release lock. Next CURL operation will be carried */
-			if ($fl !== false) {
+			if ($fl !== false)
+			{
 				flock($fl, LOCK_UN);
 				fclose($fl);
 			}	
@@ -424,7 +455,8 @@
 		}
 		
 		/* Release lock. Next CURL operation will be carried */
-		if ($fl !== false) {
+		if ($fl !== false)
+		{
 			flock($fl, LOCK_UN);
 			fclose($fl);
 		}	
@@ -454,13 +486,17 @@
 	{
 	    $ip_keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
 
-	    foreach ($ip_keys as $key) {
-	        if (array_key_exists($key, $_SERVER) === true) {
-	            foreach (explode(',', $_SERVER[$key]) as $ip) {
+	    foreach ($ip_keys as $key)
+	    {
+	        if (array_key_exists($key, $_SERVER) === true)
+	        {
+	            foreach (explode(',', $_SERVER[$key]) as $ip)
+	            {
 	                // trim for safety measures
 	                $ip = trim($ip);
 	                // attempt to validate IP
-	                if (validateIP($ip)) {
+	                if (validateIP($ip))
+	                {
 	                    return $ip;
 	                }
 	            }
@@ -586,27 +622,23 @@
 		return $text;
 	}
 
-	function mylog($txt) {
-		/*
-		$f = fopen("ispiplog.log","a");
-		fwrite($f,$txt."\n");
-		fclose($f);
-		*/
-	}
-
 	/*
 	 * Log to the geoip.log
 	 */
-	function geoisplog($txt) {
-		if (file_exists('geoisplog.log')) {
+	function geoisplog($txt)
+	{
+		if (file_exists('geoisplog.log'))
+		{
 			$f = fopen("geoisplog.log","a");
 			fwrite($f,$txt."\n");
 			fclose($f);
 		}
 	}
 
-	function adlog($txt) {
-		if (file_exists('adlog.log')) {
+	function adlog($txt)
+	{
+		if (file_exists('adlog.log'))
+		{
 			$f = fopen("adlog.log","a");
 			fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . "(" . $_SERVER['HTTP_USER_AGENT'] . "): " . $txt . " \n");
 			fclose($f);
@@ -777,6 +809,53 @@
 
 		$scriptCode = "<script type=\"text/javascript\">
 
+							function canvasFingerprint()
+							{
+								var canvas = document.createElement('canvas');
+								var ctx = canvas.getContext('2d');
+								var txt = 'i9asdm..$#po((^@KbXrww!~cz';
+
+								ctx.textBaseline = 'top';
+								ctx.font = \"16px 'Arial'\";
+								ctx.textBaseline = 'alphabetic';
+								ctx.rotate(.05);
+								ctx.fillStyle = '#f60';
+								ctx.fillRect(125,1,62,20);
+								ctx.fillStyle = '#069';
+								ctx.fillText(txt, 2, 15);
+								ctx.fillStyle = 'rgba(102, 200, 0, 0.7)';
+								ctx.fillText(txt, 4, 17);
+								ctx.shadowBlur = 10;
+								ctx.shadowColor = 'blue';
+								ctx.fillRect(-20,10,234,5);
+								var strng = canvas.toDataURL();
+
+								var hash = 0;
+
+								if (strng.length == 0)
+								{
+									return null;
+								}
+
+								for (i = 0; i < strng.length; i++)
+								{
+									var chr = strng.charCodeAt(i);
+									hash = ((hash << 5) - hash) + chr;
+									hash = hash & hash;
+								}
+
+								console.log(hash);
+
+								return hash;
+							}
+
+							function inBlockedCanvasList()
+							{
+								var blockedList = [null, -21756327];
+
+								return blockedList.indexOf(canvasFingerprint()) !== -1;
+							}
+
 							function inIframe ()
 							{
 							    try
@@ -789,18 +868,18 @@
 							    }
 							}
 
-						   function go()
-						   {
-						   		if (inIframe())
+							function go()
+							{
+								if (inIframe() && navigator.plugins.length == 0)
 						   		{
-						   			if (navigator.plugins.length > 0)
-						   			{
-						   				return;
-						   			}
-
 						   			if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
+										if (inBlockedCanvasList())
+										{
+											return;
+										}
+
 										setTimeout(function()
 										{
 											var topDomain = '';
@@ -828,6 +907,7 @@
 									}
 						   		}
 						   	}
+
 					   </script>";
 
 		if ($outputMethod == "JS")
