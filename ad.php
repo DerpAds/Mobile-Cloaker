@@ -622,6 +622,16 @@
 		return $text;
 	}
 
+	function createJSCode($resultHtml)
+	{
+		$resultHtml = minify($resultHtml);
+		$resultHtml = str_replace("'", "\\'", $resultHtml);
+
+		$resultHtml = "document.write('" . $resultHtml . "');";
+
+		return $resultHtml;
+	}
+
 	/*
 	 * Log to the geoip.log
 	 */
@@ -745,6 +755,11 @@
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
 		$resultHtml = str_replace("{onload}", "", $resultHtml);
+
+		if ($outputMethod == "JS")
+		{
+			$resultHtml = createJSCode($resultHtml);
+		}
 	}
 	else
 	{
@@ -916,10 +931,7 @@
 
 			$resultHtml = str_replace("{script}", $scriptCode, $resultHtml);
 
-			$resultHtml = minify($resultHtml);
-			$resultHtml = str_replace("'", "\\'", $resultHtml);
-
-			$resultHtml = "document.write('" . $resultHtml . "');";
+			$resultHtml = createJSCode($resultHtml);
 		}
 		else
 		{
