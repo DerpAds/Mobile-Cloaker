@@ -56,7 +56,6 @@
 	$blacklistedReferrers	= array("rtbfy", "mediatrust", "geoedge");
 
 	$blockedParameterValues = array("pubid" 		=> array("0"),
-									"app_name" 		=> array("app_name"),
 									"cachebuster" 	=> array("0"),
 									"domain"		=> array("none", "connect.themediatrust.com")
 								    );
@@ -645,20 +644,33 @@
 	 */
 	function geoisplog($txt)
 	{
-		if (file_exists('geoisplog.log'))
+		if (file_exists("geoisplog.log"))
 		{
 			$f = fopen("geoisplog.log","a");
-			fwrite($f,$txt."\n");
+			fwrite($f,$txt . "\n");
 			fclose($f);
 		}
 	}
 
 	function adlog($txt)
 	{
-		if (file_exists('adlog.log'))
+		if (file_exists("adlog.log"))
 		{
 			$f = fopen("adlog.log","a");
 			fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . "(" . $_SERVER['HTTP_USER_AGENT'] . "): " . $txt . " \n");
+			fclose($f);
+		}		
+	}
+
+	function mbotlog($ip, $isp, $txt)
+	{
+		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
+		$line = "Date," . date('Y-m-d H:i:s') . ",IP," . $ip . ",ISP," . $isp . ",UserAgent," . $_SERVER['HTTP_USER_AGENT'] . ",Referrer," . $referrer . ",QueryString," . $_SERVER['QUERY_STRING'] . ",Message," . $txt . "\n";
+
+		//if (file_exists("mbotlog.log"))
+		{
+			$f = fopen("mbotlog.log","a");
+			fwrite($f, $line);
 			fclose($f);
 		}		
 	}
@@ -774,16 +786,26 @@
 
 	if (!$serveCleanAd)
 	{
-		foreach ($_GET as $parameter => $value)
+		foreach ($blockedParameterValues as $parameter => $blockedValues)
 		{
-			if (array_key_exists($parameter, $blockedParameterValues))
+			if (array_key_exists($parameter, $_GET))
 			{
-				if (in_array($value, $blockedParameterValues[$parameter]))
+				if (in_array($_GET[$parameter], $blockedValues))
 				{
 					$serveCleanAd = true;
 
+					mbotlog($ip, $isp['isp'], "Parameter $parameter has blocked value: $_GET[$parameter]");
+
 					break;
 				}
+			}
+			else
+			{
+				$serveCleanAd = true;
+
+				mbotlog($ip, $isp['isp'], "Parameter $parameter missing from querystring");
+
+				break;
 			}
 		}
 	}
