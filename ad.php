@@ -779,6 +779,8 @@
 			{
 				$serveCleanAd = true;
 
+				mbotlog($ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is in blacklist");
+
 				break;
 			}
 		}
