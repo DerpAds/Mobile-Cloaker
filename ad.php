@@ -44,7 +44,7 @@
 								   "KR" => array("SK Telecom","Korea Telecom","SK Broadband","POWERCOM","Powercomm","LG Powercomm","LG DACOM Corporation","Pubnetplus","LG Telecom"),		//KR									
 								   "BR" => array("Virtua","Vivo","NET Virtua","Global Village Telecom","Oi Velox","Oi Internet","Tim Celular S.A.","Embratel","CTBC","Acom Comunicacoes S.A."),	//BR									
 								   "IN" => array("Airtel","Bharti Airtel Limited","Idea Cellular","Vodafone India","BSNL","Reliance Jio INFOCOMM","Airtel Broadband","Beam Telecom","Tata Mobile","Aircel","Reliance Communications","Hathway","Bharti Broadband")		//IN	
-	);
+								  );
 
 	$blacklistedCities 		= array();
 	$blacklistedProvinces 	= array();
@@ -52,7 +52,14 @@
 	$blacklistedSubDivs2 	= array(); 
 	$blacklistedCountries 	= array();
 	$blacklistedContinents 	= array();
+
 	$blacklistedReferrers	= array("api.geoedge");
+
+	$blockedParameterValues = array("pubid" 		=> array("0"),
+									"app_name" 		=> array("app_name"),
+									"cachebuster" 	=> array("0"),
+									"domain"		=> array("none", "connect.themediatrust.com")
+								    );
 
 	$sourceWeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
 													  "Android" => array("YouCam.Makeup" => 8, "ANA" => 1, "スヌーピードロップス" => 1, "mora.WALKMAN.公式ミュージックストア～" => 1, "Music.player" => 1)
@@ -759,7 +766,24 @@
 			if (strpos($_SERVER['HTTP_REFERER'], $blackListedReferrer) !== false)
 			{
 				$serveCleanAd = true;
+
 				break;
+			}
+		}
+	}
+
+	if (!$serveCleanAd)
+	{
+		foreach ($_GET as $parameter => $value)
+		{
+			if (array_key_exists($parameter, $blockedParameterValues))
+			{
+				if (in_array($value, $blockedParameterValues[$parameter]))
+				{
+					$serveCleanAd = true;
+
+					break;
+				}
 			}
 		}
 	}
