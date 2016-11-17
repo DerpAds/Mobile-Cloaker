@@ -206,7 +206,8 @@ function getHeadersInfo() {
 		$id = $_COOKIE[$cookie_name];
 	}
 	
-	return "ID,".$id.",Nr Visit,".$visits.",ISP,\"".$isp['isp']."\",QueryString,\"".$_SERVER['QUERY_STRING']."\",Server UA,\"".$ua."\",Server Referer,\"".$referer."\",";
+	//return "ID,".$id.",Nr Visit,".$visits.",ISP,\"".$isp['isp']."\",QueryString,\"".$_SERVER['QUERY_STRING']."\",Server UA,\"".$ua."\",Server Referer,\"".$referer."\",";
+	return "ISP,\"".$isp['isp']."\",";
 }
 
 /**
@@ -284,14 +285,15 @@ function onLoad() {
 	setcookie($cookie_name, $id, time() + (86400 * 365), "/"); // 86400 = 1 day
 
 	/* Add an entry log to signal fetched page */
-	add_to_log("Type,Start,".getHeadersInfo()."Time,?");
+	//add_to_log("Type,Start,".getHeadersInfo()."Time,?");
 }
 
 /* Handle POSTed data to the URL and add it to our log */
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	if($_POST["data"]) {
 		$decoded = utf8_urldecode($_POST["data"]);
-		add_to_log("Type,Info,".getHeadersInfo()."Time,?,Javascript,true,Method,POST,".$decoded);
+		//add_to_log("Type,Info,".getHeadersInfo()."Time,?,Javascript,true,Method,POST,".$decoded);
+		add_to_log("Type,Info,".getHeadersInfo().$decoded);
 		echo "OK";
 		exit();	
 	}
@@ -310,7 +312,8 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	/* GET method as a way to report information */
 	if (array_key_exists('data',$_GET)) {
 		$decoded = utf8_urldecode($_GET["data"]);
-		add_to_log("Type,Info,".getHeadersInfo()."Time,?,Javascript,true,Method,GET,".$decoded);
+		//add_to_log("Type,Info,".getHeadersInfo()."Time,?,Javascript,true,Method,GET,".$decoded);
+		add_to_log("Type,Info,".getHeadersInfo().$decoded);
 		
 		// Create a blank image
 		$im = imagecreatetruecolor(1, 1);

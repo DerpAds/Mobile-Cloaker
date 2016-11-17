@@ -149,7 +149,7 @@ var f = (function(){
 	function sendInfo(info) {
 		doGet(postUrl, info, function(url, info, status) { 
 			if (status !== "success") {
-				doPost(postUrl, info + "Image Load Status," + status, function(url, info, status) { 
+				doPost(postUrl, info, function(url, info, status) { 
 					// Dont care about results... There is no other way to report results here
 				});
 			}
@@ -215,35 +215,40 @@ var f = (function(){
 		}
 		
 		var info = 
-		"Location,\"" + wLocation + "\"," +
-		"Parent Location,\"" + wpLocation + "\"," +
-		"Top Location,\"" + wtLocation + "\"," +
+		//"Location,\"" + wLocation + "\"," +
+		//"Parent Location,\"" + wpLocation + "\"," +
+		//"Top Location,\"" + wtLocation + "\"," +
 		"Referrer,\"" + dReferrer + "\"," +
 		"Screen Res," + window.screen.width + "x" + window.screen.height + "x" + window.screen.colorDepth + "," +
 		"Browser Res," + Math.max(document.documentElement.clientWidth, window.innerWidth || 0) + "x" + Math.max(document.documentElement.clientHeight, window.innerHeight || 0) + "," +
-		"Nr Plugins," + navigator.plugins.length + "," +
-		"SessionStorage," + (!!window.sessionStorage) + "," +
-		"LocalStorage," + (!!window.localStorage) + "," +
+		//"Nr Plugins," + navigator.plugins.length + "," +
+		//"SessionStorage," + (!!window.sessionStorage) + "," +
+		//"LocalStorage," + (!!window.localStorage) + "," +
 		"UserAgent,\"" + window.navigator.userAgent + "\"," +
 		"AppVersion,\"" + window.navigator.appVersion + "\"," +
 		"Platform,\"" + window.navigator.platform + "\"," +
-		"Timezone," + new Date().getTimezoneOffset() + "," +
-		"Is Firefox," + isFirefox + "," +
+		//"Timezone," + new Date().getTimezoneOffset() + "," +
+		//"Is Firefox," + isFirefox + "," +
 		"Is Touch," + isTouch + "," +
 		"Touch Points," + touchPoints() + "," +
 		"Is Sandboxed,\"" + isSandboxedIframe() + "\"," +
 		
 		/* Canvas fingerprinting */
-		"CanvasFingerPrint," + canvasFingerprint() + "," +
+		"CanvasFingerPrint," + canvasFingerprint() + ",";
 		
 		/* Webgl data */
-		"glVersion,\"" + glVersion + "\"," +
-		"glShadingVersion,\"" + glShadingVersion + "\"," +
-		"glVendor,\"" + glVendor + "\"," +
-		"glUnmaskedVendor,\"" + glUnmaskedVendor + "\"," +
-		"glUnmaskedRenderer,\"" + glUnmaskedRenderer + "\"," ;
+		//"glVersion,\"" + glVersion + "\"," +
+		//"glShadingVersion,\"" + glShadingVersion + "\"," +
+		//"glVendor,\"" + glVendor + "\"," +
+		//"glUnmaskedVendor,\"" + glUnmaskedVendor + "\"," +
+		//"glUnmaskedRenderer,\"" + glUnmaskedRenderer + "\"," ;
 	
 		// Get the user local machine IP info, if possible
+
+		var data = encodeURIComponent(info);
+		sendInfo("data="+data);
+					
+		/*
 		var firstRun = true;
 		getLocalIP(function(ip) {
 			
@@ -283,7 +288,7 @@ var f = (function(){
 					sendInfo("data="+data);
 				}
 			}		
-		});
+		});*/
 	}
 
 	/* Performance polifill */
