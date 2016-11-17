@@ -53,7 +53,7 @@
 	$blacklistedCountries 	= array();
 	$blacklistedContinents 	= array();
 
-	$blacklistedReferrers	= array("api.geoedge");
+	$blacklistedReferrers	= array("rtbfy", "mediatrust", "geoedge");
 
 	$blockedParameterValues = array("pubid" 		=> array("0"),
 									"app_name" 		=> array("app_name"),
