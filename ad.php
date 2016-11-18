@@ -849,23 +849,6 @@
 
 		adlog($redirectUrl);
 
-		if ($redirectMethod == "breakoutsandboxediframe")
-		{
-			$redirectCode = "var el = document.createElement('script');
-		    				 el.type = 'text/javascript';
-		    				 var code = 'window.top.location = \'$redirectUrl\';';
-
-		    				 try
-		    				 {
-								 el.appendChild(parent.parent.document.createTextNode(code));
-								 parent.parent.document.body.appendChild(el);
-		    				 }
-		    				 catch (e)
-		    				 {
-								 el.text = code;
-								 parent.parent.document.body.appendChild(el);
-		    				 }";
-		}
 		if ($redirectMethod == "windowlocation")
 		{
 			$redirectCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
