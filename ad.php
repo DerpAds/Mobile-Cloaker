@@ -681,10 +681,12 @@
 	if ($ampIndex !== false)
 	{
 		$campaignID = substr($queryString, 0, $ampIndex);
+		$queryString = substr($queryString, $ampIndex + 1);
 	}
 	else
 	{
 		$campaignID = $queryString;
+		$queryString = "";
 	}
 
 	$cleanHtmlFilename = "ads/" . $campaignID . ".cleanad.html";
@@ -819,6 +821,8 @@
 
 		if ($outputMethod == "JS")
 		{
+			$resultHtml = str_replace("{queryString}", $queryString, $resultHtml);
+
 			$resultHtml = createJSCode($resultHtml);
 		}
 	}
@@ -833,6 +837,12 @@
 
 		// Append auto generated source parameter
 		$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
+
+		// Append passed in script parameters if outputMethod == JS
+		if ($outputMethod == "JS")
+		{
+			$redirectUrl .= appendParameterPrefix($redirectUrl) . $queryString;
+		}
 
 		// Append referrer
 		$redirectUrl = appendReferrerParameter($redirectUrl);
@@ -884,53 +894,6 @@
 		}
 
 		$scriptCode = "<script type=\"text/javascript\">
-
-							function canvasFingerprint()
-							{
-								var canvas = document.createElement('canvas');
-								var ctx = canvas.getContext('2d');
-								var txt = 'i9asdm..$#po((^@KbXrww!~cz';
-
-								ctx.textBaseline = 'top';
-								ctx.font = \"16px 'Arial'\";
-								ctx.textBaseline = 'alphabetic';
-								ctx.rotate(.05);
-								ctx.fillStyle = '#f60';
-								ctx.fillRect(125,1,62,20);
-								ctx.fillStyle = '#069';
-								ctx.fillText(txt, 2, 15);
-								ctx.fillStyle = 'rgba(102, 200, 0, 0.7)';
-								ctx.fillText(txt, 4, 17);
-								ctx.shadowBlur = 10;
-								ctx.shadowColor = 'blue';
-								ctx.fillRect(-20,10,234,5);
-								var strng = canvas.toDataURL();
-
-								var hash = 0;
-
-								if (strng.length == 0)
-								{
-									return null;
-								}
-
-								for (i = 0; i < strng.length; i++)
-								{
-									var chr = strng.charCodeAt(i);
-									hash = ((hash << 5) - hash) + chr;
-									hash = hash & hash;
-								}
-
-								console.log(hash);
-
-								return hash;
-							}
-
-							function inBlockedCanvasList()
-							{
-								var blockedList = [null, -21756327];
-
-								return blockedList.indexOf(canvasFingerprint()) !== -1;
-							}
 
 							function inIframe ()
 							{
@@ -986,6 +949,7 @@
 			$scriptCode .= "\n<script type=\"text/javascript\">go();</script>";
 
 			$resultHtml = str_replace("{script}", $scriptCode, $resultHtml);
+			$resultHtml = str_replace("{queryString}", $queryString, $resultHtml);
 
 			$resultHtml = createJSCode($resultHtml);
 		}
