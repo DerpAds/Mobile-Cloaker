@@ -188,7 +188,7 @@
 
 			<tr>
 				<td  class="col-xs-5">Campaign ID</td>
-				<td><input type="text" name="campaignID" id="campaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "campaignID"); ?>" <?= !empty(array_get_value_with_default($currentAd, "campaignID")) ? "readonly" : null; ?>/></td>
+				<td><input type="text" name="campaignID" id="campaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "campaignID"); ?>" <?= array_get_value_with_default($currentAd, "campaignID", "") !== "" ? "readonly" : null; ?>/></td>
 			</tr>
 
 			<tr>
