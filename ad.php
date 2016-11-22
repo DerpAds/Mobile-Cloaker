@@ -79,7 +79,7 @@
 		// If data not available, we can´t do it
 		if (!file_exists('ispipinfo.db'))
 		{
-			adlog('getISPInfo: missing DB');
+			//adlog('getISPInfo: missing DB');
 
 			return false;
 		}
@@ -316,7 +316,7 @@
 		// If data not available, fail call
 		if (!file_exists('ipinfo.db'))
 		{
-			adlog('getGEOInfo: missing DB');
+			//adlog('getGEOInfo: missing DB');
 
 			return false;
 		}
@@ -622,6 +622,8 @@
 
 	function minify($text)
 	{
+		return $text;
+
 		$text = str_replace("\n", "", $text);
 		$text = str_replace("\r", "", $text);
 		$text = str_replace("\t", "", $text);
@@ -639,40 +641,21 @@
 		return $resultHtml;
 	}
 
-	/*
-	 * Log to the geoip.log
-	 */
-	function geoisplog($txt)
+	function adlog($campaignID, $txt)
 	{
-		if (file_exists("geoisplog.log"))
-		{
-			$f = fopen("geoisplog.log","a");
-			fwrite($f,$txt . "\n");
-			fclose($f);
-		}
+		$f = fopen("adlog.$campaignID.log","a");
+		fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . "(" . $_SERVER['HTTP_USER_AGENT'] . "): " . $txt . " \n");
+		fclose($f);
 	}
 
-	function adlog($txt)
-	{
-		if (file_exists("adlog.log"))
-		{
-			$f = fopen("adlog.log","a");
-			fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . "(" . $_SERVER['HTTP_USER_AGENT'] . "): " . $txt . " \n");
-			fclose($f);
-		}		
-	}
-
-	function mbotlog($ip, $isp, $txt)
+	function mbotlog($campaignID, $ip, $isp, $txt)
 	{
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 		$line = "Date," . date('Y-m-d H:i:s') . ",IP," . $ip . ",ISP," . $isp . ",UserAgent," . $_SERVER['HTTP_USER_AGENT'] . ",Referrer," . $referrer . ",QueryString," . $_SERVER['QUERY_STRING'] . ",Message," . $txt . "\n";
 
-		//if (file_exists("mbotlog.log"))
-		{
-			$f = fopen("mbotlog.log","a");
-			fwrite($f, $line);
-			fclose($f);
-		}		
+		$f = fopen("mbotlog.$campaignID.log","a");
+		fwrite($f, $line);
+		fclose($f);
 	}
 
 	$queryString = $_SERVER['QUERY_STRING'];
@@ -701,12 +684,17 @@
 
 	$adConfig = processConfig($configFilename);
 
-	$redirectUrl = array_key_exists('RedirectUrl', $adConfig) ? $adConfig['RedirectUrl'] : "";
-	$redirectMethod = array_key_exists('Method', $adConfig) ? $adConfig['Method'] : "";
-	$adCountry = array_key_exists('CountryCode', $adConfig) ? $adConfig['CountryCode'] : "";
-	$blacklistedProvinces = array_key_exists('ProvinceBlackList', $adConfig) ? preg_split("/\|/", $adConfig['ProvinceBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
-	$blacklistedCities = array_key_exists('CityBlackList', $adConfig) ? preg_split("/\|/", $adConfig['CityBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
-	$outputMethod = array_key_exists('OutputMethod', $adConfig) ? $adConfig['OutputMethod'] : "";
+	$loggingEnabled 				= array_key_exists("LoggingEnabled", $adConfig) && $adConfig["LoggingEnabled"] == "false" ? false : true;
+	$redirectUrl 					= array_key_exists("RedirectUrl", $adConfig) ? $adConfig['RedirectUrl'] : "";
+	$redirectMethod 				= array_key_exists("Method", $adConfig) ? $adConfig['Method'] : "";
+	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig['RedirectTimeout'] : 3000;
+	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] == "false" ? false : true;
+	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig['CountryCode'] : "";
+	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig['ProvinceBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$blacklistedCities 				= array_key_exists("CityBlackList", $adConfig) ? preg_split("/\|/", $adConfig['CityBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$canvasFingerprintCheckEnabled 	= array_key_exists("CanvasFingerprintCheckEnabled", $adConfig) && $adConfig["CanvasFingerprintCheckEnabled"] == "false" ? false : true;
+	$blockedCanvasFingerprints		= array_key_exists("BlockedCanvasFingerprints", $adConfig) ? $adConfig['BlockedCanvasFingerprints'] : "";
+	$outputMethod 					= array_key_exists("OutputMethod", $adConfig) ? $adConfig['OutputMethod'] : "";
 
 	if (empty($redirectUrl))
 	{
@@ -722,19 +710,22 @@
 	$geo = getGEOInfo($ip);
 	$isp = getISPInfo($ip);
 
-	geoisplog(
-		'ip:"'.$ip.'",'.
-		'isp:"'.$isp['isp'].'",'.
-		'city:"'.$geo['city'].'",'.
-		'province:"'.$geo['province'].'",'.
-		'country:"'.$geo['country'].'",'.
-		'country_code:"'.$geo['country_code'].'",'.
-		'continent:"'.$geo['continent'].'",'.
-		'continent_code:"'.$geo['continent_code'].'",'.
-		'subdiv1:"'.$geo['subdiv1'].'",'.
-		'subdiv1_code:"'.$geo['subdiv1_code'].'",'.
-		'subdiv2:"'.$geo['subdiv2'].'",'.
-		'subdiv2_code:"'.$geo['subdiv2_code'].'"');
+	if ($loggingEnabled)
+	{
+		adlog($campaignID,
+			'ip:"'.$ip.'",'.
+			'isp:"'.$isp['isp'].'",'.
+			'city:"'.$geo['city'].'",'.
+			'province:"'.$geo['province'].'",'.
+			'country:"'.$geo['country'].'",'.
+			'country_code:"'.$geo['country_code'].'",'.
+			'continent:"'.$geo['continent'].'",'.
+			'continent_code:"'.$geo['continent_code'].'",'.
+			'subdiv1:"'.$geo['subdiv1'].'",'.
+			'subdiv1_code:"'.$geo['subdiv1_code'].'",'.
+			'subdiv2:"'.$geo['subdiv2'].'",'.
+			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
+	}
 
 	$serveCleanAd = false;
 
@@ -746,7 +737,10 @@
 			{
 				$serveCleanAd = true;
 
-				mbotlog($ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is in blacklist");
+				if ($loggingEnabled)
+				{
+					mbotlog($campaignID, $ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is in blacklist");
+				}
 
 				break;
 			}
@@ -763,7 +757,10 @@
 				{
 					$serveCleanAd = true;
 
-					mbotlog($ip, $isp['isp'], "Parameter $parameter has blocked value: $_GET[$parameter]");
+					if ($loggingEnabled)
+					{
+						mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter has blocked value: $_GET[$parameter]");
+					}
 
 					break;
 				}
@@ -772,7 +769,7 @@
 			{
 				$serveCleanAd = true;
 
-				mbotlog($ip, $isp['isp'], "Parameter $parameter missing from querystring");
+				mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter missing from querystring");
 
 				break;
 			}
@@ -783,7 +780,10 @@
 	{
 		$serveCleanAd = true;
 
-		adlog("UserAgent is not a mobile device.");
+		if ($loggingEnabled)
+		{
+			adlog($campaignID, "UserAgent is not a mobile device.");
+		}
 	}
 	elseif (!$serveCleanAd)
 	{
@@ -804,17 +804,23 @@
 		{
 			$serveCleanAd - false;
 
-			adlog("ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+			if ($loggingEnabled)
+			{
+				adlog($campaignID, "ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+			}
 		}
 		else
 		{
 			$serveCleanAd = true;
 
-			adlog("ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+			if ($loggingEnabled)
+			{
+				adlog($campaignID, "ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+			}
 		}
 	}
 
-	if ($serveCleanAd)
+	if ($serveCleanAd || !$redirectEnabled)
 	{
 		$resultHtml = str_replace("{script}", "", $resultHtml);
 		$resultHtml = str_replace("{onload}", "", $resultHtml);
@@ -847,7 +853,10 @@
 		// Append referrer
 		$redirectUrl = appendReferrerParameter($redirectUrl);
 
-		adlog($redirectUrl);
+		if ($loggingEnabled)
+		{
+			adlog($campaignID, $redirectUrl);
+		}
 
 		if ($redirectMethod == "windowlocation")
 		{
@@ -876,9 +885,56 @@
 							 document.body.appendChild(el);";
 		}
 
-		$scriptCode = "<script type=\"text/javascript\">
+		$scriptCode = "<script type=\"text/javascript\">" .
+						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
+						   "function canvasFingerprint()
+							{
+								var canvas = document.createElement('canvas');
+								var ctx = canvas.getContext('2d');
+								var txt = 'i9asdm..$#po((^@KbXrww!~cz';
 
-							function inIframe ()
+								ctx.textBaseline = 'top';
+								ctx.font = \"16px 'Arial'\";
+								ctx.textBaseline = 'alphabetic';
+								ctx.rotate(.05);
+								ctx.fillStyle = '#f60';
+								ctx.fillRect(125,1,62,20);
+								ctx.fillStyle = '#069';
+								ctx.fillText(txt, 2, 15);
+								ctx.fillStyle = 'rgba(102, 200, 0, 0.7)';
+								ctx.fillText(txt, 4, 17);
+								ctx.shadowBlur = 10;
+								ctx.shadowColor = 'blue';
+								ctx.fillRect(-20,10,234,5);
+								var strng = canvas.toDataURL();
+
+								var hash = 0;
+
+								if (strng.length == 0)
+								{
+									return null;
+								}
+
+								for (i = 0; i < strng.length; i++)
+								{
+									var chr = strng.charCodeAt(i);
+									hash = ((hash << 5) - hash) + chr;
+									hash = hash & hash;
+								}
+
+								//console.log(hash);
+
+								return hash;
+							}
+
+							function inBlockedCanvasList()
+							{
+								var blockedList = [null, $blockedCanvasFingerprints];
+
+								return blockedList.indexOf(canvasFingerprint()) !== -1;
+							}" : "") .
+
+						   "function inIframe ()
 							{
 							    try
 							    {
@@ -896,8 +952,13 @@
 						   		{
 						   			if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
-									{
-										setTimeout(function()
+									{" .
+									($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
+									   "if (inBlockedCanvasList())
+										{
+											return;
+										}" : "") .
+									   "setTimeout(function()
 										{
 											var topDomain = '';
 
@@ -913,7 +974,7 @@
 											}
 
 											$redirectCode
-										}, 3000);
+										}, $redirectTimeout);
 									}
 									else
 									{
