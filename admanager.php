@@ -344,7 +344,7 @@
 		<button type="submit" class="btn btn-primary">
 			Save
 		</button>
-		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php';">
+		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?<?= mt_rand(); ?>';">
 			Cancel
 		</button>
 
@@ -470,7 +470,7 @@
 				$adTagCode = getAdTagCode($campaignID);
 
 				echo "<tr>\n";
-				echo "<td><a href=\"admanager.php?edit=$campaignID\" alt=\"Edit\" title=\"Edit\">$campaignID</a></td>\n";
+				echo "<td><a href=\"admanager.php?edit=$campaignID&" . mt_rand() . "\" alt=\"Edit\" title=\"Edit\">$campaignID</a></td>\n";
 				echo "<td><input class=\"form-control form-control-lg\" type=\"text\" value=\"$adTagCode\" onclick=\"this.select(); document.execCommand('copy'); toastr.success('Link \'$adTagCode\' copied to clipboard.');\" /></td>\n";
 
 				if (strpos($adTagCode, "javascript") === false)
