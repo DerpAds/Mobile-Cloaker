@@ -290,6 +290,16 @@
 			</tr>
 
 			<tr>
+				<td>Province / State Blacklist (pipe | separated)</td>
+				<td><input type="text" name="ProvinceBlackList" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "ProvinceBlackList"); ?>" /></td>
+			</tr>
+
+			<tr>
+				<td>City Blacklist (pipe | separated)</td>
+				<td><input type="text" name="CityBlackList" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "CityBlackList"); ?>" /></td>
+			</tr>
+
+			<tr>
 				<td>Logging Enabled</td>
 				<td>
 					<input type="hidden" name="LoggingEnabled" value="false" />
