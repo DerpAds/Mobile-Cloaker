@@ -108,7 +108,7 @@
 	else
 	{
 		$currentAd = array("campaignID" 	=> "", 
-				   		   "configArray" 	=> array("Method" => "windowtoplocation", "OutputMethod" => "HTML", "CanvasFingerprintCheckEnabled" => "false"), 
+				   		   "configArray" 	=> array("Method" => "windowtoplocation", "TrackingPixelEnabled" => "true", "OutputMethod" => "HTML", "CanvasFingerprintCheckEnabled" => "false"), 
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
@@ -235,6 +235,19 @@
 					<input class="form-check-input" type="checkbox" name="RedirectEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "RedirectEnabled") ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
+
+			<tr>
+				<td>Tracking Pixel URL</td>
+				<td><input type="text" name="TrackingPixelUrl" id="TrackingPixelUrl" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "TrackingPixelUrl"); ?>" /></td>
+			</tr>
+
+			<tr>
+				<td>Tracking Pixel Enabled</td>
+				<td>
+					<input type="hidden" name="TrackingPixelEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="TrackingPixelEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TrackingPixelEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>			
 
 			<tr>
 				<td>Logging Enabled</td>
