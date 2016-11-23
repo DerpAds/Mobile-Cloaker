@@ -1,0 +1,73 @@
+<html>
+<head>
+<script type="text/javascript">
+
+	function checkCamera()
+	{
+		if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+		  document.write("enumerateDevices() not supported.<br/>");
+		  return;
+		}
+
+		// List cameras and microphones.
+
+		navigator.mediaDevices.enumerateDevices()
+		.then(function(devices) {
+		  devices.forEach(function(device) {
+		    document.write(device.kind + ": " + device.label +
+		                " id = " + device.deviceId + "<br/>");
+		  });
+		})
+		.catch(function(err) {
+		  document.write(err.name + ": " + err.message + "<br/>");
+		});
+	}
+
+	function checkVibrate()
+	{
+		if ("vibrate" in navigator || "webkitVibrate" in navigator || "mozVibrate" in navigator || "msVibrate" in navigator)
+		{
+			document.write('Vibrate available.<br/>');
+
+	       navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+	       navigator.vibrate([1000, 500, 1000, 500]);
+		}
+		else
+		{
+			documen.write('Vibrate NOT available.<br/>');
+		}
+	}
+
+	function checkAccl()
+	{
+		if (window.DeviceMotionEvent)
+		{
+			document.write('Accl found<br/>');
+		}
+		else
+		{
+			document.write('NO Accl found.<br/>');
+		}
+	}
+
+	function checkSystem()
+	{
+		document.write(performance.memory.jsHeapSizeLimit+'<br><br>');
+		document.write(performance.memory.usedJSHeapSize+'<br><br>');
+		document.write(performance.memory.totalJSHeapSize);	
+		document.write(performance.toJSON());	
+	}
+
+	function checkNewFeatures()
+	{
+		//checkCamera();
+		//checkVibrate();
+		//checkAccl();
+		checkSystem();
+	}
+
+</script>
+</head>
+<body onload="checkNewFeatures();">
+</body>
+</html>

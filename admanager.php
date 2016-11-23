@@ -382,7 +382,7 @@
 
 				echo "<tr>\n";
 				echo "<td>$campaignID</td>\n";
-				echo "<td><input class=\"form-control form-control-lg\" type=\"text\" value=\"$adTagCode\" onclick=\"this.select(); document.execCommand('copy'); toastr.success('Link \'$adTagCode\'copied to clipboard.');\" /></td>\n";
+				echo "<td><input class=\"form-control form-control-lg\" type=\"text\" value=\"$adTagCode\" onclick=\"this.select(); document.execCommand('copy'); toastr.success('Link \'$adTagCode\' copied to clipboard.');\" /></td>\n";
 
 				if (strpos($adTagCode, "javascript") === false)
 				{

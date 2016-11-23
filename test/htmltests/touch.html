@@ -1,0 +1,28 @@
+<html>
+<head>
+	<script type="text/javascript">
+
+	function touchPoints() {
+		return (!('ontouchstart' in window)) ? 0 :
+			(	((typeof navigator.maxTouchPoints === "undefined") ? 0 : navigator.maxTouchPoints) +
+				((typeof navigator.msMaxTouchPoints === "undefined") ? 0 : navigator.msMaxTouchPoints)
+			);
+	} 
+	
+	function isTouchDevice() {
+		return (('ontouchstart' in window)
+		  || (navigator.MaxTouchPoints > 0)
+		  || (navigator.msMaxTouchPoints > 0));
+	}
+
+
+	function detectFeatures()
+	{
+		alert(touchPoints() + ' ' + isTouchDevice());
+	}
+
+	</script>
+</head>
+<body onload="detectFeatures();">
+</body>
+</html>
