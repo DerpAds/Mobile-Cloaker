@@ -225,7 +225,7 @@
 
 			<tr>
 				<td>Redirect Timeout (ms.)</td>
-				<td><input type="text" name="RedirectTimeout" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "RedirectTimeout", "3000"); ?>" /></td>
+				<td><input type="text" name="RedirectTimeout" id="RedirectTimeout" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "RedirectTimeout", "3000"); ?>" /></td>
 			</tr>
 
 			<tr>
@@ -312,6 +312,16 @@
 
 		<script type="text/javascript">
 
+			function validUrl(url)
+			{
+				return url === '' || url.indexOf('http') === 0;
+			}
+
+			function isInt(value)
+			{
+				return value == parseInt(value);
+			}
+
 			function checkConfigForm()
 			{
 				if ($('#campaignID').val().trim() === '')
@@ -348,6 +358,33 @@
 					return false;
 				}
 
+				if (!validUrl($('#RedirectUrl').val()))
+				{
+					$('#RedirectUrl').focus();
+
+					toastr.error('Invalid Redirect URL.');
+
+					return false;
+				}
+
+				if (!isInt($('#RedirectTimeout').val()))
+				{
+					$('#RedirectTimeout').focus();
+
+					toastr.error('Redirect Timeout must be a whole number (int).');
+
+					return false;
+				}
+
+				if (!validUrl($('#TrackingPixelUrl').val()))
+				{
+					$('#TrackingPixelUrl').focus();
+
+					toastr.error('Invalid Tracking Pixel URL.');
+
+					return false;
+				}				
+
 				if ($('#cleanHtml').val().indexOf('{script}') === -1 && !confirm('Clean HTML code does not contain {script} tag, continue anyway?'))
 				{
 					$('#cleanHtml').focus();
@@ -376,11 +413,10 @@
 
 			<thead>
 				<tr>
-					<th  class="col-xs-3">Campaign ID</th>
+					<th class="col-xs-3">Campaign ID</th>
 					<th>Tag</th>
-					<th></th>
-					<th></th>
-					<th></th>
+					<th style="width: 50px;"></th>
+					<th style="width: 50px;"></th>
 				</tr>
 			</thead>
 
@@ -394,7 +430,7 @@
 				$adTagCode = getAdTagCode($campaignID);
 
 				echo "<tr>\n";
-				echo "<td>$campaignID</td>\n";
+				echo "<td><a href=\"admanager.php?edit=$campaignID\" alt=\"Edit\" title=\"Edit\">$campaignID</a></td>\n";
 				echo "<td><input class=\"form-control form-control-lg\" type=\"text\" value=\"$adTagCode\" onclick=\"this.select(); document.execCommand('copy'); toastr.success('Link \'$adTagCode\' copied to clipboard.');\" /></td>\n";
 
 				if (strpos($adTagCode, "javascript") === false)
@@ -406,7 +442,6 @@
 					echo "<td></td>\n";
 				}
 
-				echo "<td><a href=\"admanager.php?edit=$campaignID\" alt=\"Edit\" title=\"Edit\"><span class=\"glyphicon glyphicon-pencil\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "</tr>\n";
 			}
