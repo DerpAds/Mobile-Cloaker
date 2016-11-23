@@ -959,7 +959,7 @@
 
 						   "$referrerDomainScript
 
-						    function inIframe ()
+						    function inIFrame()
 							{
 							    try
 							    {
@@ -974,11 +974,12 @@
 							function go()
 							{" .
 								($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
-							   "if (inIframe() && navigator.plugins.length == 0)
-						   		{
-						   			if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
-		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))
-									{" .
+							   "if (" . ($iframeCloakingEnabled ? "inIFrame() && " : "") . "navigator.plugins.length == 0)
+						   		{" .
+						   			($touchCloakingEnabled ?
+						   		   "if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
+		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))" : "") .
+								   "{" .
 									($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
 									   "if (inBlockedCanvasList())
 										{
