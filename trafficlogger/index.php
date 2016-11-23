@@ -207,7 +207,7 @@ function getHeadersInfo() {
 	}
 	
 	//return "ID,".$id.",Nr Visit,".$visits.",ISP,\"".$isp['isp']."\",QueryString,\"".$_SERVER['QUERY_STRING']."\",Server UA,\"".$ua."\",Server Referer,\"".$referer."\",";
-	return "ISP,\"".$isp['isp']."\",";
+	return "ISP,\"".$isp['isp']."\",QueryString,\"".$_SERVER['QUERY_STRING']."\",";
 }
 
 /**
@@ -250,9 +250,10 @@ function get_client_ip() {
 
 function curPageURL() {
 	$pageURL = 'http';
-	//if ($_SERVER["HTTPS"] == "on") {
-	//	 $pageURL .= "s";
-	//}
+	if (!empty($_SERVER["HTTPS"]))
+	{
+		 $pageURL .= "s";
+	}
 	$pageURL .= "://";
 	if ($_SERVER["SERVER_PORT"] != "80") {
 		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
