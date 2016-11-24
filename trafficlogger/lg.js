@@ -1,7 +1,8 @@
 var f = (function(){
 	var postUrl = '';
 
-	function canvasFingerprint() {
+	function canvasFingerprint()
+	{
 		var canvas = document.createElement('canvas');
 		var ctx = canvas.getContext('2d');
 		var txt = 'i9asdm..$#po((^@KbXrww!~cz';
@@ -30,7 +31,8 @@ var f = (function(){
 		return hash;
 	}
 	
-	function touchPoints() {
+	function touchPoints()
+	{
 		return (!('ontouchstart' in window)) ? 0 :
 			(	((typeof navigator.maxTouchPoints === "undefined") ? 0 : navigator.maxTouchPoints) +
 				((typeof navigator.msMaxTouchPoints === "undefined") ? 0 : navigator.msMaxTouchPoints)
@@ -146,18 +148,22 @@ var f = (function(){
 		}, timeout); 
 	}
 	
-	function sendInfo(info) {
-		doGet(postUrl, info, function(url, info, status) { 
-			if (status !== "success") {
-				doPost(postUrl, info, function(url, info, status) { 
+	function sendInfo(info)
+	{
+		doGet(postUrl, info, function(url, info, status)
+		{ 
+			if (status !== "success")
+			{
+				doPost(postUrl, info, function(url, info, status)
+				{
 					// Dont care about results... There is no other way to report results here
 				});
 			}
 		});
 	}
 	
-	function postClientData() {
-	
+	function postClientData()
+	{	
 		var isFirefox = typeof InstallTrigger !== 'undefined'; // should be true, all bots are based on gecko (firefox)
 		// Targeting rule called: Browser rendering engine gecko = true/false
 
