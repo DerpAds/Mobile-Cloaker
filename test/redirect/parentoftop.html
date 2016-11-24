@@ -1,0 +1,16 @@
+<html>
+<body onload="findTopParent();">
+	<script type="text/javascript">
+
+		function findTopParent()
+		{
+			for (var currentParent = parent; currentParent != window.top; currentParent = currentParent.parent) { }
+
+			alert(currentParent.location);
+
+			return currentParent;
+		}
+		
+	</script>
+</body>
+</html>
