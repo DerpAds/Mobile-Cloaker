@@ -207,7 +207,7 @@ function getHeadersInfo() {
 	}
 	
 	//return "ID,".$id.",Nr Visit,".$visits.",ISP,\"".$isp['isp']."\",QueryString,\"".$_SERVER['QUERY_STRING']."\",Server UA,\"".$ua."\",Server Referer,\"".$referer."\",";
-	return "ISP,\"".$isp['isp']."\",QueryString,\"".$_SERVER['QUERY_STRING']."\",";
+	return "ISP|\"".$isp['isp']."\"|QueryString|\"".$_SERVER['QUERY_STRING']."\"|";
 }
 
 /**
@@ -223,7 +223,7 @@ function utf8_urldecode($str) {
  */
 function add_to_log($txt) {
 	$f = fopen("ad-access.log","a");
-	$line = "Date,".date('Y-m-d H:i:s').",IP,".get_client_ip().",".$txt."\n";
+	$line = "Date|".date('Y-m-d H:i:s')."|IP|".get_client_ip()."|".$txt."\n";
 	fwrite($f,$line);
 	fclose($f);
 }
@@ -294,13 +294,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	if($_POST["data"]) {
 		$decoded = utf8_urldecode($_POST["data"]);
 		//add_to_log("Type,Info,".getHeadersInfo()."Time,?,Javascript,true,Method,POST,".$decoded);
-		add_to_log("Type,Info,".getHeadersInfo().$decoded);
+		add_to_log("Type|Info|".getHeadersInfo().$decoded);
 		echo "OK";
 		exit();	
 	}
 	if($_POST["time"]) {
 		$decoded = utf8_urldecode($_POST["time"]);
-		add_to_log("Type,End,".getHeadersInfo()."Time,".$decoded.",Javascript,true");
+		add_to_log("Type|End|".getHeadersInfo()."Time|".$decoded."|Javascript|true");
 		echo "OK";
 		exit();	
 	}
@@ -314,7 +314,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	if (array_key_exists('data',$_GET)) {
 		$decoded = utf8_urldecode($_GET["data"]);
 		//add_to_log("Type,Info,".getHeadersInfo()."Time,?,Javascript,true,Method,GET,".$decoded);
-		add_to_log("Type,Info,".getHeadersInfo().$decoded);
+		add_to_log("Type|Info|".getHeadersInfo().$decoded);
 		
 		// Create a blank image
 		$im = imagecreatetruecolor(1, 1);
@@ -355,7 +355,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	/* If we were called by a noscript tag, log that javascript was disabled */
 	if (array_key_exists('nojs',$_GET) && $_GET['nojs'] == 1) {
 		
-		add_to_log("Type,Info,".getHeadersInfo()."Time,?,Javascript,false");
+		add_to_log("Type|Info|".getHeadersInfo()."Time|?|Javascript|false");
 		
 		// Create a blank image
 		$im = imagecreatetruecolor(1, 1);

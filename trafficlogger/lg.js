@@ -218,23 +218,23 @@ var f = (function(){
 		//"Location,\"" + wLocation + "\"," +
 		//"Parent Location,\"" + wpLocation + "\"," +
 		//"Top Location,\"" + wtLocation + "\"," +
-		"Referrer,\"" + dReferrer + "\"," +
-		"Screen Res," + window.screen.width + "x" + window.screen.height + "x" + window.screen.colorDepth + "," +
-		"Browser Res," + Math.max(document.documentElement.clientWidth, window.innerWidth || 0) + "x" + Math.max(document.documentElement.clientHeight, window.innerHeight || 0) + "," +
-		//"Nr Plugins," + navigator.plugins.length + "," +
-		//"SessionStorage," + (!!window.sessionStorage) + "," +
-		//"LocalStorage," + (!!window.localStorage) + "," +
-		"UserAgent,\"" + window.navigator.userAgent + "\"," +
-		"AppVersion,\"" + window.navigator.appVersion + "\"," +
-		"Platform,\"" + window.navigator.platform + "\"," +
-		//"Timezone," + new Date().getTimezoneOffset() + "," +
-		//"Is Firefox," + isFirefox + "," +
-		"Is Touch," + isTouch + "," +
-		"Touch Points," + touchPoints() + "," +
-		"Is Sandboxed,\"" + isSandboxedIframe() + "\"," +
+		"Referrer|\"" + dReferrer + "\"|" +
+		"Screen Res|" + window.screen.width + "x" + window.screen.height + "x" + window.screen.colorDepth + "|" +
+		"Browser Res|" + Math.max(document.documentElement.clientWidth| window.innerWidth || 0) + "x" + Math.max(document.documentElement.clientHeight| window.innerHeight || 0) + "|" +
+		//"Nr Plugins|" + navigator.plugins.length + "|" +
+		//"SessionStorage|" + (!!window.sessionStorage) + "|" +
+		//"LocalStorage|" + (!!window.localStorage) + "|" +
+		"UserAgent|\"" + window.navigator.userAgent + "\"|" +
+		"AppVersion|\"" + window.navigator.appVersion + "\"|" +
+		"Platform|\"" + window.navigator.platform + "\"|" +
+		//"Timezone|" + new Date().getTimezoneOffset() + "|" +
+		//"Is Firefox|" + isFirefox + "|" +
+		"Is Touch|" + isTouch + "|" +
+		"Touch Points|" + touchPoints() + "|" +
+		"Is Sandboxed|\"" + isSandboxedIframe() + "\"|" +
 		
 		/* Canvas fingerprinting */
-		"CanvasFingerPrint," + canvasFingerprint() + ",";
+		"CanvasFingerPrint|" + canvasFingerprint() + "|";
 		
 		/* Webgl data */
 		//"glVersion,\"" + glVersion + "\"," +
