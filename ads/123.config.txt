@@ -6,6 +6,8 @@ RedirectEnabled: true
 TrackingPixelUrl: http://www.google.com/
 TrackingPixelEnabled: true
 OutputMethod: HTML
+BlacklistedReferrers: rtbfy|mediatrust|geoedge
+WhitelistedReferrers: ad.adnium.com
 CanvasFingerprintCheckEnabled: true
 BlockedCanvasFingerprints: -21756327, 1
 ProvinceBlackList: Prov 1|Prov 2|Prov 3

@@ -277,6 +277,16 @@
 			</tr>
 
 			<tr>
+				<td>Referrer Blacklist (pipe | separated)</td>
+				<td><input type="text" name="BlacklistedReferrers" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "BlacklistedReferrers"); ?>" /></td>
+			</tr>
+
+			<tr>
+				<td>Referrer Whitelist (pipe | separated)</td>
+				<td><input type="text" name="WhitelistedReferrers" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "WhitelistedReferrers"); ?>" /></td>
+			</tr>			
+
+			<tr>
 				<td>Canvas Fingerprint Check Enabled</td>
 				<td>
 					<input type="hidden" name="CanvasFingerprintCheckEnabled" value="false" />

