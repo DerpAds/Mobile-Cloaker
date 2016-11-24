@@ -1,12 +1,16 @@
-LoggingEnabled: false
+CountryCode: US
 RedirectUrl: http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2
 Method: windowlocation
 RedirectTimeout: 1000
 RedirectEnabled: true
-CountryCode: US
+TrackingPixelUrl: http://www.google.com/
+TrackingPixelEnabled: true
+OutputMethod: HTML
+CanvasFingerprintCheckEnabled: true
+BlockedCanvasFingerprints: -21756327, 1
 ProvinceBlackList: Prov 1|Prov 2|Prov 3
 CityBlackList: City 1|City 2|City 3
-CanvasFingerprintcheckEnabled: true
-BlockedCanvasFingerprints: -21756327, 1
-TrackingPixelEnabled: true
-TrackingPixelUrl: http://www.google.com/
+LoggingEnabled: true
+ISPCloakingEnabled: true
+IFrameCloakingEnabled: true
+TouchCloakingEnabled: true
