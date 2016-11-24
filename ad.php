@@ -614,7 +614,7 @@
 
 	function adlog($campaignID, $txt)
 	{
-		$f = fopen("adlog.$campaignID.log","a");
+		$f = fopen("logs/adlog.$campaignID.log","a");
 		fwrite($f,date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . "(" . $_SERVER['HTTP_USER_AGENT'] . "): " . $txt . " \n");
 		fclose($f);
 	}
@@ -624,7 +624,7 @@
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 		$line = "Date," . date('Y-m-d H:i:s') . ",IP," . $ip . ",ISP," . $isp . ",UserAgent," . $_SERVER['HTTP_USER_AGENT'] . ",Referrer," . $referrer . ",QueryString," . $_SERVER['QUERY_STRING'] . ",Message," . $txt . "\n";
 
-		$f = fopen("mbotlog.$campaignID.log","a");
+		$f = fopen("logs/mbotlog.$campaignID.log","a");
 		fwrite($f, $line);
 		fclose($f);
 	}
