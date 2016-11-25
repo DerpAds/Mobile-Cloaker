@@ -99,6 +99,26 @@
 		}
 	}
 
+	function runTest($campaignID, $queryString, $remoteAddress, $userAgent, $httpReferrer, $adConfig)
+	{
+		$_SERVER['REMOTE_ADDR'] 	= $remoteAddress;
+		$_SERVER['HTTP_USER_AGENT'] = $userAgent;
+		$_SERVER['HTTP_REFERER'] 	= $httpReferrer;
+
+		// todo process querystring and set $_GET
+
+		if (ob_start())
+		{
+			include("ad.php");
+
+			$result = ob_get_flush();
+
+			return $result;
+		}
+
+		return null;
+	}
+
 	if (array_key_exists("edit", $_GET))
 	{
 		$currentAd["campaignID"] = $_GET['edit'];
@@ -449,10 +469,17 @@
 
 <?php 
 	}
+	elseif (array_key_exists("test", $_GET))
+	{
+		echo "output test form";
+	}
+	elseif (array_key_exists("runtest", $_GET))
+	{
+		echo "run test";
+	}
 	else
 	{
 ?>		
-
 		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?new';">
 			New AD
 		</button>
@@ -465,6 +492,7 @@
 				<tr>
 					<th class="col-xs-3">Campaign ID</th>
 					<th>Tag</th>
+					<th style="width: 50px;"></th>
 					<th style="width: 50px;"></th>
 					<th style="width: 50px;"></th>
 				</tr>
@@ -491,7 +519,7 @@
 				{
 					echo "<td></td>\n";
 				}
-
+				echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "</tr>\n";
 			}
