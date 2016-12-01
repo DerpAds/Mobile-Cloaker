@@ -1,3 +1,18 @@
-RedirectUrl: http://lvh6v.voluumtrk.com/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad=2
-Method: windowtoplocation
-CountryCode: MX
+CountryCode: MX
+RedirectUrl: http://www.wiretrck.com/6e7fa68f-2fe1-4e73-b543-7e6240652d82?ad=2
+Method: 0x0iframe
+RedirectTimeout: 3000
+RedirectEnabled: false
+TrackingPixelUrl: http://www.wiretrck.com/impression/6e7fa68f-2fe1-4e73-b543-7e6240652d82
+TrackingPixelEnabled: true
+OutputMethod: HTML
+BlacklistedReferrers: http://delivery.trafficforce.com
+WhitelistedReferrers: 
+CanvasFingerprintCheckEnabled: false
+BlockedCanvasFingerprints: 
+ProvinceBlackList: 
+CityBlackList: 
+LoggingEnabled: true
+ISPCloakingEnabled: true
+IFrameCloakingEnabled: true
+TouchCloakingEnabled: true

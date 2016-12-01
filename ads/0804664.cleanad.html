@@ -1,63 +1,21 @@
-
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name='viewport' content='width=device-width, initial-scale=1' />
-    <title>NWWF</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>    
-
-    {script}
-
-    <script type="text/javascript">
-
-        function getReferrerDomain()
-        {
-            var topDomain = '';
-
-            try
-            {
-                topDomain = window.top.location.href;
-            }
-            catch(e) { }
-
-            if (topDomain == null || topDomain === 'undefined' || typeof topDomain == 'undefined' || topDomain.trim() === '')
-            {
-                topDomain = document.referrer;
-            }
-
-            return topDomain;
-        }
-        
-        function addSearchPixel()
-        {
-            var topDomain = getReferrerDomain();
-
-            var el = document.createElement('img');
-            el.src = 'http://lvh6v.voluumtrk.com/impression/a704cad6-098c-4e1b-a4db-f957dfe24f5e?referrer=' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
-            el.width = 0;
-            el.height = 0;
-            el.border = 0;
-            document.body.appendChild(el);
-        }  
-
-        $(document).ready(function() {
-            addSearchPixel();
-        });
-
-    </script>
-</head>
-
-<body{onload}>
-
-    <div id="content1">
-        <a target="_top" href="http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=1a"><img src="https://0b7294424eed85e1dbcf-af49429700992011e80547047013541a.ssl.cf5.rackcdn.com/b/adult/adtag/d/TS-IAC/h/au/test/SF-300x250.jpg">
-        </a>
-    </div>
-
-    <img src="http://www.wiretrck.com/6e7fa68f-2fe1-4e73-b543-7e6240652d82" />
-
-</body>
-
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <title>NWWF</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>    
+{script}
+</head>
+
+<body{onload}>
+
+    <div id="content1">
+        <a target="_top" href="http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=1a"><img src="https://0b7294424eed85e1dbcf-af49429700992011e80547047013541a.ssl.cf5.rackcdn.com/b/adult/adtag/d/TS-IAC/h/au/test/SF-300x250.jpg">
+        </a>
+    </div>
+
+</body>
+
 </html>
