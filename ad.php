@@ -48,20 +48,10 @@
 								   "IN" => array("Airtel","Bharti Airtel Limited","Idea Cellular","Vodafone India","BSNL","Reliance Jio INFOCOMM","Airtel Broadband","Beam Telecom","Tata Mobile","Aircel","Reliance Communications","Hathway","Bharti Broadband")		//IN	
 								  );
 
-	$blacklistedCities 		= array();
-	$blacklistedProvinces 	= array();
 	$blacklistedSubDivs1 	= array();
 	$blacklistedSubDivs2 	= array(); 
 	$blacklistedCountries 	= array();
 	$blacklistedContinents 	= array();
-
-	$blacklistedReferrers	= array("rtbfy", "mediatrust", "geoedge");
-	$whitelistedReferrers	= array();
-
-	$blockedParameterValues = array("pubid" 		=> array("0"),
-									"cachebuster" 	=> array("0"),
-									"domain"		=> array("none", "connect.themediatrust.com")
-								    );
 
 	$sourceWeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
 													  "Android" => array("YouCam.Makeup" => 8, "ANA" => 1, "スヌーピードロップス" => 1, "mora.WALKMAN.公式ミュージックストア～" => 1, "Music.player" => 1)
@@ -229,6 +219,7 @@
 	$touchCloakingEnabled 			= array_key_exists("TouchCloakingEnabled", $adConfig) && $adConfig["TouchCloakingEnabled"] === "false" ? false : true;
 	$blacklistedReferrers 			= array_key_exists("BlacklistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["BlacklistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$whitelistedReferrers 			= array_key_exists("WhitelistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["WhitelistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$blockedParameterValues			= array_key_exists("BlockedParameterValues", $adConfig) ? json_decode($adConfig["BlockedParameterValues"]) : array();
 
 	if (empty($redirectUrl))
 	{

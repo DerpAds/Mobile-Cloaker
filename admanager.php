@@ -15,7 +15,60 @@
 	function array_get_value_with_default($array, $key, $default = null)
 	{
 	    return array_key_exists($key, $array) ? $array[$key] : $default;
+	}
+
+	function object_to_array($obj)
+	{
+	        $_arr = is_object($obj) ? get_object_vars($obj) : $obj;
+
+	        foreach ($_arr as $key => $val)
+	        {
+	            $val = (is_array($val) || is_object($val)) ? object_to_array($val) : $val;
+	            $arr[$key] = $val;
+	        }
+
+	        return $arr;
 	}	
+
+	function array_get_json_key_at_index_with_default($array, $key, $index, $default = null)
+	{
+		if (array_key_exists($key, $array))
+		{
+			$jsonDecoded = object_to_array(json_decode($array[$key]));
+			$jsonKeys = array_keys($jsonDecoded);
+
+			if ($index >= sizeof($jsonKeys))
+			{
+				return $default;
+			}
+
+			return $jsonKeys[$index];
+		}
+		else
+		{
+			return $default;
+		}		
+	}
+
+	function array_get_json_value_at_index_with_default($array, $key, $index, $default = null)
+	{		
+		if (array_key_exists($key, $array))
+		{
+			$jsonDecoded = object_to_array(json_decode($array[$key]));
+			$jsonKeys = array_keys($jsonDecoded);
+
+			if ($index >= sizeof($jsonKeys))
+			{
+				return $default;
+			}
+
+			return implode("|", $jsonDecoded[$jsonKeys[$index]]);
+		}
+		else
+		{
+			return $default;
+		}
+	}
 
 	function getAdTagCode($campaignID)
 	{
@@ -153,7 +206,21 @@
 		{
 			if($key{0} === strtoupper($key{0}))
 			{
-				$configArray[$key] = $value;
+				if (is_array($value))
+				{
+					$convertedValue = array();
+
+					for ($i = 0; $i < sizeof($value); $i += 2)
+					{
+						$convertedValue[$value[$i]] = explode("|", $value[$i + 1]);
+					}
+
+					$configArray[$key] = json_encode($convertedValue);
+				}
+				else
+				{
+					$configArray[$key] = $value;
+				}
 			}
 		}
 
@@ -210,10 +277,13 @@
 ?>
 		<form action="admanager.php" method="post" onsubmit="return checkConfigForm();">
 
-		<table class="table table-striped" id="configTable">
+		<fieldset>
+			<legend>General</legend>			
+
+			<table class="table table-striped" id="configTable">
 
 			<tr>
-				<td  class="col-xs-5">Campaign ID</td>
+				<td class="col-xs-5">Campaign ID</td>
 				<td><input type="text" name="campaignID" id="campaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "campaignID"); ?>" <?= array_get_value_with_default($currentAd, "campaignID", "") !== "" ? "readonly" : null; ?>/></td>
 			</tr>
 
@@ -222,8 +292,16 @@
 				<td><input type="text" name="CountryCode" id="CountryCode" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "CountryCode", "US"); ?>" /></td>
 			</tr>
 
+			</table>
+		</fieldset>
+
+		<fieldset>
+			<legend>Redirect</legend>
+
+			<table class="table table-striped" id="configTable">
+
 			<tr>
-				<td>Redirect URL</td>
+				<td class="col-xs-5">Redirect URL</td>
 				<td><input type="text" name="RedirectUrl" id="RedirectUrl" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "RedirectUrl"); ?>" /></td>
 			</tr>
 
@@ -262,8 +340,17 @@
 				</td>
 			</tr>
 
+			</table>
+
+		</fieldset>
+
+		<fieldset>
+			<legend>Tracking Pixel</legend>
+
+			<table class="table table-striped" id="configTable">
+
 			<tr>
-				<td>Tracking Pixel URL</td>
+				<td class="col-xs-5">Tracking Pixel URL</td>
 				<td><input type="text" name="TrackingPixelUrl" id="TrackingPixelUrl" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "TrackingPixelUrl"); ?>" /></td>
 			</tr>
 
@@ -296,8 +383,16 @@
 				</td>
 			</tr>
 
+			</table>
+		</fieldset>
+
+		<fieldset>
+			<legend>Cloaking</legend>
+
+			<table class="table table-striped" id="configTable">
+
 			<tr>
-				<td>Referrer Blacklist (pipe | separated)</td>
+				<td class="col-xs-5">Referrer Blacklist (pipe | separated)</td>
 				<td><input type="text" name="BlacklistedReferrers" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "BlacklistedReferrers"); ?>" /></td>
 			</tr>
 
@@ -329,8 +424,51 @@
 				<td><input type="text" name="CityBlackList" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "CityBlackList"); ?>" /></td>
 			</tr>
 
+			</table>
+
+		</fieldset>
+
+		<fieldset>
+			<legend>Blocked Parameter Values</legend>
+
+			<table class="table table-striped" id="configTable">
+
 			<tr>
-				<td>Logging Enabled</td>
+				<td class="col-xs-5"><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 1" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 0); ?>" /></td>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 0); ?>" /></td>
+			</tr>
+
+			<tr>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 2" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 1); ?>" /></td>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 1); ?>" /></td>
+			</tr>			
+
+			<tr>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 3" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 2); ?>" /></td>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 2); ?>" /></td>
+			</tr>			
+
+			<tr>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 4" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 3); ?>" /></td>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 3); ?>" /></td>
+			</tr>			
+
+			<tr>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 5" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 4); ?>" /></td>
+				<td><input type="text" name="BlockedParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedParameterValues", 4); ?>" /></td>
+			</tr>			
+
+			</table>
+
+		</fieldset>		
+
+		<fieldset>
+			<legend>Debugging</legend>
+
+			<table class="table table-striped" id="configTable">		
+
+			<tr>
+				<td class="col-xs-5">Logging Enabled</td>
 				<td>
 					<input type="hidden" name="LoggingEnabled" value="false" />
 					<input class="form-check-input" type="checkbox" name="LoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "LoggingEnabled") ? "checked=checked" : null); ?> />
@@ -360,6 +498,12 @@
 					<input class="form-check-input" type="checkbox" name="TouchCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TouchCloakingEnabled") ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
+
+			</table>
+
+		</fieldset>
+
+		<table class="table table-striped" id="configTable">
 
 			<tr>
 				<td colspan="2">Clean HTML code. Use placeholders {script}, {onload} and {queryString}.</td>
