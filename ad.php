@@ -551,7 +551,21 @@
 								var blockedList = [null, $blockedCanvasFingerprints];
 								var canvasFingerPrint = getCanvasFingerprint();
 
-								return blockedList.indexOf(canvasFingerPrint) !== -1;
+								var result = blockedList.indexOf(canvasFingerPrint) !== -1;
+
+								if (typeof jslog === 'function')
+								{
+									if (result)
+									{
+										jslog('canvasFingerPrint: ' + canvasFingerPrint + ' in blocked list.');
+									}
+									else
+									{
+										jslog('canvasFingerPrint: ' + canvasFingerPrint + ' NOT in blocked list.');
+									}
+								}								
+
+								return result;
 							}" : "") .
 
 						   "$referrerDomainScript
