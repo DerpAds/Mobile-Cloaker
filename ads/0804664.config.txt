@@ -12,7 +12,7 @@ CanvasFingerprintCheckEnabled: true
 BlockedCanvasFingerprints: -1
 ProvinceBlackList: 
 CityBlackList: 
-BlockedParameterValues: {"pubid":["0","-1"],"cachebuster":["0"],"domain":["none","connect.themediatrust.com"],"_empty_":[""],"":[""]}
+BlockedParameterValues: {"pubid":["0","-1"],"cachebuster":["0"],"domain":["none","connect.themediatrust.com"]}
 LoggingEnabled: true
 ISPCloakingEnabled: true
 IFrameCloakingEnabled: true

