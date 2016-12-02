@@ -1,6 +1,49 @@
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
 <?php
 
 	require_once("adlib.inc");
+	require_once("admanager_security.php");
+
+	session_start();
+
+	if (array_key_exists("logout", $_GET))
+	{
+		logoutUser();
+	}
+
+	if (!empty($_POST['username']) && !empty($_POST['password']))
+	{
+		loginUser($_POST['username'], $_POST['password']);
+	}
+
+	if (!userAuthenticated())
+	{
+?>
+		<div class="container">
+
+	      <form class="form-signin" method="POST">
+	        <h2 class="form-signin-heading">Please sign in</h2>
+	        <label for="username" class="sr-only">Email address</label>
+	        <input type="text" id="username" name="username" class="form-control" placeholder="Email address" required="" autofocus="">
+	        <label for="password" class="sr-only">Password</label>
+	        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="">
+
+	        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+	      </form>
+
+	    </div>
+<?php
+		exit;
+	}
 
 	function print_r_nice($mixed)
 	{
@@ -175,7 +218,7 @@
 		deleteAd($_GET['delete']);
 	}
 
-	if (!empty($_POST))
+	if (!empty($_POST['campaignID']))
 	{
 		//print_r_nice($_POST);
 
@@ -213,22 +256,12 @@
 
 ?>
 
-<html>
-<head>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
 	<script type="text/javascript">
 		$(document).ready(function() {
 		    //$('#adTable').DataTable();
 
 <?php
-	if (!empty($_POST))
+	if (!empty($_POST['campaignID']))
 	{
 		echo "toastr.options.timeOut = 10;";
 		echo "toastr.options.closeDuration = 500;\n";
@@ -605,10 +638,19 @@
 	}
 	else
 	{
-?>		
-		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?new';">
-			New AD
-		</button>
+?>
+	<div>
+		<div style="float: left;">
+			<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?new';">
+				New AD
+			</button>
+		</div>
+		<div style="float: right;">
+			<button type="button" class="btn btn-danger" onclick="window.location = 'admanager.php?logout';">
+				Logout
+			</button>
+		</div>
+	</div>
 
 		<br/><br/>
 
