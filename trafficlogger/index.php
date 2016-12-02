@@ -55,7 +55,7 @@
 		}
 		
 		//return "ID,".$id.",Nr Visit,".$visits.",ISP,\"".$isp['isp']."\",QueryString,\"".$_SERVER['QUERY_STRING']."\",Server UA,\"".$ua."\",Server Referer,\"".$referer."\",";
-		return "ISP|\"".$isp['isp']."\"|QueryString|\"".$_SERVER['QUERY_STRING']."\"|";
+		return "ISP|\"".$isp['isp']."\"|QueryString|\"".$_SERVER['QUERY_STRING']."\"|Server Referrer|\"".$referer."\"|";
 	}
 
 	/**
