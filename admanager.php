@@ -33,10 +33,10 @@
 ?>
 		<div class="container">
 
-	      <form class="form-signin" method="POST">
+	      <form class="form-signin" action="admanager.php" method="POST">
 	        <h2 class="form-signin-heading">Please sign in</h2>
-	        <label for="username" class="sr-only">Email address</label>
-	        <input type="text" id="username" name="username" class="form-control" placeholder="Email address" required="" autofocus="">
+	        <label for="username" class="sr-only">Username</label>
+	        <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="" autofocus="">
 	        <label for="password" class="sr-only">Password</label>
 	        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="">
 
