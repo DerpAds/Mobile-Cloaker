@@ -1,3 +1,8 @@
+<?php
+
+	session_start();
+?>
+
 <html>
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
@@ -12,8 +17,6 @@
 
 	require_once("adlib.inc");
 	require_once("admanager_security.php");
-
-	session_start();
 
 	if (array_key_exists("logout", $_GET))
 	{
@@ -646,7 +649,7 @@
 			</button>
 		</div>
 		<div style="float: right;">
-			<button type="button" class="btn btn-danger" onclick="window.location = 'admanager.php?logout';">
+			<button type="button" class="btn btn-danger" onclick="window.location = 'admanager.php?logout&<?= mt_rand(); ?>';">
 				Logout
 			</button>
 		</div>
