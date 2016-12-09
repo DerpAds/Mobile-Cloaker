@@ -53,13 +53,29 @@
 	$blacklistedCountries 	= array();
 	$blacklistedContinents 	= array();
 
-	$sourceWeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
+	$f_apps_WeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
 													  "Android" => array("YouCam.Makeup" => 8, "ANA" => 1, "スヌーピードロップス" => 1, "mora.WALKMAN.公式ミュージックストア～" => 1, "Music.player" => 1)
 													 ),
 								  		"MX" => array("iOS" 	=> array("Scanner.for.Me" => 8, "PicLab" => 1, "Free.Music.Mgic" => 1, "Runtastic" => 1, "Text.On.Pictures" => 1), 
 								  					  "Android" => array("El.Chavo.Kart" => 8, "Zombie.Roadkill.3D" => 1, "Ice.Cream.Maker" => 1, "Kids.Doodle" => 1, "Fishing.Hook" => 1)
 								  					 ),
 								  	   );
+
+	$f_site_WeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
+													   "Android" => array("YouCam.Makeup" => 8, "ANA" => 1, "スヌーピードロップス" => 1, "mora.WALKMAN.公式ミュージックストア～" => 1, "Music.player" => 1)
+													 ),
+								  		 "MX" => array("iOS" 	=> array("Scanner.for.Me" => 8, "PicLab" => 1, "Free.Music.Mgic" => 1, "Runtastic" => 1, "Text.On.Pictures" => 1), 
+								  					   "Android" => array("El.Chavo.Kart" => 8, "Zombie.Roadkill.3D" => 1, "Ice.Cream.Maker" => 1, "Kids.Doodle" => 1, "Fishing.Hook" => 1)
+								  					 ),
+								  	   );
+
+	$f_siteid_WeightListPerCountry = array("JP" => array("iOS" 	=> array("slither.io" => 8, "謎解き母からのメモ" => 1, "Photomath" => 1, "Magic.Piano" => 1, "スヌーピードロップス" => 1), 
+													     "Android" => array("YouCam.Makeup" => 8, "ANA" => 1, "スヌーピードロップス" => 1, "mora.WALKMAN.公式ミュージックストア～" => 1, "Music.player" => 1)
+													 ),
+								  		   "MX" => array("iOS" 	=> array("Scanner.for.Me" => 8, "PicLab" => 1, "Free.Music.Mgic" => 1, "Runtastic" => 1, "Text.On.Pictures" => 1), 
+								  					     "Android" => array("El.Chavo.Kart" => 8, "Zombie.Roadkill.3D" => 1, "Ice.Cream.Maker" => 1, "Kids.Doodle" => 1, "Fishing.Hook" => 1)
+								  					 ),
+								  	   );								  	   	
 
 	function appendReferrerParameter($url)
 	{
@@ -71,11 +87,10 @@
 
 	function detectMobileOS()
 	{
-		 $osArray = array(
-	                        '/iphone/i'             =>  'iOS',
-	                        '/ipod/i'               =>  'iOS',
-	                        '/ipad/i'               =>  'iOS',
-	                        '/android/i'            =>  'Android',
+		 $osArray = array("/iphone/i"	=>  "iOS",
+	                      "/ipod/i"		=>  "iOS",
+	                      "/ipad/i"		=>  "iOS",
+	                      "/android/i"	=>  "Android"
 		                 );
 
 	    foreach ($osArray as $regex => $value)
@@ -107,12 +122,12 @@
 	    return null;
 	}	
 
-	function generateAutoRotateSourceParameter($sourceWeightList)
+	function generateAutoRotateParameter($parameter, $sourceWeightList)
 	{
-		$result = "f_source=";
+		$result = "$parameter=";
 		$os = detectMobileOS();
 
-		if ($os != null)
+		if ($os != null && array_key_exists($os, $sourceWeightList))
 		{
 			$result .= weightedRand($sourceWeightList[$os]);
 		}
@@ -120,9 +135,9 @@
 		return $result;
 	}
 
-	function appendAutoRotateSourceParameter($url, $sourceWeightList)
+	function appendAutoRotateParameter($url, $parameter, $sourceWeightList)
 	{
-		return appendParameterPrefix($url) . generateAutoRotateSourceParameter($sourceWeightList);
+		return appendParameterPrefix($url) . generateAutoRotateParameter($parameter, $sourceWeightList);
 	}
 
 	function minify($text)
@@ -482,15 +497,29 @@
 			allowedTrafficLog($campaignID, $ip, $isp['isp']);
 		}
 
-		$sourceWeightList = array();
+		$f_apps_WeightList 		= array();
+		$f_site_WeightList 		= array();
+		$f_siteid_WeightList 	= array();
 
-		if (array_key_exists($adCountry, $sourceWeightListPerCountry))
+		if (array_key_exists($adCountry, $f_apps_WeightListPerCountry))
 		{
-			$sourceWeightList = $sourceWeightListPerCountry[$adCountry];
+			$f_apps_WeightList = $f_apps_WeightListPerCountry[$adCountry];
+		}
+
+		if (array_key_exists($adCountry, $f_site_WeightListPerCountry))
+		{
+			$f_site_WeightList = $f_site_WeightListPerCountry[$adCountry];
+		}
+
+		if (array_key_exists($adCountry, $f_siteid_WeightListPerCountry))
+		{
+			$f_siteid_WeightList = $f_siteid_WeightListPerCountry[$adCountry];
 		}
 
 		// Append auto generated source parameter
-		$redirectUrl = appendAutoRotateSourceParameter($redirectUrl, $sourceWeightList);
+		$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_apps", $f_apps_WeightList);
+		$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_site", $f_site_WeightList);
+		$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_siteid", $f_siteid_WeightList);
 
 		// Append passed in script parameters if outputMethod == JS
 		if ($outputMethod === "JS")
