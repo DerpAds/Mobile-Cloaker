@@ -12,7 +12,11 @@ CanvasFingerprintCheckEnabled: true
 BlockedCanvasFingerprints: -21756327, 1
 ProvinceBlackList: Prov 1|Prov 2|Prov 3
 CityBlackList: City 1|City 2|City 3
+BlockedParameterValues: []
 LoggingEnabled: true
+ConsoleLoggingEnabled: true
 ISPCloakingEnabled: true
 IFrameCloakingEnabled: true
+PluginCloakingEnabled: true
 TouchCloakingEnabled: true
+ForceDirtyAd: true
