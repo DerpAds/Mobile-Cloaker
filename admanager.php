@@ -15,7 +15,7 @@
 
 <?php
 
-	require_once("adlib.inc");
+	require_once("include/adlib.inc");
 	require_once("admanager_security.php");
 
 	if (array_key_exists("logout", $_GET))
@@ -46,11 +46,6 @@
 	    </div>
 <?php
 		exit;
-	}
-
-	function print_r_nice($mixed)
-	{
-		echo str_replace("\n", "<br/>", print_r($mixed, true));
 	}
 
 	function array_get_bool($array, $key)

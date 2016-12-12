@@ -1,16 +1,16 @@
 <?php
 
-	if (file_exists("../adlib.inc"))
-	{
-		require_once("../adlib.inc");
-	}
-	elseif (file_exists("adlib.inc"))
+	if (file_exists("adlib.inc"))
 	{
 		require_once("adlib.inc");
 	}
+	elseif (file_exists("../include/adlib.inc"))
+	{
+		require_once("../include/adlib.inc");
+	}	
 	else
 	{
-		die('Cannot find include file.');
+		die("Cannot find include file.");
 	}
 
 	function getHeadersInfo()

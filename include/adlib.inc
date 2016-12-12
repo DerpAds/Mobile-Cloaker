@@ -498,4 +498,9 @@
 	    return $result;
 	}
 
+	function print_r_nice($mixed)
+	{
+		echo str_replace("\n", "<br/>", print_r($mixed, true));
+	}	
+
 ?>

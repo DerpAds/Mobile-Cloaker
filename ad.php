@@ -14,7 +14,7 @@
 	// Ad configuration resides in the <id>.config.txt file, and can define the redirectUrl, the ad language (locale), and which redirect method should be used.
 	//
 
-	require_once("adlib.inc");
+	require_once("include/adlib.inc");
 
 	$allowedIspsPerCountry = array("US" => array("AT&T Wireless",
 												 "T-Mobile USA",
