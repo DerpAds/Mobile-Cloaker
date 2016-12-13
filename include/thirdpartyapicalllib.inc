@@ -42,7 +42,7 @@
 		return $json;		
 	}
 
-	function getLimeLightCMSProspects($campaignId)
+	function getLimeLightCMSProspects($campaignId, $startDate)
 	{
 		$apiUrl = "https://safeguardoffers.limelightcrm.com/admin/membership.php";
 
@@ -50,8 +50,8 @@
 										   "password" 		=> "UPZCkKYFeMAKr", 
 										   "method" 		=> "prospect_find",
 										   "campaign_id" 	=> $campaignId,
-										   "start_date" 	=> date("m/d/Y", time() - 60 * 60 * 24),
-										   "end_date" 		=> date("m/d/Y"),
+										   "start_date" 	=> $startDate,
+										   "end_date"		=> "12/31/" . (date("Y") + 1),
 										   "return_type" 	=> "prospect_view"));
 
 		$json = json_decode(substr($response, strpos($response, "&data=") + 6), true);
@@ -105,6 +105,19 @@
 		$json = json_decode($response, true);
 
 		return $json;
+	}
+
+	function hasBeenProspectFor20Mins($dateTime)
+	{
+		//Format: 2016-12-11 03:42:34
+		$now = new DateTime("now", new DateTimeZone("America/New_York"));
+		$created = new DateTime(urldecode($dateTime), new DateTimeZone("America/New_York"));
+
+		$diff = $created->diff($now);
+
+		$minutes = $diff->days * 24 * 60 + $diff->h * 60 + $diff->i;
+
+		return $minutes > 20;
 	}
 
 	function validPhoneNumber($phoneNumber)
