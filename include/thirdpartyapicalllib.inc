@@ -107,7 +107,7 @@
 		return $json;
 	}
 
-	function hasBeenProspectFor20Mins($dateTime)
+	function hasBeenProspectFor10Mins($dateTime)
 	{
 		//Format: 2016-12-11 03:42:34
 		$now = new DateTime("now", new DateTimeZone("America/New_York"));
@@ -117,7 +117,7 @@
 
 		$minutes = $diff->days * 24 * 60 + $diff->h * 60 + $diff->i;
 
-		return $minutes > 20;
+		return $minutes > 10;
 	}
 
 	function validPhoneNumber($phoneNumber)
