@@ -104,24 +104,6 @@
 	    return null;
 	}
 
-	function weightedRand($sourceWeightList)
-	{
-	    $pos = mt_rand(1, array_sum(array_values($sourceWeightList)));           
-	    $sum = 0;
-
-	    foreach ($sourceWeightList as $source => $weight)
-	    {
-	        $sum += $weight;
-
-	        if ($sum >= $pos)
-	        {
-	            return $source;
-	        }
-	    }
-
-	    return null;
-	}	
-
 	function generateAutoRotateParameter($parameter, $sourceWeightList)
 	{
 		$result = "$parameter=";
@@ -214,7 +196,7 @@
 
 	$resultHtml = file_get_contents($cleanHtmlFilename);
 
-	$adConfig = processConfig($configFilename);
+	$adConfig = processAdConfig($configFilename);
 
 	$redirectUrl 					= array_key_exists("RedirectUrl", $adConfig) ? $adConfig["RedirectUrl"] : "";
 	$redirectMethod 				= array_key_exists("Method", $adConfig) ? $adConfig["Method"] : "";

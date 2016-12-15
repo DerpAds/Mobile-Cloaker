@@ -42,14 +42,19 @@
 		return $json;		
 	}
 
-	function getLimeLightCMSProspects($campaignId, $startDate)
+	function getLimeLightCMSUrlFromBaseUrl($config)
 	{
-		$apiUrl = "https://safeguardoffers.limelightcrm.com/admin/membership.php";
+		return "https://$config[baseUrl].limelightcrm.com/";
+	}
 
-		$response = callAPI($apiUrl, array("username" 		=> "prospect_capture", 
-										   "password" 		=> "UPZCkKYFeMAKr", 
+	function getLimeLightCMSProspects($config, $startDate)
+	{
+		$apiUrl = getLimeLightCMSUrlFromBaseUrl($config) . "admin/membership.php";
+
+		$response = callAPI($apiUrl, array("username" 		=> $config["username"],//"prospect_capture", 
+										   "password" 		=> $config["password"], //"UPZCkKYFeMAKr", 
 										   "method" 		=> "prospect_find",
-										   "campaign_id" 	=> $campaignId,
+										   "campaign_id" 	=> $config["campaignID"], //$campaignId,
 										   "start_date" 	=> $startDate,
 										   "end_date"		=> "12/31/" . (date("Y") + 1),
 										   "return_type" 	=> "prospect_view"));
@@ -60,28 +65,6 @@
 		{
 			return $response;
 		}		
-
-		return $json;
-	}
-
-	function getLimeLightCMSCustomers($campaignId)
-	{
-		$apiUrl = "https://safeguardoffers.limelightcrm.com/admin/membership.php";
-
-		$response = callAPI($apiUrl, array("username" 		=> "prospect_capture", 
-										   "password" 		=> "UPZCkKYFeMAKr", 
-										   "method" 		=> "customer_find",
-										   "campaign_id" 	=> $campaignId,
-										   "start_date" 	=> date("m/d/Y", time() - 60 * 60 * 24),
-										   "end_date" 		=> date("m/d/Y"),
-										   "return_type" 	=> "prospect_view"));
-
-		$json = json_decode(substr($response, strpos($response, "&data=") + 6), true);
-
-		if ($json == null)
-		{
-			return $response;
-		}
 
 		return $json;
 	}
@@ -107,17 +90,17 @@
 		return $json;
 	}
 
-	function hasBeenProspectFor10Mins($dateTime)
+	function hasBeenProspectForXMins($dateTime, $syncTimeOut)
 	{
 		//Format: 2016-12-11 03:42:34
 		$now = new DateTime("now", new DateTimeZone("America/New_York"));
-		$created = new DateTime(urldecode($dateTime), new DateTimeZone("America/New_York"));
+		$created = DateTime::createFromFormat("Y-m-d H:i:s", urldecode($dateTime), new DateTimeZone("America/New_York"));
 
 		$diff = $created->diff($now);
 
 		$minutes = $diff->days * 24 * 60 + $diff->h * 60 + $diff->i;
 
-		return $minutes > 10;
+		return $minutes > $syncTimeOut;
 	}
 
 	function validPhoneNumber($phoneNumber)

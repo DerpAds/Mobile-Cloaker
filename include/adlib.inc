@@ -445,12 +445,12 @@
 	    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
 	}
 
-	function getCleanHtmlFilename($campaignID)
+	function getAdCleanHtmlFilename($campaignID)
 	{
 		return "ads/" . $campaignID . ".cleanad.html";
 	}
 
-	function getConfigFilename($campaignID)
+	function getAdConfigFilename($campaignID)
 	{
 		return "ads/" . $campaignID . ".config.txt";
 	}
@@ -472,9 +472,27 @@
 		}
 
 		return $url;
-	}	
+	}
 
-	function processConfig($filename)
+	function weightedRand($sourceWeightList)
+	{
+	    $pos = mt_rand(1, array_sum(array_values($sourceWeightList)));           
+	    $sum = 0;
+
+	    foreach ($sourceWeightList as $source => $weight)
+	    {
+	        $sum += $weight;
+
+	        if ($sum >= $pos)
+	        {
+	            return $source;
+	        }
+	    }
+
+	    return null;
+	}
+
+	function processAdConfig($filename)
 	{
 		$result = array();
 

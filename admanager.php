@@ -16,6 +16,7 @@
 <?php
 
 	require_once("include/adlib.inc");
+	require_once("include/managersecurity.inc");
 	require_once("admanager_security.php");
 
 	if (array_key_exists("logout", $_GET))
@@ -25,7 +26,7 @@
 
 	if (!empty($_POST['username']) && !empty($_POST['password']))
 	{
-		loginUser($_POST['username'], $_POST['password']);
+		loginUser($_POST['username'], $_POST['password'], $loginHashes);
 	}
 
 	if (!userAuthenticated())
@@ -94,7 +95,7 @@
 	{
 		$adUrl = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "") . "://" . $_SERVER['SERVER_NAME'] . substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], "/") + 1) . "ad.php?$campaignID";
 
-		$adConfig = processConfig(getConfigFilename($campaignID));
+		$adConfig = processAdConfig(getAdConfigFilename($campaignID));
 
 		if (array_key_exists("OutputMethod", $adConfig) && $adConfig["OutputMethod"] === "JS")
 		{
@@ -141,8 +142,8 @@
 
 	function createOrUpdateAd($campaignID, $cleanHtml, $configArray)
 	{
-		$cleanHtmlFilename = getCleanHtmlFilename($campaignID);
-		$configFilename  = getConfigFilename($campaignID);
+		$cleanHtmlFilename = getAdCleanHtmlFilename($campaignID);
+		$configFilename  = getAdConfigFilename($campaignID);
 
 		file_put_contents($cleanHtmlFilename, $cleanHtml);
 
@@ -158,8 +159,8 @@
 
 	function deleteAd($campaignID)
 	{
-		$cleanHtmlFilename = getCleanHtmlFilename($campaignID);
-		$configFilename  = getConfigFilename($campaignID);
+		$cleanHtmlFilename = getAdCleanHtmlFilename($campaignID);
+		$configFilename  = getAdConfigFilename($campaignID);
 
 		if (file_exists($cleanHtmlFilename))
 		{
@@ -195,8 +196,8 @@
 	if (array_key_exists("edit", $_GET))
 	{
 		$currentAd["campaignID"] = $_GET['edit'];
-		$currentAd["configArray"] = processConfig(getConfigFilename($_GET['edit']));
-		$currentAd["cleanHtml"] = file_get_contents(getCleanHtmlFilename($_GET['edit']));
+		$currentAd["configArray"] = processAdConfig(getAdConfigFilename($_GET['edit']));
+		$currentAd["cleanHtml"] = file_get_contents(getAdCleanHtmlFilename($_GET['edit']));
 	}
 	else
 	{
@@ -664,18 +665,18 @@
 	else
 	{
 ?>
-	<div>
-		<div style="float: left;">
-			<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?new';">
-				New AD
-			</button>
+		<div>
+			<div style="float: left;">
+				<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?new';">
+					New AD
+				</button>
+			</div>
+			<div style="float: right;">
+				<button type="button" class="btn btn-danger" onclick="window.location = 'admanager.php?logout&<?= mt_rand(); ?>';">
+					Logout
+				</button>
+			</div>
 		</div>
-		<div style="float: right;">
-			<button type="button" class="btn btn-danger" onclick="window.location = 'admanager.php?logout&<?= mt_rand(); ?>';">
-				Logout
-			</button>
-		</div>
-	</div>
 
 		<br/><br/>
 
