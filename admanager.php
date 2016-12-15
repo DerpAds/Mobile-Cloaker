@@ -17,6 +17,7 @@
 
 	require_once("include/adlib.inc");
 	require_once("include/managersecurity.inc");
+	require_once("include/arrayhelpers.inc");
 	require_once("admanager_security.php");
 
 	if (array_key_exists("logout", $_GET))
@@ -47,48 +48,6 @@
 	    </div>
 <?php
 		exit;
-	}
-
-	function array_get_bool($array, $key)
-	{
-		return array_key_exists($key, $array) && $array[$key] === "false" ? false : true;
-	}
-
-	function array_get_value_with_default($array, $key, $default = null)
-	{
-	    return array_key_exists($key, $array) ? $array[$key] : $default;
-	}
-
-	function array_get_json_key_at_index_with_default($array, $key, $index, $default = null)
-	{
-		if (array_key_exists($key, $array))
-		{
-			$jsonDecoded = json_decode($array[$key], true);
-			$jsonKeys = array_keys($jsonDecoded);
-
-			if ($index < sizeof($jsonKeys))
-			{
-				return $jsonKeys[$index];
-			}			
-		}
-
-		return $default;
-	}
-
-	function array_get_json_value_at_index_with_default($array, $key, $index, $default = null)
-	{		
-		if (array_key_exists($key, $array))
-		{
-			$jsonDecoded = json_decode($array[$key], true);
-			$jsonKeys = array_keys($jsonDecoded);
-
-			if ($index < sizeof($jsonKeys))
-			{
-				return implode("|", $jsonDecoded[$jsonKeys[$index]]);
-			}			
-		}
-
-		return $default;
 	}
 
 	function getAdTagCode($campaignID)
@@ -301,7 +260,7 @@
 
 			<tr>
 				<td class="col-xs-5">Campaign ID</td>
-				<td><input type="text" name="campaignID" id="campaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "campaignID"); ?>" <?= array_get_value_with_default($currentAd, "campaignID", "") !== "" ? "readonly" : null; ?>/></td>
+				<td><input type="text" name="campaignID" id="campaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "campaignID"); ?>" <?= array_get_value_with_default($currentAd, "campaignID", "") !== "" ? "readonly" : null; ?> /></td>
 			</tr>
 
 			<tr>
