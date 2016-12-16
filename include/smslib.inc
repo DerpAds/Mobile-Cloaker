@@ -10,9 +10,9 @@
 		return json_decode(file_get_contents(getSMSConfigFilename($SMSCampaignID, $root)), true);
 	}
 
-	function getSMSConfigs()
+	function getSMSConfigs($root)
 	{
-		$files = scandir("smsconfigs");
+		$files = scandir($root . "/smsconfigs");
 		$result = array();
 
 		foreach ($files as $filename)

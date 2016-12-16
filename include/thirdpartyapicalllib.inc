@@ -63,6 +63,12 @@
 
 		if ($json == null)
 		{
+			if (strpos($response, "response_code=602") !== false)
+			{
+				// Response code indicates empty set (no prospects found)
+				return array();
+			}
+
 			return $response;
 		}		
 
