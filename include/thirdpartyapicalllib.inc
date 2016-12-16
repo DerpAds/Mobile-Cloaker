@@ -87,6 +87,8 @@
 
 		$json = json_decode($response, true);
 
+		smslog("EZTexting", print_r($json, true));
+
 		return $json;
 	}
 
