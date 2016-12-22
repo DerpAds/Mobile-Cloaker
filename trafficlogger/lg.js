@@ -240,7 +240,10 @@ var f = (function(){
 		"Is Sandboxed|\"" + isSandboxedIframe() + "\"|" +
 		
 		/* Canvas fingerprinting */
-		"CanvasFingerPrint|" + canvasFingerprint() + "|";
+		"CanvasFingerPrint|" + canvasFingerprint() + "|" +
+
+		"Location Hash|" + window.location.hash + "|" +
+		"Location Search|" + window.location.search + "|";
 		
 		/* Webgl data */
 		//"glVersion,\"" + glVersion + "\"," +

