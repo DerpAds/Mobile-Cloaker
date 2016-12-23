@@ -621,6 +621,31 @@
 	{
 		echo "run test";
 	}
+	elseif (array_key_exists("viewlog", $_GET))
+	{
+		$logFilenames = array("logs/adlog.$_GET[viewlog].log",
+							  "logs/allowed_traffic.$_GET[viewlog].log",
+							  "logs/mbotlog.$_GET[viewlog].log");
+
+		$filesExist = 0;
+
+		foreach ($logFilenames as $logFilename)
+		{
+			if (file_exists($logFilename))
+			{
+				echo "$logFilename<br/>";
+				echo "<iframe src=\"$logFilename\" width=\"100%\" height=\"33%\"></iframe>";
+				echo "<br/>";
+
+				$filesExist++;
+			}
+		}
+
+		if ($filesExist == 0)
+		{
+			echo "No log files found.<br/>";
+		}
+	}
 	else
 	{
 ?>
@@ -645,6 +670,9 @@
 				<tr>
 					<th class="col-xs-3">Campaign ID</th>
 					<th>Tag</th>
+					<th style="width: 50px;"></th>
+					<th style="width: 50px;"></th>
+					<th style="width: 50px;"></th>
 					<th style="width: 50px;"></th>
 					<th style="width: 50px;"></th>
 				</tr>
@@ -673,6 +701,7 @@
 				}
 
 				//echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
+				echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "</tr>\n";
 			}

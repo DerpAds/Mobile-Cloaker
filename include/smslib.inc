@@ -116,6 +116,7 @@
 		}
 	}
 
+	// TODO: function should take $root !
 	function smslog($SMSCampaignID, $txt)
 	{
 		$f = fopen("logs/smslog.$SMSCampaignID.log","a");
