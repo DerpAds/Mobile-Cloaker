@@ -516,6 +516,18 @@
 	    return $result;
 	}
 
+	function substr_count_in_file($filename, $needle)
+	{
+		if (!file_exists($filename))
+		{
+			return null;
+		}
+
+		$fileContents = file_get_contents($filename);
+
+		return substr_count($fileContents, $needle);
+	}
+
 	function print_r_nice($mixed)
 	{
 		echo str_replace("\n", "<br/>", print_r($mixed, true));

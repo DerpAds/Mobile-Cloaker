@@ -634,7 +634,7 @@
 			if (file_exists($logFilename))
 			{
 				echo "$logFilename<br/>";
-				echo "<iframe src=\"$logFilename\" width=\"100%\" height=\"33%\"></iframe>";
+				echo "<iframe src=\"$logFilename?" . mt_rand() . "\" width=\"100%\" height=\"33%\"></iframe>";
 				echo "<br/>";
 
 				$filesExist++;
