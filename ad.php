@@ -224,6 +224,12 @@
 		$adCountry = "US";
 	}
 
+	// Preprocess referrer for usage
+	if (!array_key_exists("HTTP_REFERER", $_SERVER) || $_SERVER['HTTP_REFERER'] === "")
+	{
+		$_SERVER['HTTP_REFERER'] = "_empty_";
+	}	
+
 	$ip  = getClientIP();
 	$geo = getGEOInfo($ip);
 	$isp = getISPInfo($ip);
@@ -246,11 +252,6 @@
 	}
 
 	$serveCleanAd = false;
-
-	if (!array_key_exists("HTTP_REFERER", $_SERVER) || $_SERVER['HTTP_REFERER'] === "")
-	{
-		$_SERVER['HTTP_REFERER'] = "_empty_";
-	}
 
 	if (!$serveCleanAd)
 	{
