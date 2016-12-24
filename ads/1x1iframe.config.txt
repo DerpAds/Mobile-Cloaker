@@ -1,3 +1,22 @@
+CountryCode: US
 RedirectUrl: http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2&site_url=1x1iframetest
 Method: 1x1iframe
-CountryCode: US
+RedirectTimeout: 3000
+RedirectEnabled: true
+TrackingPixelUrl: 
+TrackingPixelEnabled: true
+OutputMethod: HTML
+BlacklistedReferrers: 
+WhitelistedReferrers: 
+CanvasFingerprintCheckEnabled: true
+BlockedCanvasFingerprints: 
+ProvinceBlackList: 
+CityBlackList: 
+BlockedParameterValues: []
+LoggingEnabled: true
+ConsoleLoggingEnabled: true
+ISPCloakingEnabled: true
+IFrameCloakingEnabled: true
+PluginCloakingEnabled: true
+TouchCloakingEnabled: true
+ForceDirtyAd: false

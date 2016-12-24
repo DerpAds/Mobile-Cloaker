@@ -6,12 +6,26 @@
 <html>
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+	<style>
+
+		body, html
+		{ 
+			height:100%; 
+			padding:0; 
+			margin:0;
+		}
+
+		td
+		{
+		    white-space: nowrap;
+		}		
+
+	</style>
 
 <?php
 
@@ -116,6 +130,21 @@
 		file_put_contents($configFilename, $configFileContents);
 	}
 
+	function copyAd($campaignID, $newCampaignID)
+	{
+		$cleanHtmlFilename = getAdCleanHtmlFilename($campaignID);
+		$configFilename  = getAdConfigFilename($campaignID);
+
+		$newCleanHtmlFilename = getAdCleanHtmlFilename($newCampaignID);
+		$newConfigFilename  = getAdConfigFilename($newCampaignID);
+
+		if (!file_exists($newCleanHtmlFilename) && !file_exists($newConfigFilename))
+		{
+			copy($cleanHtmlFilename, $newCleanHtmlFilename);
+			copy($configFilename, $newConfigFilename);
+		}
+	}
+
 	function deleteAd($campaignID)
 	{
 		$cleanHtmlFilename = getAdCleanHtmlFilename($campaignID);
@@ -174,6 +203,11 @@
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
+	if (array_key_exists("copy", $_GET) && array_key_exists("newCampaignID", $_GET))
+	{
+		copyAd($_GET['copy'], $_GET['newCampaignID']);
+	}
+
 	if (array_key_exists("delete", $_GET))
 	{
 		deleteAd($_GET['delete']);
@@ -224,11 +258,17 @@
 <?php
 	if (!empty($_POST['campaignID']))
 	{
-		echo "toastr.options.timeOut = 10;";
+		echo "toastr.options.timeOut = 10;\n";
 		echo "toastr.options.closeDuration = 500;\n";
 		echo "toastr.success('Saved');\n";
 	}
-?>		    
+	elseif (!empty($_GET['copy']))
+	{
+		echo "toastr.options.timeOut = 10;\n";
+		echo "toastr.options.closeDuration = 500;\n";
+		echo "toastr.success('Copied');\n";
+	}
+?>
 		});
 	</script>
 
@@ -240,7 +280,7 @@
 
 <body>
 
-	<div style="width: 95%; margin: 10 auto;">
+	<div style="width: 95%; height: 100%; margin: 10 auto;">
 
 <?php
 
@@ -633,8 +673,12 @@
 		{
 			if (file_exists($logFilename))
 			{
-				echo "$logFilename<br/>";
-				echo "<iframe src=\"$logFilename?" . mt_rand() . "\" width=\"100%\" height=\"33%\"></iframe>";
+				echo "<strong>$logFilename</strong><br/>";
+				echo "<div style=\"overflow: scroll; width: 100%; height: 33%;\">\n";
+				echo "<table class=\"table table-bordered table-striped\">\n";
+				echo "<tr>\n<td>" . str_replace("\n", "</td></tr>\n<tr><td>", implode("</td><td>", explode("|", file_get_contents($logFilename))));
+				echo "</table>\n";
+				echo "</div>\n";
 				echo "<br/>";
 
 				$filesExist++;
@@ -645,6 +689,15 @@
 		{
 			echo "No log files found.<br/>";
 		}
+?>
+
+		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?<?= mt_rand(); ?>';">
+			Back
+		</button>
+
+		<br/><br/>
+
+<?php
 	}
 	else
 	{
@@ -701,14 +754,36 @@
 				}
 
 				//echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
+				//echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\" data-toggle=\"modal\" data-target=\"#myModal\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\" onclick=\"$('.modal-body').load('admanager.php?viewlog=$campaignID');\"></span></a></td>\n";
+
+				echo "<td><a href=\"admanager.php?copy=$campaignID\" alt=\"Copy\" title=\"Copy\" onclick=\"var newCampaignID = prompt('Please enter the id of the copied campaign'); $(this).attr('href', $(this).attr('href') + '&newCampaignID=' + newCampaignID);\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "</tr>\n";
 			}
 
 		?>
+
 			</tbody>
 		</table>
+
+		<!-- Modal -->
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		        <h4 class="modal-title" id="myModalLabel">Ad logs</h4>
+		      </div>
+		      <div class="modal-body">
+		        If you see this message, please disable your ad blocker.
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
 <?php
 	}
 ?>

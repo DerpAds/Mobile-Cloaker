@@ -516,6 +516,14 @@
 	    return $result;
 	}
 
+	function createLogLine($ip, $isp, $txt)
+	{
+		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
+		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . $referrer . "|QueryString|" . $_SERVER['QUERY_STRING'] . "|Message|" . $txt . "\n";
+
+		return $line;		
+	}	
+
 	function substr_count_in_file($filename, $needle)
 	{
 		if (!file_exists($filename))

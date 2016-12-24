@@ -14,6 +14,9 @@ ProvinceBlackList:
 CityBlackList: 
 BlockedParameterValues: {"pubid":["0","-1"],"cachebuster":["0"],"domain":["none","connect.themediatrust.com"]}
 LoggingEnabled: true
+ConsoleLoggingEnabled: false
 ISPCloakingEnabled: true
 IFrameCloakingEnabled: true
+PluginCloakingEnabled: true
 TouchCloakingEnabled: true
+ForceDirtyAd: false
