@@ -113,7 +113,39 @@
 		return $result;
 	}
 
-	function createOrUpdateAd($campaignID, $cleanHtml, $configArray)
+	function getAllProfiles()
+	{
+		$files = scandir("profiles");
+		$result = array();
+
+		foreach ($files as $filename)
+		{
+			if (strpos($filename, ".profile") !== false)
+			{
+				$profileName = substr($filename, 0, strpos($filename, ".profile"));
+
+				$result[$profileName] = $filename;
+			}
+		}
+
+		return $result;
+	}
+
+	function createOrUpdateAd($campaignID, $configArray)
+	{
+		$configFilename  = getAdConfigFilename($campaignID);
+
+		$configFileContents = "";
+
+		foreach ($configArray as $key => $value)
+		{
+			$configFileContents .= "$key: $value\r\n";
+		}
+
+		file_put_contents($configFilename, $configFileContents);
+	}	
+
+	function createOrUpdateAdWithCleanHtml($campaignID, $cleanHtml, $configArray)
 	{
 		$cleanHtmlFilename = getAdCleanHtmlFilename($campaignID);
 		$configFilename  = getAdConfigFilename($campaignID);
@@ -181,11 +213,31 @@
 		return null;
 	}
 
+	if (!empty($_POST['campaignID']))
+	{
+		//print_r_nice($_POST);
+
+		$configFilename = getAdConfigFilename($_POST['campaignID'], __DIR__);
+
+		if (!file_exists($configFilename))
+		{
+			copy("profiles/" . $_POST['profile'], $configFilename);
+
+			$_GET['edit'] = $_POST['campaignID'];
+		}
+	}	
+
 	if (array_key_exists("edit", $_GET))
 	{
 		$currentAd["campaignID"] = $_GET['edit'];
 		$currentAd["configArray"] = processAdConfig(getAdConfigFilename($_GET['edit']));
-		$currentAd["cleanHtml"] = file_get_contents(getAdCleanHtmlFilename($_GET['edit']));
+
+		$cleanHtmlFilename = getAdCleanHtmlFilename($_GET['edit']);
+
+		if (file_exists($cleanHtmlFilename))
+		{
+			$currentAd["cleanHtml"] = file_get_contents($cleanHtmlFilename);
+		}
 	}
 	else
 	{
@@ -214,17 +266,22 @@
 		deleteAd($_GET['delete']);
 	}
 
-	if (!empty($_POST['campaignID']))
+	if (!empty($_POST['campaignID']) && !array_key_exists("edit", $_GET))
 	{
 		//print_r_nice($_POST);
 
 		$configArray = array();
+		$HTMLTemplateValues = array();
 
 		foreach ($_POST as $key => $value)
 		{
 			if($key{0} === strtoupper($key{0}))
 			{
-				if (is_array($value))
+				if (strpos($key, "HTMLTemplateValues_") !== false)
+				{
+					$HTMLTemplateValues[substr($key, strlen("HTMLTemplateValues_"))] = $value;
+				}
+				elseif (is_array($value))
 				{
 					$convertedValue = array();
 
@@ -245,9 +302,18 @@
 			}
 		}
 
+		$configArray["HTMLTemplateValues"] = json_encode($HTMLTemplateValues);
+
 		//print_r_nice($configArray);
 
-		createOrUpdateAd($_POST['campaignID'], $_POST['cleanHtml'], $configArray);
+		if (array_key_exists("cleanHtml", $_POST))
+		{
+			createOrUpdateAdWithCleanHtml($_POST['campaignID'], $_POST['cleanHtml'], $configArray);
+		}
+		else
+		{
+			createOrUpdateAd($_POST['campaignID'], $configArray);	
+		}
 	}
 
 ?>
@@ -285,7 +351,49 @@
 
 <?php
 
-	if (array_key_exists("new", $_GET) || array_key_exists("edit", $_GET))
+	if (array_key_exists("new", $_GET))
+	{ 
+		$profiles = getAllProfiles();
+
+		?>
+
+		<form action="admanager.php" method="post" onsubmit="if ($('#campaignID').val() === '') { $('#campaignID').focus(); toastr.error('Campaign ID cannot be empty.'); return false; } return true;">
+
+		<table class="table table-striped" id="configTable">
+
+			<tr>
+				<td class="col-xs-5">Campaign ID</td>
+				<td><input type="text" name="campaignID" id="campaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "campaignID"); ?>" <?= array_get_value_with_default($currentAd, "campaignID", "") !== "" ? "readonly" : null; ?> /></td>
+			</tr>
+
+			<tr>
+				<td>Traffic Source</td>
+				<td>
+					<select name="profile" class="form-control">
+<?php
+						foreach ($profiles as $profileName => $profileFilename)
+						{
+							echo "<option value=\"$profileFilename\">$profileName</option>";
+						}
+?>
+					</select>
+				</td>
+			</tr>
+
+		</table>
+
+		<button type="submit" class="btn btn-primary">
+			Save
+		</button>
+		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?<?= mt_rand(); ?>';">
+			Cancel
+		</button>		
+
+		</form>
+
+<?php
+	}
+	elseif (array_key_exists("edit", $_GET))
 	{
 
 		$redirectMethodOptions = array("windowlocation", "windowtoplocation", "0x0iframe", "1x1iframe");
@@ -552,7 +660,53 @@
 
 		</fieldset>
 
-		<table class="table table-striped" id="configTable">
+		<fieldset>
+			<legend>HTML</legend>
+
+			<table class="table table-striped" id="configTable">
+
+<?php
+
+		if (array_key_exists("HTMLTemplate", $currentAd["configArray"]))
+		{
+?>
+			<input type="hidden" name="HTMLTemplate" value="<?= $currentAd["configArray"]["HTMLTemplate"] ?>" />
+<?php
+			$HTMLTemplateValues = json_decode($currentAd["configArray"]["HTMLTemplateValues"]);
+
+			foreach ($HTMLTemplateValues as $parameter => $parameterValue)
+			{
+?>
+				<tr>
+					<td class="col-xs-5"><?= $parameter ?></td>
+					<td>
+<?php
+				if (is_array($parameterValue))
+				{
+					for ($i = 0; $i < 5; $i++)
+					{
+						$value = $i < sizeof($parameterValue) ? $parameterValue[$i] : "";
+?>
+						<input type="text" name="HTMLTemplateValues_<?= $parameter ?>[]" class="form-control form-control-lg" value="<?= $value ?>" /><br/>
+<?php
+					}
+				}
+				else
+				{
+?>
+					<input type="text" name="HTMLTemplateValues_<?= $parameter ?>" class="form-control form-control-lg" value="<?= $parameterValue ?>" />
+<?php
+				}
+?>
+						
+					</td>
+				</tr>
+<?php
+			}
+		}
+		else
+		{
+?>
 
 			<tr>
 				<td colspan="2">Clean HTML code. Use placeholders {script}, {onload} and {queryString}.</td>
@@ -562,7 +716,13 @@
 				<td colspan="2"><textarea style="width: 100%" rows="20" class="form-check-input" id="cleanHtml" name="cleanHtml"><?= array_get_value_with_default($currentAd, "cleanHtml"); ?></textarea></td>
 			</tr>
 
-		</table>
+<?php
+		}
+?>
+
+			</table>
+
+		</fieldset>
 
 		<button type="submit" class="btn btn-primary">
 			Save
