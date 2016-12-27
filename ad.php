@@ -165,6 +165,85 @@
 		fclose($f);
 	}
 
+	function trafficLoggerLog($campaignID, $line)
+	{
+		$f = fopen("logs/traffic_logger.$campaignID.log", "a");
+		fwrite($f, $line . "\n");
+		fclose($f);		
+	}
+
+	function createTrafficLoggerLogLine()
+	{
+		$ip  = getClientIP();
+		$isp = getISPInfo($ip);
+
+		return str_replace("|Message|\n", "|", createLogLine($ip, $isp, ""));
+
+		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
+
+		$ip  = getClientIP();
+		$isp = getISPInfo($ip);
+
+		return "ISP|\"".$isp['isp']."\"|QueryString|\"".$_SERVER['QUERY_STRING']."\"|Server Referrer|\"".$referer."\"|";
+	}	
+
+	function handleTrafficLoggerData($campaignID)
+	{
+		/* Handle POSTed data to the URL and add it to our log */
+		if ($_SERVER['REQUEST_METHOD'] == "POST" && array_key_exists("data", $_POST))
+		{
+			$decoded = urldecode($_POST['data']);
+			
+			trafficLoggerLog($campaignID, "Type|Info|" . createTrafficLoggerLogLine() . $decoded);
+
+			echo "OK";
+
+			exit;
+		}
+
+		if ($_SERVER['REQUEST_METHOD'] == "GET")
+		{
+			/* GET method as a way to report information */
+			if (array_key_exists("data", $_GET))
+			{
+				$decoded = urldecode($_GET['data']);
+				
+				trafficLoggerLog($campaignID, "Type|Info|".createTrafficLoggerLogLine() . $decoded);
+				
+				// Create a blank image
+				$im = imagecreatetruecolor(1, 1);
+
+				// Set the content type header - in this case image/gif
+				header('Content-Type: image/gif');
+
+				// Output the image
+				imagegif($im);
+
+				// Free up memory
+				imagedestroy($im);
+				
+				exit;
+			}
+			elseif (array_key_exists("nojs", $_GET) && $_GET['nojs'] == 1)
+			{		
+				trafficLoggerLog($campaignID, "Type|Info|" . createTrafficLoggerLogLine(). "Javascript|false");
+				
+				// Create a blank image
+				$im = imagecreatetruecolor(1, 1);
+
+				// Set the content type header - in this case image/gif
+				header('Content-Type: image/gif');
+
+				// Output the image
+				imagegif($im);
+
+				// Free up memory
+				imagedestroy($im);
+				exit;
+			}
+		}		
+	}
+
 	$queryString = $_SERVER['QUERY_STRING'];
 	$ampIndex = strpos($queryString, "&");
 
@@ -178,6 +257,8 @@
 		$campaignID = $queryString;
 		$queryString = "";
 	}
+
+	handleTrafficLoggerData($campaignID);
 
 	$cleanHtmlFilename = "ads/" . $campaignID . ".cleanad.html";
 	$configFilename  = "ads/" . $campaignID . ".config.txt";
@@ -213,6 +294,7 @@
 	$blockedParameterValues			= array_key_exists("BlockedParameterValues", $adConfig) ? json_decode($adConfig["BlockedParameterValues"]) : array();
 	$consoleLoggingEnabled 			= array_key_exists("ConsoleLoggingEnabled", $adConfig) && $adConfig["ConsoleLoggingEnabled"] === "false" ? false : true;
 	$forceDirtyAd 					= array_key_exists("ForceDirtyAd", $adConfig) && $adConfig["ForceDirtyAd"] === "false" ? false : true;
+	$trafficLoggerEnabled			= array_key_exists("TrafficLoggerEnabled", $adConfig) && $adConfig["TrafficLoggerEnabled"] === "false" ? false : true;
 
 	if (empty($redirectUrl))
 	{
@@ -251,7 +333,19 @@
 			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
 	}
 
-	$serveCleanAd = false;
+	if ($trafficLoggerEnabled)
+	{
+		$serveCleanAd = true;
+
+		if ($loggingEnabled)
+		{
+			adlog($campaignID, $ip, $isp['isp'], "Traffic Logger Enabled.");
+		}		
+	}
+	else
+	{
+		$serveCleanAd = false;
+	}
 
 	if (!$serveCleanAd)
 	{
@@ -415,7 +509,12 @@
 			adlog($campaignID, $ip, $isp['isp'], "Redirect disabled.");
 		}
 
-		if ($trackingPixelEnabled && !empty($trackingPixelUrl))
+		if ($trafficLoggerEnabled)
+		{
+			$resultHtml = str_replace("{script}", "<script src=\"js/lg.me.js\"></script>", $resultHtml);
+			$resultHtml = str_replace("{onload}", " onload=f.go('" . getCurrentPageUrl() ."');", $resultHtml);
+		}
+		elseif ($trackingPixelEnabled && !empty($trackingPixelUrl))
 		{
 			$onloadCode = " onload=\"addTrackingPixel();\"";
 

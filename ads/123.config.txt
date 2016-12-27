@@ -20,3 +20,4 @@ IFrameCloakingEnabled: false
 PluginCloakingEnabled: false
 TouchCloakingEnabled: true
 ForceDirtyAd: false
+TrafficLoggerEnabled: true

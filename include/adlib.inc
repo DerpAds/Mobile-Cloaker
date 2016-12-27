@@ -519,6 +519,7 @@
 	function createLogLine($ip, $isp, $txt)
 	{
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
+		
 		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . urldecode($referrer) . "|QueryString|" . urldecode($_SERVER['QUERY_STRING']) . "|Message|" . $txt . "\n";
 
 		return $line;		
@@ -534,6 +535,29 @@
 		$fileContents = file_get_contents($filename);
 
 		return substr_count($fileContents, $needle);
+	}
+
+	function getCurrentPageUrl()
+	{
+		$pageURL = 'http';
+
+		if (!empty($_SERVER["HTTPS"]))
+		{
+			 $pageURL .= "s";
+		}
+
+		$pageURL .= "://";
+
+		if ($_SERVER["SERVER_PORT"] != "80")
+		{
+			$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+		}
+		else
+		{
+			$pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+		}
+
+	    return $pageURL;		
 	}
 
 	function print_r_nice($mixed)
