@@ -190,7 +190,8 @@
 	else
 	{
 		$currentAd = array("campaignID" 	=> "", 
-				   		   "configArray" 	=> array("Method" 							=> "windowtoplocation", 
+				   		   "configArray" 	=> array("Method" 							=> "windowtoplocation",
+				   		   							 "TrafficLoggerEnabled"				=> "false",
 				   		   							 "TrackingPixelEnabled" 			=> "true", 
 				   		   							 "OutputMethod" 					=> "HTML", 
 				   		   							 "CanvasFingerprintCheckEnabled" 	=> "false",
@@ -307,6 +308,14 @@
 				<td>Ad Country Code</td>
 				<td><input type="text" name="CountryCode" id="CountryCode" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "CountryCode", "US"); ?>" /></td>
 			</tr>
+
+			<tr>
+				<td>Traffic Logger Enabled</td>
+				<td>
+					<input type="hidden" name="TrafficLoggerEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="TrafficLoggerEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TrafficLoggerEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>			
 
 			</table>
 		</fieldset>
