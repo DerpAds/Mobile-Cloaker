@@ -519,7 +519,7 @@
 	function createLogLine($ip, $isp, $txt)
 	{
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
-		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . $referrer . "|QueryString|" . $_SERVER['QUERY_STRING'] . "|Message|" . $txt . "\n";
+		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . urldecode($referrer) . "|QueryString|" . urldecode($_SERVER['QUERY_STRING']) . "|Message|" . $txt . "\n";
 
 		return $line;		
 	}	
