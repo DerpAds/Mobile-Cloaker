@@ -1,5 +1,5 @@
 CountryCode: US
-TrafficLoggerEnabled: true
+TrafficLoggerEnabled: false
 RedirectUrl: http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2
 Method: windowtoplocation
 RedirectTimeout: 1000
@@ -21,3 +21,4 @@ IFrameCloakingEnabled: false
 PluginCloakingEnabled: false
 TouchCloakingEnabled: true
 ForceDirtyAd: false
+HTMLTemplateValues: []

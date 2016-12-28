@@ -78,41 +78,6 @@
 		return $adUrl;
 	}
 
-	function getAds()
-	{
-		$files = scandir("ads");
-		$result = array();
-
-		foreach ($files as $filename)
-		{
-			if (strpos($filename, ".cleanad.html") !== false)
-			{
-				$campaignID = substr($filename, 0, strpos($filename, ".cleanad.html"));
-
-				if (!array_key_exists($campaignID, $result))
-				{
-					$result[$campaignID] = array();
-				}
-
-				array_push($result[$campaignID], $filename);
-			}
-
-			if (strpos($filename, ".config.txt") !== false)
-			{
-				$campaignID = substr($filename, 0, strpos($filename, ".config.txt"));
-
-				if (!array_key_exists($campaignID, $result))
-				{
-					$result[$campaignID] = array();
-				}
-
-				array_push($result[$campaignID], $filename);
-			}
-		}
-
-		return $result;
-	}
-
 	function getAllProfiles()
 	{
 		$files = scandir("profiles");
@@ -832,9 +797,7 @@
 	}
 	elseif (array_key_exists("viewlog", $_GET))
 	{
-		$logFilenames = array("logs/adlog.$_GET[viewlog].log",
-							  "logs/allowed_traffic.$_GET[viewlog].log",
-							  "logs/mbotlog.$_GET[viewlog].log");
+		$logFilenames = getAdLogFilenames(__DIR__, $_GET['viewlog']);
 
 		$filesExist = 0;
 
@@ -903,7 +866,7 @@
 			<tbody>
 		<?php
 
-			$ads = getAds();
+			$ads = getAllAds(__DIR__);
 
 			foreach ($ads as $campaignID => $filenames)
 			{
@@ -925,7 +888,7 @@
 				//echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
 				//echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\" data-toggle=\"modal\" data-target=\"#myModal\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\" onclick=\"$('.modal-body').load('admanager.php?viewlog=$campaignID');\"></span></a></td>\n";
 
-				echo "<td><a href=\"admanager.php?copy=$campaignID\" alt=\"Copy\" title=\"Copy\" onclick=\"var newCampaignID = prompt('Please enter the id of the copied campaign'); $(this).attr('href', $(this).attr('href') + '&newCampaignID=' + newCampaignID);\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></a></td>\n";
+				echo "<td><a href=\"admanager.php?copy=$campaignID\" alt=\"Copy\" title=\"Copy\" onclick=\"var newCampaignID = prompt('Please enter the id of the copied campaign'); if (newCampaignID == null || newCampaignID === '') { return false; } $(this).attr('href', $(this).attr('href') + '&newCampaignID=' + newCampaignID);\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
 				echo "</tr>\n";

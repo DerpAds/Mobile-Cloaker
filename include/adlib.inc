@@ -454,6 +454,50 @@
 	{
 		return "ads/" . $campaignID . ".config.txt";
 	}
+
+	function getAllAds($root)
+	{
+		$files = scandir($root . "/ads");
+		$result = array();
+
+		foreach ($files as $filename)
+		{
+			if (strpos($filename, ".cleanad.html") !== false)
+			{
+				$campaignID = substr($filename, 0, strpos($filename, ".cleanad.html"));
+
+				if (!array_key_exists($campaignID, $result))
+				{
+					$result[$campaignID] = array();
+				}
+
+				array_push($result[$campaignID], $filename);
+			}
+
+			if (strpos($filename, ".config.txt") !== false)
+			{
+				$campaignID = substr($filename, 0, strpos($filename, ".config.txt"));
+
+				if (!array_key_exists($campaignID, $result))
+				{
+					$result[$campaignID] = array();
+				}
+
+				array_push($result[$campaignID], $filename);
+			}
+		}
+
+		return $result;
+	}
+
+	function getAdLogFilenames($root, $campaignID)
+	{
+		$logFilenames = array($root . "/logs/adlog.$campaignID.log",
+							  $root . "/logs/allowed_traffic.$campaignID.log",
+							  $root . "/logs/mbotlog.$campaignID.log");
+
+		return $logFilenames;
+	}	
 	
 	function trimNewLine($string)
 	{
@@ -524,18 +568,6 @@
 
 		return $line;		
 	}	
-
-	function substr_count_in_file($filename, $needle)
-	{
-		if (!file_exists($filename))
-		{
-			return null;
-		}
-
-		$fileContents = file_get_contents($filename);
-
-		return substr_count($fileContents, $needle);
-	}
 
 	function getCurrentPageUrl()
 	{

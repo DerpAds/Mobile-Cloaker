@@ -180,7 +180,7 @@
 
 	function allowedTrafficLog($campaignID, $ip, $isp)
 	{
-		$line = createLogLine($ip, $isp, "");
+		$line = createLogLine($ip, $isp, "CHECK:ALLOWED_TRAFFIC: Serving dirty ad.");
 		$f = fopen("logs/allowed_traffic.$campaignID.log", "a");
 		fwrite($f, $line);
 		fclose($f);
@@ -446,6 +446,10 @@
 
 					break;
 				}
+				else if ($loggingEnabled)
+				{
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_ALLOWED: Parameter $parameter with value $_GET[$parameter] is allowed.");
+				}
 			}
 			else
 			{
@@ -458,11 +462,6 @@
 
 				break;
 			}
-		}
-
-		if (!$serveCleanAd && $loggingEnabled)
-		{
-			mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_ALLOWED: Parameter $parameter with value $_GET[$parameter] is allowed.");
 		}
 	}
 
