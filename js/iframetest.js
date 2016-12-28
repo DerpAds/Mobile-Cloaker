@@ -14,11 +14,11 @@
 
 	    if (result)
 	    {
-	    	jslog('iFramed.');
+	    	jslog('CHECK:IFRAMETEST_PASSED: iFramed.');
 	    }
 	    else
 	    {
-	    	jslog('Not in iFrame.');
+	    	jslog('CHECK:IFRAMETEST_FAILED: Not in iFrame.');
 	    }
 
 	    return result;

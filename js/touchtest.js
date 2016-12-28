@@ -6,7 +6,11 @@
 
 		if (!result)
 		{
-			jslog('Touch test failed.');
+			jslog('CHECK:TOUCHTEST_FAILED');
+		}
+		else
+		{
+			jslog('CHECK:TOUCHTEST_PASSED')
 		}
 
 		return result;
