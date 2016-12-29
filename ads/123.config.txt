@@ -14,6 +14,7 @@ BlockedCanvasFingerprints: -21756327, 1
 ProvinceBlackList: Prov 1|Prov 2|Prov 3
 CityBlackList: City 1|City 2|City 3
 BlockedParameterValues: []
+BlockedReferrerParameterValues: {"id_site":["20"]}
 LoggingEnabled: true
 ConsoleLoggingEnabled: false
 ISPCloakingEnabled: true

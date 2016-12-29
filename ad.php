@@ -309,6 +309,7 @@
 	$blacklistedReferrers 			= array_key_exists("BlacklistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["BlacklistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$whitelistedReferrers 			= array_key_exists("WhitelistedReferrers", $adConfig) ? preg_split("/\|/", $adConfig["WhitelistedReferrers"], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$blockedParameterValues			= array_key_exists("BlockedParameterValues", $adConfig) ? json_decode($adConfig["BlockedParameterValues"]) : array();
+	$blockedReferrerParameterValues	= array_key_exists("BlockedReferrerParameterValues", $adConfig) ? json_decode($adConfig["BlockedReferrerParameterValues"]) : array();
 	$consoleLoggingEnabled 			= array_key_exists("ConsoleLoggingEnabled", $adConfig) && $adConfig["ConsoleLoggingEnabled"] === "false" ? false : true;
 	$forceDirtyAd 					= array_key_exists("ForceDirtyAd", $adConfig) && $adConfig["ForceDirtyAd"] === "false" ? false : true;
 	$trafficLoggerEnabled			= array_key_exists("TrafficLoggerEnabled", $adConfig) && $adConfig["TrafficLoggerEnabled"] === "false" ? false : true;
@@ -429,6 +430,7 @@
 		}
 	}
 
+	// Check querystring parameters against blocked parameter values
 	if (!$serveCleanAd)
 	{
 		foreach ($blockedParameterValues as $parameter => $blockedValues)
@@ -458,6 +460,47 @@
 				if ($loggingEnabled)
 				{
 					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_MISSING: Parameter $parameter missing from querystring.");
+				}
+
+				break;
+			}
+		}
+	}
+
+	// Check referrer querystring parameters against blocked parameter values
+
+	$referrerParameters = array();
+	parse_str(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_QUERY), $referrerParameters);
+
+	if (!$serveCleanAd)
+	{
+		foreach ($blockedReferrerParameterValues as $parameter => $blockedValues)
+		{
+			if (array_key_exists($parameter, $referrerParameters))
+			{
+				if (in_array($referrerParameters[$parameter], $blockedValues))
+				{
+					$serveCleanAd = true;
+
+					if ($loggingEnabled)
+					{
+						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_BLOCKED: Parameter $parameter has blocked value: $referrerParameters[$parameter].");
+					}
+
+					break;
+				}
+				else if ($loggingEnabled)
+				{
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_ALLOWED: Parameter $parameter with value $referrerParameters[$parameter] is allowed.");
+				}
+			}
+			else
+			{
+				$serveCleanAd = true;
+
+				if ($loggingEnabled)
+				{
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_MISSING: Parameter $parameter missing from referrer querystring.");
 				}
 
 				break;

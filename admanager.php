@@ -696,6 +696,40 @@
 
 			</table>
 
+		</fieldset>
+
+		<fieldset>
+			<legend>Blocked Referrer Parameter Values</legend>
+
+			<table class="table table-striped" id="configTable">
+
+			<tr>
+				<td class="col-xs-5"><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 1" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 0); ?>" /></td>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 0); ?>" /></td>
+			</tr>
+
+			<tr>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 2" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 1); ?>" /></td>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 1); ?>" /></td>
+			</tr>			
+
+			<tr>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 3" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 2); ?>" /></td>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 2); ?>" /></td>
+			</tr>			
+
+			<tr>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 4" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 3); ?>" /></td>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 3); ?>" /></td>
+			</tr>			
+
+			<tr>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Parameter 5" value="<?= array_get_json_key_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 4); ?>" /></td>
+				<td><input type="text" name="BlockedReferrerParameterValues[]" class="form-control form-control-lg" placeholder="Blocked Values (pipe | separated)" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "BlockedReferrerParameterValues", 4); ?>" /></td>
+			</tr>			
+
+			</table>
+
 		</fieldset>		
 
 		<fieldset>
