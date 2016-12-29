@@ -41,5 +41,5 @@
 
 		return $default;
 	}
-	
+
 ?>

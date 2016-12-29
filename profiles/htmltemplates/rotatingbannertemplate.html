@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name='viewport' content='width=device-width, initial-scale=1' />
-    <title>{title}</title>
+    <title>{{title}}</title>
 
     {script}
 </head>
 <body{onload}>
     <div>
-        <a id="link" target="_top" href="{adlink}">
+        <a id="link" target="_top" href="{{adlink}}">
         </a>
     </div>
 
@@ -19,7 +19,7 @@
 
         function rotateBanners()
         {
-            var bannerUrls = [{bannerUrls}];
+            var bannerUrls = [{{bannerUrls()}}];
 
             var randomUrlIndex = Math.floor(Math.random() * bannerUrls.length);
 

@@ -96,6 +96,42 @@
 		return $result;
 	}
 
+	function getAllHTMLTemplates()
+	{
+		$files = scandir("profiles/htmltemplates");
+		$result = array();
+
+		foreach ($files as $filename)
+		{
+			if (strpos($filename, ".html") !== false)
+			{
+				$htmlTemplateName = substr($filename, 0, strpos($filename, ".html"));
+
+				$result[$htmlTemplateName] = $htmlTemplateName;
+			}
+		}
+
+		return $result;		
+	}
+
+	function getHTMLTemplateValues($htmlTemplateName)
+	{
+		$template = file_get_contents("profiles/htmltemplates/$htmlTemplateName.html");
+
+		$matches = array();
+
+		preg_match_all("/{{.*}}/", $template, $matches);
+
+		$result = array();
+
+		foreach ($matches[0] as $templateValue)
+		{
+			$result[$templateValue] = "";
+		}
+
+		return $result;
+	}
+
 	function createOrUpdateAd($campaignID, $configArray)
 	{
 		$configFilename  = getAdConfigFilename($campaignID);
@@ -127,6 +163,25 @@
 		file_put_contents($configFilename, $configFileContents);
 	}
 
+	function createOrUpdateProfile($profileName, $configArray)
+	{
+		$configFilename  = "profiles/$profileName.profile";
+
+		$configFileContents = "";
+
+		foreach ($configArray as $key => $value)
+		{
+			$configFileContents .= "$key: $value\r\n";
+		}
+
+		file_put_contents($configFilename, $configFileContents);		
+	}
+
+	function getAdProfileFilename($profileName)
+	{
+		return "profiles/$profileName.profile";
+	}
+
 	function copyAd($campaignID, $newCampaignID)
 	{
 		$cleanHtmlFilename = getAdCleanHtmlFilename($campaignID);
@@ -137,8 +192,23 @@
 
 		if (!file_exists($newCleanHtmlFilename) && !file_exists($newConfigFilename))
 		{
-			copy($cleanHtmlFilename, $newCleanHtmlFilename);
+			if (file_exists($cleanHtmlFilename))
+			{
+				copy($cleanHtmlFilename, $newCleanHtmlFilename);
+			}
+
 			copy($configFilename, $newConfigFilename);
+		}
+	}
+
+	function copyProfile($profileName, $newProfileName)
+	{
+		$profileFilename = getAdProfileFilename($profileName);
+		$newProfileFilename = getAdProfileFilename($newProfileName);
+
+		if (!file_exists($newProfileFilename))
+		{
+			copy($profileFilename, $newProfileFilename);
 		}
 	}
 
@@ -155,6 +225,16 @@
 		if (file_exists($configFilename))
 		{
 			unlink($configFilename);
+		}
+	}
+
+	function deleteProfile($profileName)
+	{
+		$profileFilename = getAdProfileFilename($profileName);
+
+		if (file_exists($profileFilename))
+		{
+			unlink($profileFilename);
 		}
 	}
 
@@ -197,12 +277,22 @@
 		$currentAd["campaignID"] = $_GET['edit'];
 		$currentAd["configArray"] = processAdConfig(getAdConfigFilename($_GET['edit']));
 
+		if (empty($currentAd["configArray"]["HTMLTemplateValues"]) && !empty($currentAd["configArray"]["HTMLTemplate"]))
+		{
+			$currentAd["configArray"]["HTMLTemplateValues"] = json_encode(getHTMLTemplateValues($currentAd["configArray"]["HTMLTemplate"]));
+		}
+
 		$cleanHtmlFilename = getAdCleanHtmlFilename($_GET['edit']);
 
 		if (file_exists($cleanHtmlFilename))
 		{
 			$currentAd["cleanHtml"] = file_get_contents($cleanHtmlFilename);
 		}
+	}
+	elseif (array_key_exists("editprofile", $_GET))
+	{
+		$currentAd["profileName"] = $_GET['editprofile'];
+		$currentAd["configArray"] = processAdConfig(getAdProfileFilename($_GET['editprofile']));
 	}
 	else
 	{
@@ -226,12 +316,22 @@
 		copyAd($_GET['copy'], $_GET['newCampaignID']);
 	}
 
+	if (array_key_exists("copyprofile", $_GET) && array_key_exists("newProfileName", $_GET))
+	{
+		copyProfile($_GET['copyprofile'], $_GET['newProfileName']);
+	}
+
 	if (array_key_exists("delete", $_GET))
 	{
 		deleteAd($_GET['delete']);
 	}
 
-	if (!empty($_POST['campaignID']) && !array_key_exists("edit", $_GET))
+	if (array_key_exists("deleteprofile", $_GET))
+	{
+		deleteProfile($_GET['deleteprofile']);
+	}
+
+	if ((!empty($_POST['campaignID']) || !empty($_POST['profileName'])) && !array_key_exists("edit", $_GET))
 	{
 		//print_r_nice($_POST);
 
@@ -244,7 +344,14 @@
 			{
 				if (strpos($key, "HTMLTemplateValues_") !== false)
 				{
-					$HTMLTemplateValues[substr($key, strlen("HTMLTemplateValues_"))] = $value;
+					if (is_array($value))
+					{
+						$HTMLTemplateValues[substr($key, strlen("HTMLTemplateValues_"))] = array_values(array_filter($value));
+					}
+					else
+					{
+						$HTMLTemplateValues[substr($key, strlen("HTMLTemplateValues_"))] = $value;
+					}
 				}
 				elseif (is_array($value))
 				{
@@ -267,6 +374,11 @@
 			}
 		}
 
+		if (empty($HTMLTemplateValues) && !empty($configArray["HTMLTemplate"]))
+		{
+			$HTMLTemplateValues = getHTMLTemplateValues($configArray["HTMLTemplate"]);
+		}
+
 		$configArray["HTMLTemplateValues"] = json_encode($HTMLTemplateValues);
 
 		//print_r_nice($configArray);
@@ -277,7 +389,14 @@
 		}
 		else
 		{
-			createOrUpdateAd($_POST['campaignID'], $configArray);	
+			if (!empty($_POST['campaignID']))
+			{
+				createOrUpdateAd($_POST['campaignID'], $configArray);	
+			}
+			else
+			{
+				createOrUpdateProfile($_POST['profileName'], $configArray);
+			}
 		}
 	}
 
@@ -288,17 +407,21 @@
 		    //$('#adTable').DataTable();
 
 <?php
-	if (!empty($_POST['campaignID']))
+
+	echo "toastr.options.timeOut = 10;\n";
+	echo "toastr.options.closeDuration = 500;\n";
+
+	if (!empty($_POST['campaignID']) || !empty($_POST['profileName']))
 	{
-		echo "toastr.options.timeOut = 10;\n";
-		echo "toastr.options.closeDuration = 500;\n";
 		echo "toastr.success('Saved');\n";
 	}
-	elseif (!empty($_GET['copy']))
+	elseif (!empty($_GET['copy']) || !empty($_GET['copyProfile']))
 	{
-		echo "toastr.options.timeOut = 10;\n";
-		echo "toastr.options.closeDuration = 500;\n";
 		echo "toastr.success('Copied');\n";
+	}
+	elseif (!empty($_GET['delete']) || !empty($_GET['deleteProfile']))
+	{
+		echo "toastr.success('Deleted');\n";		
 	}
 ?>
 		});
@@ -358,7 +481,7 @@
 
 <?php
 	}
-	elseif (array_key_exists("edit", $_GET))
+	elseif (array_key_exists("edit", $_GET) || array_key_exists("newprofile", $_GET) || array_key_exists("editprofile", $_GET))
 	{
 
 		$redirectMethodOptions = array("windowlocation", "windowtoplocation", "0x0iframe", "1x1iframe");
@@ -372,11 +495,26 @@
 
 			<table class="table table-striped" id="configTable">
 
+<?php
+			if (array_key_exists("edit", $_GET))
+			{
+?>
 			<tr>
 				<td class="col-xs-5">Campaign ID</td>
 				<td><input type="text" name="campaignID" id="campaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "campaignID"); ?>" <?= array_get_value_with_default($currentAd, "campaignID", "") !== "" ? "readonly" : null; ?> /></td>
 			</tr>
-
+<?php
+			}
+			else
+			{
+?>
+			<tr>
+				<td class="col-xs-5">Profile Name</td>
+				<td><input type="text" name="profileName" id="profileName" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd, "profileName"); ?>" <?= array_get_value_with_default($currentAd, "profileName", "") !== "" ? "readonly" : null; ?> /></td>
+			</tr>
+<?php				
+			}
+?>
 			<tr>
 				<td>Ad Country Code</td>
 				<td><input type="text" name="CountryCode" id="CountryCode" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "CountryCode", "US"); ?>" /></td>
@@ -632,7 +770,33 @@
 
 <?php
 
-		if (array_key_exists("HTMLTemplate", $currentAd["configArray"]))
+		if (array_key_exists("newprofile", $_GET) || array_key_exists("editprofile", $_GET))
+		{
+			$htmlTemplates = getAllHTMLTemplates();
+?>
+			<tr>
+				<td>HTML Template</td>
+				<td>
+					<select name="HTMLTemplate" class="form-control">
+<?php
+					foreach ($htmlTemplates as $htmlTemplateName)
+					{
+						if (array_get_value_with_default($currentAd["configArray"], "HTMLTemplate") == $option)
+						{
+							echo "<option value=\"$htmlTemplateName\" selected=\"selected\">$htmlTemplateName</option>\n";
+						}
+						else
+						{
+							echo "<option value=\"$htmlTemplateName\">$htmlTemplateName</option>\n";
+						}
+					}
+?>
+					</select>
+				</td>
+			</tr>			
+<?php
+		}
+		elseif (array_key_exists("HTMLTemplate", $currentAd["configArray"]))
 		{
 ?>
 			<input type="hidden" name="HTMLTemplate" value="<?= $currentAd["configArray"]["HTMLTemplate"] ?>" />
@@ -646,11 +810,11 @@
 					<td class="col-xs-5"><?= $parameter ?></td>
 					<td>
 <?php
-				if (is_array($parameterValue))
+				if (is_array($parameterValue) || strpos($parameter, "()") !== false)
 				{
 					for ($i = 0; $i < 5; $i++)
 					{
-						$value = $i < sizeof($parameterValue) ? $parameterValue[$i] : "";
+						$value = $i < sizeof($parameterValue) && is_array($parameterValue) ? $parameterValue[$i] : "";
 ?>
 						<input type="text" name="HTMLTemplateValues_<?= $parameter ?>[]" class="form-control form-control-lg" value="<?= $value ?>" /><br/>
 <?php
@@ -662,8 +826,7 @@
 					<input type="text" name="HTMLTemplateValues_<?= $parameter ?>" class="form-control form-control-lg" value="<?= $parameterValue ?>" />
 <?php
 				}
-?>
-						
+?>						
 					</td>
 				</tr>
 <?php
@@ -712,11 +875,20 @@
 
 			function checkConfigForm()
 			{
-				if ($('#campaignID').val().trim() === '')
+				if (typeof $('#campaignID').val() != 'undefined' && $('#campaignID').val().trim() === '')
 				{
 					$('#campaignID').focus();
 						
 					toastr.error('Campaign ID cannot be empty.');
+
+					return false;
+				}
+
+				if (typeof $('#profileName').val() != 'undefined' && $('#profileName').val().trim() === '')
+				{
+					$('#profileName').focus();
+						
+					toastr.error('Profile name cannot be empty.');
 
 					return false;
 				}
@@ -730,7 +902,7 @@
 					return false;					
 				}
 
-				if ($('#cleanHtml').val().trim() === '')
+				if (typeof $('#cleanHtml').val() != 'undefined' && $('#cleanHtml').val().trim() === '')
 				{
 					$('#cleanHtml').focus();
 						
@@ -834,87 +1006,159 @@
 	else
 	{
 ?>
-		<div>
-			<div style="float: left;">
-				<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?new';">
-					New AD
-				</button>
-			</div>
-			<div style="float: right;">
-				<button type="button" class="btn btn-danger" onclick="window.location = 'admanager.php?logout&<?= mt_rand(); ?>';">
-					Logout
-				</button>
-			</div>
+
+		<div style="float: right;">
+			<button type="button" class="btn btn-danger" onclick="window.location = 'admanager.php?logout&<?= mt_rand(); ?>';">
+				Logout
+			</button>
 		</div>
 
-		<br/><br/>
+		<ul class="nav nav-tabs" id="navtab-container">
+		  <li class="active"><a data-toggle="tab" href="#ads">Ads</a></li>
+		  <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
+		</ul>
 
-		<table class="table table-striped" id="adTable">
+		<div class="tab-content">
+		  <div id="ads" class="tab-pane fade in active">
 
-			<thead>
-				<tr>
-					<th class="col-xs-3">Campaign ID</th>
-					<th>Tag</th>
-					<th style="width: 50px;"></th>
-					<th style="width: 50px;"></th>
-					<th style="width: 50px;"></th>
-					<th style="width: 50px;"></th>
-					<th style="width: 50px;"></th>
-				</tr>
-			</thead>
+		  	<br/>
 
-			<tbody>
-		<?php
+			<div>
+				<div style="float: right;">
+					<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?new';">
+						New AD
+					</button>
+				</div>
+			</div>
 
-			$ads = getAllAds(__DIR__);
+			<br/><br/>
 
-			foreach ($ads as $campaignID => $filenames)
-			{
-				$adTagCode = getAdTagCode($campaignID);
+			<table class="table table-striped" id="adTable">
 
-				echo "<tr>\n";
-				echo "<td><a href=\"admanager.php?edit=$campaignID&" . mt_rand() . "\" alt=\"Edit\" title=\"Edit\">$campaignID</a></td>\n";
-				echo "<td><input class=\"form-control form-control-lg\" type=\"text\" value=\"$adTagCode\" onclick=\"this.select(); document.execCommand('copy'); toastr.success('Link \'$adTagCode\' copied to clipboard.');\" /></td>\n";
+				<thead>
+					<tr>
+						<th class="col-xs-3">Campaign ID</th>
+						<th>Tag</th>
+						<th style="width: 50px;"></th>
+						<th style="width: 50px;"></th>
+						<th style="width: 50px;"></th>
+						<th style="width: 50px;"></th>
+						<th style="width: 50px;"></th>
+					</tr>
+				</thead>
 
-				if (strpos($adTagCode, "javascript") === false)
+				<tbody>
+			<?php
+
+				$ads = getAllAds(__DIR__);
+
+				foreach ($ads as $campaignID => $filenames)
 				{
-					echo "<td><a href=\"$adTagCode\" alt=\"View\" title=\"View\" target=\"_blank\"><span class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></span></a></td>\n";
+					$adTagCode = getAdTagCode($campaignID);
+
+					echo "<tr>\n";
+					echo "<td><a href=\"admanager.php?edit=$campaignID&" . mt_rand() . "\" alt=\"Edit\" title=\"Edit\">$campaignID</a></td>\n";
+					echo "<td><input class=\"form-control form-control-lg\" type=\"text\" value=\"$adTagCode\" onclick=\"this.select(); document.execCommand('copy'); toastr.success('Link \'$adTagCode\' copied to clipboard.');\" /></td>\n";
+
+					if (strpos($adTagCode, "javascript") === false)
+					{
+						echo "<td><a href=\"$adTagCode\" alt=\"View\" title=\"View\" target=\"_blank\"><span class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></span></a></td>\n";
+					}
+					else
+					{
+						echo "<td></td>\n";
+					}
+
+					//echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
+					//echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\" data-toggle=\"modal\" data-target=\"#myModal\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\" onclick=\"$('.modal-body').load('admanager.php?viewlog=$campaignID');\"></span></a></td>\n";
+
+					echo "<td><a href=\"admanager.php?copy=$campaignID\" alt=\"Copy\" title=\"Copy\" onclick=\"var newCampaignID = prompt('Please enter the id of the copied campaign'); if (newCampaignID == null || newCampaignID === '') { return false; } $(this).attr('href', $(this).attr('href') + '&newCampaignID=' + newCampaignID);\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></a></td>\n";
+					echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\"></span></a></td>\n";
+					echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
+					echo "</tr>\n";
 				}
-				else
-				{
-					echo "<td></td>\n";
-				}
 
-				//echo "<td><a href=\"admanager.php?test=$campaignID\" alt=\"Test\" title=\"Test\"><span class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></span></a></td>\n";
-				//echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\" data-toggle=\"modal\" data-target=\"#myModal\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\" onclick=\"$('.modal-body').load('admanager.php?viewlog=$campaignID');\"></span></a></td>\n";
+			?>
 
-				echo "<td><a href=\"admanager.php?copy=$campaignID\" alt=\"Copy\" title=\"Copy\" onclick=\"var newCampaignID = prompt('Please enter the id of the copied campaign'); if (newCampaignID == null || newCampaignID === '') { return false; } $(this).attr('href', $(this).attr('href') + '&newCampaignID=' + newCampaignID);\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></a></td>\n";
-				echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\"></span></a></td>\n";
-				echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
-				echo "</tr>\n";
-			}
+				</tbody>
+			</table>
 
-		?>
+			<!-- Modal -->
+			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			        <h4 class="modal-title" id="myModalLabel">Ad logs</h4>
+			      </div>
+			      <div class="modal-body">
+			        If you see this message, please disable your ad blocker.
+			      </div>
+			    </div>
+			  </div>
+			</div>
 
-			</tbody>
-		</table>
-
-		<!-- Modal -->
-		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		  <div class="modal-dialog" role="document">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-		          <span aria-hidden="true">&times;</span>
-		        </button>
-		        <h4 class="modal-title" id="myModalLabel">Ad logs</h4>
-		      </div>
-		      <div class="modal-body">
-		        If you see this message, please disable your ad blocker.
-		      </div>
-		    </div>
-		  </div>
 		</div>
+		<div id="profiles" class="tab-pane fade">
+			<br/>
+
+			<div>
+				<div style="float: right;">
+					<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?newprofile';">
+						New Profile
+					</button>
+				</div>
+
+			</div>
+
+			<br/><br/>
+
+			<table class="table table-striped" id="adTable">
+
+				<thead>
+					<tr>
+						<th class="col-xs-3">Profile Name</th>
+						<th style="width: 50px;"></th>
+						<th style="width: 50px;"></th>
+					</tr>
+				</thead>
+
+				<tbody>
+			<?php
+
+				$profiles = getAllProfiles();
+
+				foreach ($profiles as $profileName => $profileFilename)
+				{
+					echo "<tr>\n";
+					echo "<td><a href=\"admanager.php?editprofile=$profileName&" . mt_rand() . "\" alt=\"Edit\" title=\"Edit\">$profileName</a></td>\n";
+					echo "<td><a href=\"admanager.php?copyprofile=$profileName\" alt=\"Copy\" title=\"Copy\" onclick=\"var newProfileName = prompt('Please enter the name of the copied profile'); if (newProfileName == null || newProfileName === '') { return false; } $(this).attr('href', $(this).attr('href') + '&newProfileName=' + newProfileName);\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></a></td>\n";
+					echo "<td><a href=\"admanager.php?deleteprofile=$profileName\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with name \'$profileName\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
+					echo "</tr>\n";
+				}
+			?>
+
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+
+		$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+		    localStorage.setItem('activeTab', $(e.target).attr('href'));
+		});
+
+		var activeTab = localStorage.getItem('activeTab');
+
+		if (activeTab)
+		{
+		   $('#navtab-container a[href="' + activeTab + '"]').tab('show');
+		}
+
+	</script>
 
 <?php
 	}
