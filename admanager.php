@@ -1199,7 +1199,7 @@
 ?>
 
 		<div>
-			<small>&copy; 2016 Adcrush Media</small>
+			<small>&copy; <?= date("Y") ?> Adcrush Media</small>
 		</div>
 
 	</div>
