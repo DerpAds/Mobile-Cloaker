@@ -198,7 +198,7 @@
 		$ip  = getClientIP();
 		$isp = getISPInfo($ip);
 
-		return str_replace("|Message|\n", "|", createLogLine($ip, $isp, ""));
+		return str_replace("|Message|\n", "|RequestMethod|" . $_SERVER['REQUEST_METHOD'] . "|", createLogLine($ip, $isp, ""));
 
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 
