@@ -521,6 +521,11 @@
 			</tr>
 
 			<tr>
+				<td>Allowed ISPs (pipe | separated)</td>
+				<td><input type="text" name="AllowedISPS" id="AllowedISPS" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "AllowedISPS", ""); ?>" /></td>
+			</tr>			
+
+			<tr>
 				<td>Traffic Logger Enabled</td>
 				<td>
 					<input type="hidden" name="TrafficLoggerEnabled" value="false" />
