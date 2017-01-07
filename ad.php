@@ -1,5 +1,13 @@
 <?php
 
+	$__VERSION = "5.0";
+
+	if (array_key_exists("version", $_GET))
+	{
+		echo $__VERSION;
+		exit;
+	}
+
 	//
 	// Script usage: http(s)://host/dir/ad.php?<id>
 	//
