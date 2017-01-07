@@ -561,6 +561,11 @@
 	    return $result;
 	}
 
+	function createUTF8File($filename)
+	{
+		file_put_contents($filename, "\xEF\xBB\xBF");
+	}
+
 	function createLogLine($ip, $isp, $txt)
 	{
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";

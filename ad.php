@@ -164,31 +164,59 @@
 
 	function adlog($campaignID, $ip, $isp, $txt)
 	{
+		$logFilename = "logs/adlog.$campaignID.log";
 		$line = createLogLine($ip, $isp, $txt);
-		$f = fopen("logs/adlog.$campaignID.log","a");
+
+		if (!file_exists($logFilename))
+		{
+			createUTF8File($logFilename);
+		}
+
+		$f = fopen($logFilename, "a");
 		fwrite($f, $line);
 		fclose($f);
 	}
 
 	function mbotlog($campaignID, $ip, $isp, $txt)
 	{
+		$logFilename = "logs/mbotlog.$campaignID.log";
 		$line = createLogLine($ip, $isp, $txt);
-		$f = fopen("logs/mbotlog.$campaignID.log", "a");
+
+		if (!file_exists($logFilename))
+		{
+			createUTF8File($logFilename);
+		}
+
+		$f = fopen($logFilename, "a");
 		fwrite($f, $line);
 		fclose($f);
 	}
 
 	function allowedTrafficLog($campaignID, $ip, $isp)
 	{
+		$logFilename = "logs/allowed_traffic.$campaignID.log";
 		$line = createLogLine($ip, $isp, "CHECK:ALLOWED_TRAFFIC: Serving dirty ad.");
-		$f = fopen("logs/allowed_traffic.$campaignID.log", "a");
+
+		if (!file_exists($logFilename))
+		{
+			createUTF8File($logFilename);
+		}
+
+		$f = fopen($logFilename, "a");
 		fwrite($f, $line);
 		fclose($f);
 	}
 
 	function trafficLoggerLog($campaignID, $line)
 	{
-		$f = fopen("logs/traffic_logger.$campaignID.log", "a");
+		$logFilename = "logs/traffic_logger.$campaignID.log";
+
+		if (!file_exists($logFilename))
+		{
+			createUTF8File($logFilename);
+		}
+
+		$f = fopen($logFilename, "a");
 		fwrite($f, $line . "\n");
 		fclose($f);		
 	}
