@@ -495,7 +495,7 @@
 		$logFilenames = array($root . "/logs/adlog.$campaignID.log",
 							  $root . "/logs/allowed_traffic.$campaignID.log",
 							  $root . "/logs/mbotlog.$campaignID.log",
-							  $root . "/logs/allowed_traffic.$campaignID.log");
+							  $root . "/logs/traffic_logger.$campaignID.log");
 
 		return $logFilenames;
 	}	
