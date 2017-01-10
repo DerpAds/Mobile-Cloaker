@@ -425,7 +425,7 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_BLOCKED: Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
 				}
 
 				break;
@@ -434,7 +434,7 @@
 
 		if (!$serveCleanAd && $loggingEnabled)
 		{
-			mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_ALLOWED: Referrer $_SERVER[HTTP_REFERER] is NOT in blacklist.");
+			mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is NOT in blacklist.");
 		}
 
 		if (!$serveCleanAd && !empty($whitelistedReferrers))
@@ -457,12 +457,12 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_BLOCKED: Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
 				}
 			}
 			elseif ($loggingEnabled)
 			{
-				mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_ALLOWED: Referrer $_SERVER[HTTP_REFERER] is in whitelist.");
+				mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in whitelist.");
 			}
 		}
 	}
@@ -480,14 +480,14 @@
 
 					if ($loggingEnabled)
 					{
-						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_BLOCKED: Parameter $parameter has blocked value: $_GET[$parameter].");
+						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_BLOCKED:$parameter:$_GET[$parameter]: Parameter $parameter has blocked value: $_GET[$parameter].");
 					}
 
 					break;
 				}
 				else if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_ALLOWED: Parameter $parameter with value $_GET[$parameter] is allowed.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_ALLOWED:$parameter:$_GET[$parameter]: Parameter $parameter with value $_GET[$parameter] is allowed.");
 				}
 			}
 			else
@@ -496,7 +496,7 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_MISSING: Parameter $parameter missing from querystring.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_MISSING:$parameter: Parameter $parameter missing from querystring.");
 				}
 
 				break;
@@ -521,14 +521,14 @@
 
 					if ($loggingEnabled)
 					{
-						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_BLOCKED: Parameter $parameter has blocked value: $referrerParameters[$parameter].");
+						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_BLOCKED:$parameter:$referrerParameters[$parameter]: Parameter $parameter has blocked value: $referrerParameters[$parameter].");
 					}
 
 					break;
 				}
 				else if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_ALLOWED: Parameter $parameter with value $referrerParameters[$parameter] is allowed.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_ALLOWED:$parameter:$referrerParameters[$parameter]: Parameter $parameter with value $referrerParameters[$parameter] is allowed.");
 				}
 			}
 			else
@@ -537,7 +537,7 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_MISSING: Parameter $parameter missing from referrer querystring.");
+					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_MISSING:$parameter: Parameter $parameter missing from referrer querystring.");
 				}
 
 				break;
@@ -551,7 +551,7 @@
 
 		if ($loggingEnabled)
 		{
-			adlog($campaignID, $ip, $isp['isp'], "CHECK:USERAGENT_MOBILE: UserAgent is not a mobile device.");
+			adlog($campaignID, $ip, $isp['isp'], "CHECK:USERAGENT_MOBILE:$_SERVER[HTTP_USER_AGENT]: UserAgent is not a mobile device.");
 		}
 	}
 	elseif (!$serveCleanAd && $ispCloakingEnabled)
@@ -629,7 +629,7 @@
 	{
 		if ($loggingEnabled && !$redirectEnabled)
 		{
-			adlog($campaignID, $ip, $isp['isp'], "Redirect disabled.");
+			adlog($campaignID, $ip, $isp['isp'], "CHECK:REDIRECT_DISABLED: Redirect disabled.");
 		}
 
 		if ($trafficLoggerEnabled)
