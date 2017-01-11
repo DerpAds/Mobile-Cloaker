@@ -2,6 +2,37 @@
 
 	require_once("include/adlib.inc");
 
+	function getAllNextLevelParametersValues($log, $startsWith)
+	{
+		$matches = array();
+
+		$regex = "/$startsWith([^.]*):([^.]*):/";
+
+		preg_match_all($regex, $log, $matches);
+
+		print_r_nice($matches);
+		exit;
+
+		$result = array();
+
+		for ($i = 0; $i < sizeof($matches[1]); $i++)
+		{
+			if (!array_key_exists($matches[1][$i], $result))
+			{
+				$result[$matches[1][$i]] = array();
+			}
+
+			if (!array_key_exists($matches[2][$i], $result[$matches[1][$i]]))
+			{
+				$result[$matches[1][$i]][$matches[2][$i]] = 0;	
+			}
+
+			$result[$matches[1][$i]][$matches[2][$i]]++;
+		}
+
+		print_r_nice($result);
+	}
+
 	$ads = getAllAds(__DIR__);
 
 	$statsPerCampaign = array();
@@ -45,7 +76,9 @@
 					$stats["PARAMETER_MISSING"] = substr_count($log, "CHECK:PARAMETER_MISSING:");
 					$stats["REFERRER_PARAMETER_BLOCKED"] = substr_count($log, "CHECK:REFERRER_PARAMETER_BLOCKED:");
 					$stats["REFERRER_PARAMETER_ALLOWED"] = substr_count($log, "CHECK:REFERRER_PARAMETER_ALLOWED:");
-					$stats["REFERRER_PARAMETER_MISSING"] = substr_count($log, "CHECK:REFERRER_PARAMETER_MISSING:");					
+					$stats["REFERRER_PARAMETER_MISSING"] = substr_count($log, "CHECK:REFERRER_PARAMETER_MISSING:");
+
+					getAllNextLevelParametersValues($log, "CHECK:PARAMETER_ALLOWED:");
 				}
 				elseif (strpos($logFilename, "adlog") !== false)
 				{
