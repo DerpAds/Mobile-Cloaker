@@ -598,9 +598,16 @@
 	    return $pageURL;		
 	}
 
-	function print_r_nice($mixed)
+	function print_r_nice($mixed, $return = false)
 	{
-		echo str_replace("\n", "<br/>", print_r($mixed, true));
+		$string = str_replace("\n", "<br/>", print_r($mixed, true));
+
+		if ($return)
+		{
+			return $string;
+		}
+		
+		echo $string;
 	}	
 
 ?>
