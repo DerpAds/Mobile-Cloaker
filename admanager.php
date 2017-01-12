@@ -32,6 +32,7 @@
 	require_once("include/adlib.inc");
 	require_once("include/managersecurity.inc");
 	require_once("include/arrayhelpers.inc");
+	require_once("include/statlib.inc");
 	require_once("admanager_security.php");
 
 	if (array_key_exists("logout", $_GET))
@@ -1008,6 +1009,8 @@
 	}
 	elseif (array_key_exists("viewlog", $_GET))
 	{
+		echo renderAdStats($_GET['viewlog'], getAdStats($_GET['viewlog']));
+
 		$logFilenames = getAdLogFilenames(__DIR__, $_GET['viewlog']);
 
 		$filesExist = 0;
@@ -1112,7 +1115,7 @@
 					//echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\" data-toggle=\"modal\" data-target=\"#myModal\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\" onclick=\"$('.modal-body').load('admanager.php?viewlog=$campaignID');\"></span></a></td>\n";
 
 					echo "<td><a href=\"admanager.php?copy=$campaignID\" alt=\"Copy\" title=\"Copy\" onclick=\"var newCampaignID = prompt('Please enter the id of the copied campaign'); if (newCampaignID == null || newCampaignID === '') { return false; } $(this).attr('href', $(this).attr('href') + '&newCampaignID=' + newCampaignID);\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></a></td>\n";
-					echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs\" title=\"Logs\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\"></span></a></td>\n";
+					echo "<td><a href=\"admanager.php?viewlog=$campaignID\" alt=\"Logs and Stats\" title=\"Logs and Stats\"><span class=\"glyphicon glyphicon-list-alt\" aria-hidden=\"true\"></span></a></td>\n";
 					echo "<td><a href=\"admanager.php?delete=$campaignID\" alt=\"Delete\" title=\"Delete\" onclick=\"return confirm('Are you sure you want to delete ad with campaignID \'$campaignID\'?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></a></td>\n";
 					echo "</tr>\n";
 				}

@@ -1,7 +1,5 @@
 <?php
 
-	require_once("include/adlib.inc");
-
 	function getAllNextLevelParametersValues($log, $startsWith)
 	{
 		$matches = array();
@@ -221,20 +219,6 @@
 		$result .= "<br/><br/>";
 
 		return $result;
-	}
-
-	$ads = getAllAds(__DIR__);
-
-	$statsPerCampaign = array();
-
-	foreach ($ads as $campaignID => $filenames)
-	{
-		$statsPerCampaign[$campaignID] = getAdStats($campaignID);
-	}
-
-	foreach ($statsPerCampaign as $campaignID => $stats)
-	{
-		echo renderAdStats($campaignID, $stats);
 	}
 
 ?>
