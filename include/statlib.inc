@@ -69,9 +69,9 @@
 		return $result;
 	}
 
-	function getAdStats($campaignID)
+	function getAdStats($campaignID, $root)
 	{
-		$logFilenames = getAdLogFilenames(__DIR__, $campaignID);
+		$logFilenames = getAdLogFilenames($root, $campaignID);
 
 		$stats = array();
 

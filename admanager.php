@@ -1009,7 +1009,7 @@
 	}
 	elseif (array_key_exists("viewlog", $_GET))
 	{
-		echo renderAdStats($_GET['viewlog'], getAdStats($_GET['viewlog']));
+		echo renderAdStats($_GET['viewlog'], getAdStats($_GET['viewlog'], __DIR__));
 
 		$logFilenames = getAdLogFilenames(__DIR__, $_GET['viewlog']);
 
