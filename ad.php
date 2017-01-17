@@ -632,23 +632,23 @@
 			adlog($campaignID, $ip, $isp["isp"], "CHECK:REDIRECT_DISABLED: Redirect disabled.");
 		}
 
+		$scriptElements = array();
+		$onloadElements = array();
+
+		if ($trackingPixelEnabled && !empty($trackingPixelUrl))
+		{
+			$scriptElements[] = minify("<script type=\"text/javascript\">\n" . $referrerDomainScript . $trackingPixelScript . "\n</script>");
+			$onloadElements[] = "addTrackingPixel();";
+		}
+
 		if ($trafficLoggerEnabled)
 		{
-			$resultHtml = str_replace("{script}", "<script src=\"js/lg.me.js\"></script>", $resultHtml);
-			$resultHtml = str_replace("{onload}", " onload=f.go('" . getCurrentPageUrl() ."');", $resultHtml);
+			$scriptElements[] = "<script src=\"js/lg.me.js\"></script>";
+			$onloadElements[] = "f.go('" . getCurrentPageUrl() . "');";
 		}
-		elseif ($trackingPixelEnabled && !empty($trackingPixelUrl))
-		{
-			$onloadCode = " onload=\"addTrackingPixel();\"";
 
-			$resultHtml = str_replace("{script}", minify("<script type=\"text/javascript\">\n" . $referrerDomainScript . $trackingPixelScript . "\n</script>"), $resultHtml);
-			$resultHtml = str_replace("{onload}", $onloadCode, $resultHtml);
-		}
-		else
-		{
-			$resultHtml = str_replace("{script}", "", $resultHtml);
-			$resultHtml = str_replace("{onload}", "", $resultHtml);
-		}
+		$resultHtml = str_replace("{script}", implode("\n", $scriptElements), $resultHtml);
+		$resultHtml = str_replace("{onload}", !empty($onloadElements) ? " onload=\"" . implode("", $onloadElements) . "\"" : "", $resultHtml);
 
 		if ($outputMethod === "JS")
 		{
