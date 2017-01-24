@@ -1022,6 +1022,7 @@
 				echo "<strong>$logFilename</strong><br/>";
 				echo "<div style=\"overflow: scroll; width: 100%; height: 33%;\">\n";
 				echo "<table class=\"table table-bordered table-striped\">\n";
+				// this explode will cause duplicate info if querystring contains pipes
 				echo "<tr>\n<td>" . str_replace("\n", "</td></tr>\n<tr><td>", implode("</td><td>", explode("|", file_get_contents($logFilename))));
 				echo "</table>\n";
 				echo "</div>\n";

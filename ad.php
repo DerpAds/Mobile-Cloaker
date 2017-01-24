@@ -264,7 +264,7 @@
 			{
 				$decoded = urldecode($_GET['data']);
 				
-				trafficLoggerLog($campaignID, "Type|Info|".createTrafficLoggerLogLine() . $decoded);
+				trafficLoggerLog($campaignID, "Type|Info|". createTrafficLoggerLogLine() . $decoded);
 				
 				// Create a blank image
 				$im = imagecreatetruecolor(1, 1);

@@ -5,8 +5,8 @@ RedirectUrl: http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2
 Method: windowtoplocation
 RedirectTimeout: 1000
 RedirectEnabled: true
-TrackingPixelUrl: http://www.google.com/
-TrackingPixelEnabled: false
+TrackingPixelUrl: http://www.trackingpixel.com/123/456/789
+TrackingPixelEnabled: true
 OutputMethod: HTML
 BlacklistedReferrers: rtbfy|mediatrust|geoedge
 WhitelistedReferrers: ad.adnium.com|_empty_
