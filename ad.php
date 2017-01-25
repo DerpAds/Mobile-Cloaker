@@ -1,6 +1,6 @@
 <?php
 
-	$__VERSION = "5.0";
+	$__VERSION = "5.1";
 
 	if (array_key_exists("version", $_GET))
 	{

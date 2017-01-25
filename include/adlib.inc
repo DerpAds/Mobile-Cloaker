@@ -404,6 +404,22 @@
 		return false;
 	}
 
+	function findPoxyFieldsInHeader()
+	{
+		$result = array();
+		$proxyHeaderFields = array("HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED");
+
+	    foreach ($proxyHeaderFields as $key)
+	    {
+	        if (array_key_exists($key, $_SERVER) === true)
+	        {
+	        	$result[] = $key;
+	        }
+	    }
+
+	    return implode(",", $result);
+	}
+
 	/**
 	 * Ensures an ip address is both a valid IP and does not fall within
 	 * a private network range.
@@ -570,7 +586,7 @@
 	{
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 		
-		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . urldecode($referrer) . "|QueryString|" . urldecode($_SERVER['QUERY_STRING']) . "|Message|" . $txt . "\n";
+		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ProxyFieldsInHeader|" . findPoxyFieldsInHeader() . "|AllHeaders|" . urldecode(http_build_query(getallheaders())) . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . urldecode($referrer) . "|QueryString|" . urldecode($_SERVER['QUERY_STRING']) . "|Message|" . $txt . "\n";
 
 		return $line;		
 	}	
