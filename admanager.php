@@ -1,10 +1,12 @@
 <?php
 
 	session_start();
+
 ?>
 
 <html>
 <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
@@ -1022,8 +1024,12 @@
 				echo "<strong>$logFilename</strong><br/>";
 				echo "<div style=\"overflow: scroll; width: 100%; height: 33%;\">\n";
 				echo "<table class=\"table table-bordered table-striped\">\n";
+
+				$fileContents = file_get_contents($logFilename);
+				//$fileContents = iconv("UTF-8", "UTF-8", $fileContents);
+
 				// this explode will cause duplicate info if querystring contains pipes
-				echo "<tr>\n<td>" . str_replace("\n", "</td></tr>\n<tr><td>", implode("</td><td>", explode("|", file_get_contents($logFilename))));
+				echo "<tr>\n<td>" . str_replace("\n", "</td></tr>\n<tr><td>", implode("</td><td>", explode("|", $fileContents)));
 				echo "</table>\n";
 				echo "</div>\n";
 				echo "<br/>";
