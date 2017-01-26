@@ -407,7 +407,23 @@
 	function findPoxyFieldsInHeader()
 	{
 		$result = array();
-		$proxyHeaderFields = array("HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED");
+
+		$proxyHeaderFields = array("HTTP_VIA",   
+								   "HTTP_X_FORWARDED_FOR",   
+								   "HTTP_FORWARDED_FOR",   
+								   "HTTP_X_FORWARDED",   
+								   "HTTP_FORWARDED",   
+								   "HTTP_CLIENT_IP",   
+								   "HTTP_FORWARDED_FOR_IP",   
+								   "VIA",   
+								   "X_FORWARDED_FOR",   
+								   "FORWARDED_FOR",   
+								   "X_FORWARDED",   
+								   "FORWARDED",   
+								   "CLIENT_IP",   
+								   "FORWARDED_FOR_IP",   
+								   "HTTP_PROXY_CONNECTION",
+								   "HTTP_X_CLUSTER_CLIENT_IP");
 
 	    foreach ($proxyHeaderFields as $key)
 	    {
@@ -418,6 +434,36 @@
 	    }
 
 	    return implode(",", $result);
+	}
+
+	function TCPPortScan($ipaddress, $port, $timeout = 1)
+	{
+		$fp = @fsockopen($ipaddress, $port, $errno, $errstr, $timeout);
+
+		if ($fp)
+		{
+			fclose($fp);
+			return true;
+		}
+
+		return false;
+	}
+
+	function findOpenProxyPorts($ipaddress)
+	{
+		$result = array();
+
+		$ports = array(8080, 80, 81, 1080, 6588, 8000, 3128, 553, 554, 4480);
+
+		foreach($ports as $port)
+		{
+		    if (TCPPortScan($ipaddress, $port)) //@fsockopen($_SERVER['REMOTE_ADDR'], $port, $errno, $errstr, 30))
+			{
+		        $result[] = $port;
+		    }
+		}
+
+		return implode(",", $result);
 	}
 
 	/**
@@ -586,7 +632,7 @@
 	{
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 		
-		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ProxyFieldsInHeader|" . findPoxyFieldsInHeader() . "|AllHeaders|" . urldecode(http_build_query(getallheaders())) . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . urldecode($referrer) . "|QueryString|" . urldecode($_SERVER['QUERY_STRING']) . "|Message|" . $txt . "\n";
+		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ProxyFieldsInHeader|" . findPoxyFieldsInHeader() . "|AllHeaders|" . urldecode(http_build_query(getallheaders())) . "|RemotePort|" . $_SERVER['REMOTE_PORT'] . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . urldecode($referrer) . "|QueryString|" . urldecode($_SERVER['QUERY_STRING']) . "|Message|" . $txt . "\n";
 
 		return $line;		
 	}	

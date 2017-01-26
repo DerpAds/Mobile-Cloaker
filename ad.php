@@ -234,7 +234,7 @@
 		$ip  = getClientIP();
 		$isp = getISPInfo($ip);
 
-		return str_replace("|Message|\n", "|RequestMethod|" . $_SERVER['REQUEST_METHOD'] . "|", createLogLine($ip, $isp["isp"], ""));
+		return str_replace("|Message|\n", "|RequestMethod|" . $_SERVER['REQUEST_METHOD'] . "|OpenProxyPorts|" . findOpenProxyPorts($_SERVER['REMOTE_ADDR']) . "|", createLogLine($ip, $isp["isp"], ""));
 
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 
@@ -299,6 +299,21 @@
 			}
 		}		
 	}
+
+	/*
+
+	if (TCPPortScan("189.60.205.48", "65000"))
+	{
+		echo "open";
+	}
+	else
+	{
+		echo "closed";
+	}
+
+	exit;
+
+	*/
 
 	$queryString = $_SERVER['QUERY_STRING'];
 	$ampIndex = strpos($queryString, "&");
