@@ -590,7 +590,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, $ip, $isp["isp"], "CHECK:GEO_ALLOWED: ISP/Geo is allowed. ISP: " . $isp["isp"] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp["isp"], "CHECK:GEO_ALLOWED: ISP/Geo is allowed. ISP: " . $isp["isp"]);
 			}
 		}
 		else
@@ -599,7 +599,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, $ip, $isp["isp"], "CHECK:GEO_BLOCKED: ISP/Geo is NOT allowed. ISP: " . $isp["isp"] . " / City: " . $geo['city'] . " / Province: " . $geo['province']);
+				adlog($campaignID, $ip, $isp["isp"], "CHECK:GEO_BLOCKED: ISP/Geo is NOT allowed. ISP: " . $isp["isp"]);
 			}
 		}
 	}
