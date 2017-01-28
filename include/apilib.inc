@@ -27,7 +27,7 @@
 		return callAPI($url, $data, $headers);
 	}
 
-	function callAPIGET($url, $data, $headers = null)
+	function callAPIGET($url, $headers = null)
 	{
 		$curl = curl_init();
 
