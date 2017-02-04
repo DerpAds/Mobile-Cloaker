@@ -142,6 +142,8 @@
 		detectNumberOfHistoryEntries();
 		detectHTML5History();
 		detectIndexedDB();
+
+		output(location.search);
 	}
 
 </script>
