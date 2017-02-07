@@ -1,11 +1,11 @@
 CountryCode: US
 AllowedISPS: 
-TrafficLoggerEnabled: true
-RedirectUrl: http://track.bnsntrk.com/cc41236c-31e5-4b7f-9c26-aec024524a25?ad=2
+TrafficLoggerEnabled: false
+RedirectUrl: http://lvh6v.voluumtrk.com/a704cad6-098c-4e1b-a4db-f957dfe24f5e
 Method: windowtoplocation
 RedirectTimeout: 1000
 RedirectEnabled: true
-TrackingPixelUrl: http://www.trackingpixel.com/123/456/789
+TrackingPixelUrl: http://lvh6v.voluumtrk.com/impression/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad={ad}&referrer={referrer}&f_source={f_source}
 TrackingPixelEnabled: true
 OutputMethod: HTML
 BlacklistedReferrers: rtbfy|mediatrust|geoedge
@@ -22,5 +22,5 @@ ISPCloakingEnabled: true
 IFrameCloakingEnabled: false
 PluginCloakingEnabled: false
 TouchCloakingEnabled: true
-ForceDirtyAd: false
+ForceDirtyAd: true
 HTMLTemplateValues: []
