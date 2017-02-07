@@ -173,19 +173,21 @@ var f = (function()
 		{
 		}
 
+		var delimiter = "^";
+
 		var info = 
-		"Referrer|\"" + dReferrer + "\"|" +
-		"Screen Res|" + window.screen.width + "x" + window.screen.height + "x" + window.screen.colorDepth + "|" +
-		"Browser Res|" + Math.max(document.documentElement.clientWidth| window.innerWidth || 0) + "x" + Math.max(document.documentElement.clientHeight| window.innerHeight || 0) + "|" +
-		"UserAgent|\"" + window.navigator.userAgent + "\"|" +
-		"AppVersion|\"" + window.navigator.appVersion + "\"|" +
-		"Platform|\"" + window.navigator.platform + "\"|" +
-		"Is Touch|" + isTouch + "|" +
-		"Touch Points|" + touchPoints() + "|" +
-		"Is Sandboxed|\"" + isSandboxedIframe() + "\"|" +
-		"CanvasFingerPrint|" + canvasFingerprint() + "|" +
-		"Location Hash|" + window.location.hash + "|" +
-		"Location Search|" + window.location.search + "|";
+		"Referrer" + delimiter + "\"" + dReferrer + "\"" + delimiter +
+		"Screen Res" + delimiter + window.screen.width + "x" + window.screen.height + "x" + window.screen.colorDepth + delimiter +
+		"Browser Res" + delimiter + Math.max(document.documentElement.clientWidth| window.innerWidth || 0) + "x" + Math.max(document.documentElement.clientHeight| window.innerHeight || 0) + delimiter +
+		"UserAgent" + delimiter + "\"" + window.navigator.userAgent + "\"" + delimiter +
+		"AppVersion" + delimiter + "\"" + window.navigator.appVersion + "\"" + delimiter +
+		"Platform" + delimiter + "\"" + window.navigator.platform + "\"" + delimiter +
+		"Is Touch" + delimiter + isTouch + delimiter +
+		"Touch Points" + delimiter + touchPoints() + delimiter +
+		"Is Sandboxed" + delimiter + "\"" + isSandboxedIframe() + "\"" + delimiter +
+		"CanvasFingerPrint" + delimiter + canvasFingerprint() + delimiter +
+		"Location Hash" + delimiter + window.location.hash + delimiter +
+		"Location Search" + delimiter + window.location.search + delimiter;
 		
 		var data = encodeURIComponent(info);
 
