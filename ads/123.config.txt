@@ -1,5 +1,5 @@
 CountryCode: US
-AllowedISPS: 
+AllowedISPS: VECTANT|O2
 TrafficLoggerEnabled: false
 RedirectUrl: http://lvh6v.voluumtrk.com/a704cad6-098c-4e1b-a4db-f957dfe24f5e
 Method: windowlocation
