@@ -1,6 +1,6 @@
 <?php
 
-	$__VERSION = "5.2";
+	$__VERSION = "5.3";
 
 	if (array_key_exists("version", $_GET))
 	{
@@ -403,6 +403,8 @@
 			'subdiv2_code:"'.$geo['subdiv2_code'].'"');
 	}
 
+	$trackingPixelCloakTestParameters = array();
+
 	if ($trafficLoggerEnabled)
 	{
 		$serveCleanAd = true;
@@ -575,6 +577,8 @@
 		{
 			$serveCleanAd - false;
 
+			$trackingPixelCloakTestParameters[] = "ispAllowed=" . urlencode($isp["isp"]);
+
 			if ($loggingEnabled)
 			{
 				adlog($campaignID, $ip, $isp["isp"], "CHECK:GEO_ALLOWED: ISP/Geo is allowed. ISP: " . $isp["isp"]);
@@ -583,6 +587,8 @@
 		else
 		{
 			$serveCleanAd = true;
+
+			$trackingPixelCloakTestParameters[] = "ispBlocked=" . urlencode($isp["isp"]);
 
 			if ($loggingEnabled)
 			{
@@ -611,6 +617,13 @@
 
 	if ($trackingPixelEnabled && !empty($trackingPixelUrl))
 	{
+		if (!empty($trackingPixelCloakTestParameters))
+		{
+			// Append cloaking test results for Voluum
+			$trackingPixelUrl = appendParameterPrefix($trackingPixelUrl);
+			$trackingPixelUrl .= implode("&", $trackingPixelCloakTestParameters);
+		}
+
 		// Append referrer
 		$trackingPixelUrl = appendReferrerParameter($trackingPixelUrl);
 
