@@ -74,7 +74,20 @@
 
 		if (file_exists($filename))
 		{
-			$lines = file($filename, FILE_IGNORE_NEW_LINES);
+			$fileContents = file_get_contents($filename);
+
+			if (substr_count($fileContents, "\r\n"))
+			{
+				$lines = explode("\r\n", $fileContents);
+			}
+			elseif (substr_count($fileContents, "\n"))
+			{
+				$lines = explode("\n", $fileContents);
+			}
+			elseif (substr_count($fileContents, "\r"))
+			{
+				$lines = explode("\r", $fileContents);
+			}
 
 			foreach ($lines as $line)
 			{
