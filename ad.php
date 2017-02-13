@@ -1,6 +1,6 @@
 <?php
 
-	$__VERSION = "5.4";
+	$__VERSION = "5.5";
 
 	if (array_key_exists("version", $_GET))
 	{
@@ -331,6 +331,14 @@
 		}		
 	}
 
+	// Set ad.php click ID cookie
+	$adClickID = uniqid("", true);
+	setcookie("_c", $adClickID, strtotime("+1 year"));
+
+	// ad.php visits
+	$adVisits = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] + 1 : 1;
+	setcookie("_v", $adVisits, strtotime("+1 year"));
+
 	$queryString = $_SERVER['QUERY_STRING'];
 	$ampIndex = strpos($queryString, "&");
 
@@ -362,6 +370,7 @@
 	$redirectSubMethod2				= array_key_exists("RedirectSubMethod2", $adConfig) ? $adConfig["RedirectSubMethod2"] : "";
 	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig["RedirectTimeout"] : 3000;
 	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] === "false" ? false : true;
+	$voluumAdCycleCount				= array_key_exists("VoluumAdCycleCount", $adConfig) ? $adConfig["VoluumAdCycleCount"] : -1;
 	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig["CountryCode"] : "";
 	$allowedIspsPerCountry			= array_key_exists("AllowedISPS", $adConfig) && !empty($adConfig["AllowedISPS"]) ? array($adCountry => preg_split("/\|/", $adConfig["AllowedISPS"], -1, PREG_SPLIT_NO_EMPTY)) : $allowedIspsPerCountry;
 	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig["ProvinceBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
@@ -713,6 +722,13 @@
 			{
 				adlog($campaignID, $ip, $isp["isp"], "Force Dirty Ad enabled.");
 			}
+		}
+
+		$redirectUrl = appendParameterPrefix($redirectUrl) . "ccid=$adClickID";
+
+		if ($voluumAdCycleCount > 0)
+		{
+			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=" . (($adVisits % $voluumAdCycleCount) + 1);
 		}
 
 		$f_apps_WeightList["iOS"] 		= getCSVContentAsArray($f_apps_iosBaseFilename . $adCountry . $csvFileSuffix);

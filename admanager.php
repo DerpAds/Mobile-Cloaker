@@ -310,7 +310,8 @@
 				   		   							 "IFrameCloakingEnabled" 			=> "true",
 				   		   							 "PluginCloakingEnabled"			=> "true",
 				   		   							 "TouchCloakingEnabled" 			=> "true",
-				   		   							 "ForceDirtyAd"						=> "false"),
+				   		   							 "ForceDirtyAd"						=> "false",
+				   		   							 "VoluumAdCycleCount"				=> "-1"),
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
@@ -627,6 +628,11 @@
 					<input class="form-check-input" type="checkbox" name="RedirectEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "RedirectEnabled") ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
+
+			<tr>
+				<td>Voluum Ad Cycle Count (-1 to disable)</td>
+				<td><input type="text" name="VoluumAdCycleCount" id="VoluumAdCycleCount" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumAdCycleCount", "-1"); ?>" /></td>
+			</tr>			
 
 			</table>
 
