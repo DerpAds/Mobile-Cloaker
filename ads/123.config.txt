@@ -2,7 +2,7 @@ CountryCode: US
 AllowedISPS: VECTANT|O2
 TrafficLoggerEnabled: false
 RedirectUrl: http://lvh6v.voluumtrk.com/a704cad6-098c-4e1b-a4db-f957dfe24f5e
-Method: windowlocation
+Method: windowtoplocationtoiframepage
 RedirectSubMethod1: windowtoplocationhref
 RedirectSubMethod2: parentwindowlocationhref
 RedirectTimeout: 1000
@@ -21,9 +21,9 @@ BlockedParameterValues: []
 BlockedReferrerParameterValues: {"id_site":["20"]}
 LoggingEnabled: true
 ConsoleLoggingEnabled: false
-ISPCloakingEnabled: true
+ISPCloakingEnabled: false
 IFrameCloakingEnabled: false
 PluginCloakingEnabled: false
-TouchCloakingEnabled: true
+TouchCloakingEnabled: false
 ForceDirtyAd: true
 HTMLTemplateValues: []
