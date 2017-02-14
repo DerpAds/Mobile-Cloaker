@@ -1,6 +1,6 @@
 	function jslog(txt)
 	{		
-		var queryUrl = "http://awstst1.com/adhost/jslog.php?txt=" + txt;
+		var queryUrl = location.href.substring(0, location.href.lastIndexOf("/")) + "/jslog.php?txt=" + txt;
 
 		// Create a cross domain request
 		var isIE8 = window.XDomainRequest ? true : false;
