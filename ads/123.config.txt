@@ -7,7 +7,8 @@ RedirectSubMethod1: windowtoplocationhref
 RedirectSubMethod2: parentwindowlocationhref
 RedirectTimeout: 1000
 RedirectEnabled: true
-VoluumAdCycleCount: -1
+VoluumNumberOfAds: 3
+VoluumAdCycleCount: 2
 TrackingPixelUrl: http://lvh6v.voluumtrk.com/impression/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad={ad}&referrer={referrer}&f_source={f_source}
 TrackingPixelEnabled: true
 OutputMethod: HTML
@@ -17,13 +18,15 @@ CanvasFingerprintCheckEnabled: true
 BlockedCanvasFingerprints: -21756327, 1
 ProvinceBlackList: Prov 1|Prov 2|Prov 3
 CityBlackList: City 1|City 2|City 3
+CloakTrackingPixelUrl: http://www.example.com/
+CloakTrackingPixelEnabled: true
 BlockedParameterValues: []
 BlockedReferrerParameterValues: {"id_site":["20"]}
 LoggingEnabled: true
 ConsoleLoggingEnabled: false
-ISPCloakingEnabled: false
-IFrameCloakingEnabled: false
-PluginCloakingEnabled: false
-TouchCloakingEnabled: false
+ISPCloakingEnabled: true
+IFrameCloakingEnabled: true
+PluginCloakingEnabled: true
+TouchCloakingEnabled: true
 ForceDirtyAd: true
 HTMLTemplateValues: []
