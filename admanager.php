@@ -404,6 +404,17 @@
 				createOrUpdateProfile($_POST['profileName'], $configArray);
 			}
 		}
+
+		if (array_key_exists("StayOnEditPage", $_POST) && $_POST['StayOnEditPage'] == "true")
+		{
+			setcookie("StayOnEditPage", "1", time() + 3600);
+
+			header("Location: " . substr($_SERVER['HTTP_REFERER'], 0, strrpos($_SERVER['HTTP_REFERER'], "&")) . "&" . mt_rand());
+		}
+		else
+		{
+			setcookie("StayOnEditPage", "0", time() + 3600);			
+		}
 	}
 
 ?>
@@ -481,7 +492,7 @@
 		</button>
 		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?<?= mt_rand(); ?>';">
 			Cancel
-		</button>		
+		</button>
 
 		</form>
 
@@ -971,6 +982,11 @@
 		<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?<?= mt_rand(); ?>';">
 			Cancel
 		</button>
+
+		<div class="checkbox" style="float:right;">
+			<input type="hidden" name="StayOnEditPage" value="false" />
+			<input class="form-check-input" type="checkbox" name="StayOnEditPage" value="true" <?= (array_key_exists("StayOnEditPage", $_COOKIE) && $_COOKIE["StayOnEditPage"] == true ? "checked=checked" : null); ?> />Stay on page
+		</div>
 
 		</form>
 
