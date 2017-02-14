@@ -10,7 +10,7 @@
 		}
 		else
 		{
-			jslog('CHECK:TOUCHTEST_PASSED')
+			jslog('CHECK:TOUCHTEST_PASSED');
 		}
 
 		return result;

