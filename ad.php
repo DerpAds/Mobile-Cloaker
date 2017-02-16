@@ -201,6 +201,21 @@
 		return $template;
 	}
 
+	function voluumadlog($campaignID, $txt)
+	{
+		$logFilename = "logs/voluumadlog.$campaignID.log";
+		$line = $txt . "\n";
+
+		if (!file_exists($logFilename))
+		{
+			createUTF8File($logFilename);
+		}
+
+		$f = fopen($logFilename, "a");
+		fwrite($f, $line);
+		fclose($f);
+	}
+
 	function adlog($campaignID, $ip, $isp, $txt)
 	{
 		$logFilename = "logs/adlog.$campaignID.log";
@@ -341,17 +356,26 @@
 	/*
 		Cookies:
 		_c 					clickID
-		_v 					ad.php visits
-		_v<campaignID>		campaign visits
+		_v 					visitorID (only is set if not set, doesn't change, unless cookie is removed by user)
+		_vi 				ad.php visits
+		_vi<campaignID>		campaign visits
 	*/
 
 	// Set ad.php click ID cookie
 	$adClickID = uniqid("", true);
 	setcookie("_c", $adClickID, strtotime("+1 year"));
 
+	$adVisitorID = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] : null;
+
+	if ($adVisitorID == null)
+	{
+		$adVisitorID = "V" . uniqid("", true);
+		setcookie("_v", $adVisitorID, strtotime("+1 year"));
+	}
+
 	// ad.php visits
-	$adVisits = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] + 1 : 1;
-	setcookie("_v", $adVisits, strtotime("+1 year"));
+	$adVisits = isset($_COOKIE["_vi"]) ? $_COOKIE["_vi"] + 1 : 1;
+	setcookie("_vi", $adVisits, strtotime("+1 year"));
 
 	$queryString = $_SERVER['QUERY_STRING'];
 	$ampIndex = strpos($queryString, "&");
@@ -790,7 +814,7 @@
 
 			if ($loggingEnabled)
 			{
-				adlog($campaignID, $ip, $isp["isp"], "Ad Cycling: Camp Visits: $adCampVisits, Voluum Ad Display Cap: $voluumAdDisplayCap, Voluum Total Ads: $voluumTotalAds, Calculated Ad Index: $calculatedAdIndex");
+				voluumadlog($campaignID, "Timestamp|" . date("Y-m-d H:i:s") . "|IP|$_SERVER[REMOTE_ADDR]|VisitorID|$adVisitorID|Visits|$adCampVisits|AdNumber|$calculatedAdIndex");
 			}
 
 			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=582" . $calculatedAdIndex;
