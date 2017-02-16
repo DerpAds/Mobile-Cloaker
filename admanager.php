@@ -312,8 +312,8 @@
 				   		   							 "PluginCloakingEnabled"			=> "true",
 				   		   							 "TouchCloakingEnabled" 			=> "true",
 				   		   							 "ForceDirtyAd"						=> "false",
-				   		   							 "VoluumNumberOfAds"				=> "-1",
-				   		   							 "VoluumAdCycleCount"				=> "-1"),
+				   		   							 "VoluumTotalAds"					=> "-1",
+				   		   							 "VoluumAdDisplayCap"				=> "-1"),
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
@@ -405,15 +405,15 @@
 			}
 		}
 
-		if (array_key_exists("StayOnEditPage", $_POST) && $_POST['StayOnEditPage'] == "true")
+		if (array_key_exists("stayOnEditPage", $_POST) && $_POST['stayOnEditPage'] == "true")
 		{
-			setcookie("StayOnEditPage", "1", time() + 3600);
+			setcookie("stayOnEditPage", "1", time() + 3600);
 
 			header("Location: " . substr($_SERVER['HTTP_REFERER'], 0, strrpos($_SERVER['HTTP_REFERER'], "&")) . "&" . mt_rand());
 		}
 		else
 		{
-			setcookie("StayOnEditPage", "0", time() + 3600);			
+			setcookie("stayOnEditPage", "0", time() + 3600);			
 		}
 	}
 
@@ -643,13 +643,13 @@
 			</tr>
 
 			<tr>
-				<td>Voluum Number of Ads (-1 to disable)</td>
-				<td><input type="text" name="VoluumNumberOfAds" id="VoluumNumberOfAds" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumNumberOfAds", "-1"); ?>" /></td>
+				<td>Voluum Total Ads (-1 to disable)</td>
+				<td><input type="text" name="VoluumTotalAds" id="VoluumTotalAds" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumTotalAds", "-1"); ?>" /></td>
 			</tr>			
 
 			<tr>
-				<td>Voluum Ad Cycle Count (-1 to disable)</td>
-				<td><input type="text" name="VoluumAdCycleCount" id="VoluumAdCycleCount" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumAdCycleCount", "-1"); ?>" /></td>
+				<td>Voluum Ad Display Cap (-1 to disable)</td>
+				<td><input type="text" name="VoluumAdDisplayCap" id="VoluumAdDisplayCap" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumAdDisplayCap", "-1"); ?>" /></td>
 			</tr>			
 
 			</table>
@@ -984,8 +984,8 @@
 		</button>
 
 		<div class="checkbox" style="float:right;">
-			<input type="hidden" name="StayOnEditPage" value="false" />
-			<input class="form-check-input" type="checkbox" name="StayOnEditPage" value="true" <?= (array_key_exists("StayOnEditPage", $_COOKIE) && $_COOKIE["StayOnEditPage"] == true ? "checked=checked" : null); ?> />Stay on page
+			<input type="hidden" name="stayOnEditPage" value="false" />
+			<input class="form-check-input" type="checkbox" name="stayOnEditPage" value="true" <?= (array_key_exists("stayOnEditPage", $_COOKIE) && $_COOKIE["stayOnEditPage"] == true ? "checked=checked" : null); ?> />Stay on page
 		</div>
 
 		</form>

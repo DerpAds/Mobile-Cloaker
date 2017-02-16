@@ -338,6 +338,13 @@
 		exit;
 	}
 
+	/*
+		Cookies:
+		_c 					clickID
+		_v 					ad.php visits
+		_v<campaignID>		campaign visits
+	*/
+
 	// Set ad.php click ID cookie
 	$adClickID = uniqid("", true);
 	setcookie("_c", $adClickID, strtotime("+1 year"));
@@ -360,6 +367,10 @@
 		$queryString = "";
 	}
 
+	// ad.php camp visits
+	$adCampVisits = isset($_COOKIE["_v" . $campaignID]) ? $_COOKIE["_v" . $campaignID] + 1 : 1;
+	setcookie("_v" . $campaignID, $adCampVisits, strtotime("+1 year"));	
+
 	handleTrafficLoggerData($campaignID);
 
 	$configFilename  = "ads/" . $campaignID . ".config.txt";
@@ -377,8 +388,8 @@
 	$redirectSubMethod2				= array_key_exists("RedirectSubMethod2", $adConfig) ? $adConfig["RedirectSubMethod2"] : "";
 	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig["RedirectTimeout"] : 3000;
 	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] === "false" ? false : true;
-	$voluumNumberOfAds				= array_key_exists("VoluumNumberOfAds", $adConfig) ? $adConfig["VoluumNumberOfAds"] : -1;
-	$voluumAdCycleCount				= array_key_exists("VoluumAdCycleCount", $adConfig) ? $adConfig["VoluumAdCycleCount"] : -1;
+	$voluumTotalAds					= array_key_exists("VoluumTotalAds", $adConfig) ? $adConfig["VoluumTotalAds"] : -1;
+	$voluumAdDisplayCap				= array_key_exists("VoluumAdDisplayCap", $adConfig) ? $adConfig["VoluumAdDisplayCap"] : -1;
 	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig["CountryCode"] : "";
 	$allowedIspsPerCountry			= array_key_exists("AllowedISPS", $adConfig) && !empty($adConfig["AllowedISPS"]) ? array($adCountry => preg_split("/\|/", $adConfig["AllowedISPS"], -1, PREG_SPLIT_NO_EMPTY)) : $allowedIspsPerCountry;
 	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig["ProvinceBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
@@ -773,9 +784,16 @@
 
 		$redirectUrl = appendParameterPrefix($redirectUrl) . "ccid=$adClickID";
 
-		if ($voluumNumberOfAds > 0 && $voluumAdCycleCount > 0)
+		if ($voluumTotalAds > 0 && $voluumAdDisplayCap > 0)
 		{
-			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=" . (((int)($adVisits / $voluumAdCycleCount) % $voluumNumberOfAds) + 1);
+			$calculatedAdIndex = (((int)($adCampVisits / $voluumAdDisplayCap) % $voluumTotalAds) + 1);
+
+			if ($loggingEnabled)
+			{
+				adlog($campaignID, $ip, $isp["isp"], "Ad Cycling: Camp Visits: $adCampVisits, Voluum Ad Display Cap: $voluumAdDisplayCap, Voluum Total Ads: $voluumTotalAds, Calculated Ad Index: $calculatedAdIndex");
+			}
+
+			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=582" . $calculatedAdIndex;
 		}
 
 		$f_apps_WeightList["iOS"] 		= getCSVContentAsArray($f_apps_iosBaseFilename . $adCountry . $csvFileSuffix);
