@@ -412,6 +412,7 @@
 	$redirectSubMethod2				= array_key_exists("RedirectSubMethod2", $adConfig) ? $adConfig["RedirectSubMethod2"] : "";
 	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig["RedirectTimeout"] : 3000;
 	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] === "false" ? false : true;
+	$voluumCampaignID				= array_key_exists("VoluumCampaignID", $adConfig) ? $adConfig["VoluumCampaignID"] : "";
 	$voluumTotalAds					= array_key_exists("VoluumTotalAds", $adConfig) ? $adConfig["VoluumTotalAds"] : -1;
 	$voluumAdDisplayCap				= array_key_exists("VoluumAdDisplayCap", $adConfig) ? $adConfig["VoluumAdDisplayCap"] : -1;
 	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig["CountryCode"] : "";

@@ -643,6 +643,11 @@
 			</tr>
 
 			<tr>
+				<td>Voluum Campaign ID</td>
+				<td><input type="text" name="VoluumCampaignID" id="VoluumCampaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumCampaignID"); ?>" /></td>
+			</tr>
+
+			<tr>
 				<td>Voluum Total Ads (-1 to disable)</td>
 				<td><input type="text" name="VoluumTotalAds" id="VoluumTotalAds" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumTotalAds", "-1"); ?>" /></td>
 			</tr>			
