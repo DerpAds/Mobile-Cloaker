@@ -512,7 +512,7 @@
 			{
 				$serveCleanAd = true;
 
-				$trackingPixelCloakTestParameters[] = "referrerBlackListBlocked=" . $_SERVER['HTTP_REFERER'];
+				$trackingPixelCloakTestParameters[] = "referrerBlocked=" . $_SERVER['HTTP_REFERER'];
 
 				if ($loggingEnabled)
 				{
@@ -525,7 +525,7 @@
 
 		if (!$serveCleanAd)
 		{
-			$trackingPixelCloakTestParameters[] = "referrerBlackListAllowed=" . $_SERVER['HTTP_REFERER'];
+			$trackingPixelCloakTestParameters[] = "referrerAllowed=" . $_SERVER['HTTP_REFERER'];
 
 			if ($loggingEnabled)
 			{
@@ -551,7 +551,7 @@
 			{
 				$serveCleanAd = true;
 
-				$trackingPixelCloakTestParameters[] = "referrerWhiteListBlocked=" . $_SERVER['HTTP_REFERER'];
+				$trackingPixelCloakTestParameters[] = "referrerBlocked=" . $_SERVER['HTTP_REFERER'];
 
 				if ($loggingEnabled)
 				{
@@ -560,7 +560,7 @@
 			}
 			else
 			{
-				$trackingPixelCloakTestParameters[] = "referrerWhiteListAllowed=" . $_SERVER['HTTP_REFERER'];
+				$trackingPixelCloakTestParameters[] = "referrerAllowed=" . $_SERVER['HTTP_REFERER'];
 
 				if ($loggingEnabled)
 				{
