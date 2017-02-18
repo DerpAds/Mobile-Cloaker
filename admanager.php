@@ -646,21 +646,6 @@
 				</td>
 			</tr>
 
-			<tr>
-				<td>Voluum Campaign ID</td>
-				<td><input type="text" name="VoluumCampaignID" id="VoluumCampaignID" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumCampaignID"); ?>" /></td>
-			</tr>
-
-			<tr>
-				<td>Voluum Total Ads (-1 to disable)</td>
-				<td><input type="text" name="VoluumTotalAds" id="VoluumTotalAds" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumTotalAds", "-1"); ?>" /></td>
-			</tr>			
-
-			<tr>
-				<td>Voluum Ad Display Cap (-1 to disable)</td>
-				<td><input type="text" name="VoluumAdDisplayCap" id="VoluumAdDisplayCap" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumAdDisplayCap", "-1"); ?>" /></td>
-			</tr>			
-
 			</table>
 
 		</fieldset>
@@ -705,6 +690,63 @@
 			</tr>
 
 			</table>
+		</fieldset>
+
+		<fieldset>
+			<legend>Voluum</legend>
+
+			<table class="table table-striped" id="voluumTable">
+
+				<tr>
+					<td class="col-xs-5">Voluum Campaign ID</td>
+					<td>
+						<select name="VoluumCampaignID" class="form-control">
+<?php
+						echo "<option value=\"\">Select Voluum Campaign...</option>\n";
+
+						foreach ($_SESSION["voluumCampaigns"] as $optionKey => $optionValue)
+						{
+							if (array_get_value_with_default($currentAd["configArray"], "VoluumCampaignID") == $optionKey)
+							{
+								echo "<option value=\"$optionKey\" selected=\"selected\">$optionValue</option>\n";
+							}
+							else
+							{
+								echo "<option value=\"$optionKey\">$optionValue</option>\n";
+							}
+						}
+?>
+						</select>
+					</td>					
+				</tr>
+
+				<tr>
+					<td>Voluum Total Ads (-1 to disable)</td>
+					<td><input type="text" name="VoluumTotalAds" id="VoluumTotalAds" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumTotalAds", "-1"); ?>" /></td>
+				</tr>			
+
+				<tr>
+					<td>Voluum Ad Display Cap (-1 to disable)</td>
+					<td><input type="text" name="VoluumAdDisplayCap" id="VoluumAdDisplayCap" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumAdDisplayCap", "-1"); ?>" /></td>
+				</tr>
+
+				<tr>
+					<td>Voluum Custom Variable Ad Prefix</td>
+					<td><input type="text" name="VoluumCustomVarAdPrefix" id="VoluumCustomVarAdPrefix" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumCustomVarAdPrefix"); ?>" /></td>
+				</tr>
+
+				<tr>
+					<td>Voluum Custom Variable Index (1-10) for <i>ccid</i> (used for conversion tracking)</td>
+					<td><input type="text" name="VoluumCustomVarCcidIndex" id="VoluumCustomVarCcidIndex" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumCustomVarCcidIndex"); ?>" /></td>
+				</tr>
+
+				<tr>
+					<td>Voluum Custom Variable Index (1-10) for <i>ad</i> (used for conversion tracking)</td>
+					<td><input type="text" name="VoluumCustomVarAdIndex" id="VoluumCustomVarAdIndex" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "VoluumCustomVarAdIndex"); ?>" /></td>
+				</tr>
+
+			</table>
+
 		</fieldset>
 
 		<fieldset>

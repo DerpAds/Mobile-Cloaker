@@ -415,6 +415,7 @@
 	$voluumCampaignID				= array_key_exists("VoluumCampaignID", $adConfig) ? $adConfig["VoluumCampaignID"] : "";
 	$voluumTotalAds					= array_key_exists("VoluumTotalAds", $adConfig) ? $adConfig["VoluumTotalAds"] : -1;
 	$voluumAdDisplayCap				= array_key_exists("VoluumAdDisplayCap", $adConfig) ? $adConfig["VoluumAdDisplayCap"] : -1;
+	$voluumCustomVarAdPrefix		= array_key_exists("VoluumCustomVarAdPrefix", $adConfig) ? $adConfig["VoluumCustomVarAdPrefix"] : "";
 	$adCountry 						= array_key_exists("CountryCode", $adConfig) ? $adConfig["CountryCode"] : "";
 	$allowedIspsPerCountry			= array_key_exists("AllowedISPS", $adConfig) && !empty($adConfig["AllowedISPS"]) ? array($adCountry => preg_split("/\|/", $adConfig["AllowedISPS"], -1, PREG_SPLIT_NO_EMPTY)) : $allowedIspsPerCountry;
 	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig["ProvinceBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
@@ -818,7 +819,7 @@
 				voluumadlog($campaignID, "Timestamp|" . date("Y-m-d H:i:s") . "|IP|$_SERVER[REMOTE_ADDR]|VisitorID|$adVisitorID|Visits|$adCampVisits|AdNumber|$calculatedAdIndex");
 			}
 
-			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=582" . $calculatedAdIndex;
+			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=" . $voluumCustomVarAdPrefix . $calculatedAdIndex;
 		}
 
 		$f_apps_WeightList["iOS"] 		= getCSVContentAsArray($f_apps_iosBaseFilename . $adCountry . $csvFileSuffix);

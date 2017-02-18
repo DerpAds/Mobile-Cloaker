@@ -7,11 +7,15 @@ RedirectSubMethod1: windowtoplocationhref
 RedirectSubMethod2: parentwindowlocationhref
 RedirectTimeout: 1000
 RedirectEnabled: true
-VoluumTotalAds: -1
-VoluumAdDisplayCap: -1
 TrackingPixelUrl: http://lvh6v.voluumtrk.com/impression/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad={ad}&referrer={referrer}&f_source={f_source}
 TrackingPixelEnabled: true
 OutputMethod: HTML
+VoluumCampaignID: 
+VoluumTotalAds: -1
+VoluumAdDisplayCap: -1
+VoluumCustomVarAdPrefix: 111222
+VoluumCustomVarCcidIndex: 
+VoluumCustomVarAdIndex: 
 BlacklistedReferrers: rtbfy|mediatrust|geoedge
 WhitelistedReferrers: ad.adnium.com|_empty_
 CanvasFingerprintCheckEnabled: true
