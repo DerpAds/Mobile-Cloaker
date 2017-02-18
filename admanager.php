@@ -32,10 +32,14 @@
 <?php
 
 	require_once("include/adlib.inc");
-	require_once("include/managersecurity.inc");
+	require_once("include/apilib.inc");
+	require_once("include/voluum.inc");
 	require_once("include/arrayhelpers.inc");
 	require_once("include/statlib.inc");
-	require_once("admanager_security.php");
+	require_once("include/databasehelpers.inc");
+	require_once("include/managersecurity.inc");
+
+	connectDatabase();
 
 	if (array_key_exists("logout", $_GET))
 	{
@@ -44,7 +48,7 @@
 
 	if (!empty($_POST['username']) && !empty($_POST['password']))
 	{
-		loginUser($_POST['username'], $_POST['password'], $loginHashes);
+		loginUser($_POST['username'], $_POST['password']);
 	}
 
 	if (!userAuthenticated())
