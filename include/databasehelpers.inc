@@ -8,18 +8,18 @@
 
 		if ($_SERVER["HTTP_HOST"] == "localhost")
 		{
-			$databaseHost = "localhost";
-			$databaseUser = "root";
-			$databasePassword = "";
-			$database = "ad_cloaker";
+			$databaseHost = 'localhost';
+			$databaseUser = 'root';
+			$databasePassword = '';
+			$database = 'ad_cloaker';
 		}
 
 		else
 		{
-			$databaseHost = "localhost";
-			$databaseUser = "awstst1_adcloak_user";
-			$databasePassword = "haha123";
-			$database = "awstst1_ad_cloaker";
+			$databaseHost = 'localhost';
+			$databaseUser = 'awstst1_ad_cloak';
+			$databasePassword = '8;G0+JV(7T6X';
+			$database = 'awstst1_ad_cloaker';
 		}		
 
 		$mysqli = new mysqli($databaseHost, $databaseUser, $databasePassword, $database);
