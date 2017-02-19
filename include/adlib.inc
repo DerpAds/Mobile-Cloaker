@@ -538,7 +538,7 @@
 					$result[$campaignID] = array();
 				}
 
-				array_push($result[$campaignID], $filename);
+				$result[$campaignID]["cleanhtmlfilename"] = $filename;
 			}
 
 			if (strpos($filename, ".config.txt") !== false)
@@ -550,7 +550,8 @@
 					$result[$campaignID] = array();
 				}
 
-				array_push($result[$campaignID], $filename);
+				$result[$campaignID]["configfilename"] = $filename;
+				$result[$campaignID]["config"] = processAdConfig($root . "/ads/" . $filename);
 			}
 		}
 

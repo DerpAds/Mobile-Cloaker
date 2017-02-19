@@ -10,12 +10,12 @@ RedirectEnabled: true
 TrackingPixelUrl: http://lvh6v.voluumtrk.com/impression/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad={ad}&referrer={referrer}&f_source={f_source}
 TrackingPixelEnabled: true
 OutputMethod: HTML
-VoluumCampaignID: 
+VoluumCampaignID: 5dce8a3a-9399-40e3-b1ed-70095e55580b
 VoluumTotalAds: -1
 VoluumAdDisplayCap: -1
 VoluumCustomVarAdPrefix: 111222
-VoluumCustomVarCcidIndex: 
-VoluumCustomVarAdIndex: 
+VoluumCustomVarCcidIndex: 7
+VoluumCustomVarAdIndex: 3
 BlacklistedReferrers: rtbfy|mediatrust|geoedge
 WhitelistedReferrers: ad.adnium.com|_empty_
 CanvasFingerprintCheckEnabled: true
