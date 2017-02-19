@@ -74,8 +74,8 @@
 
 				if (!$result->num_rows)				
 				{
-					$stmt = $mysqli->prepare("INSERT INTO voluumconversions (voluumclickid, ccid, campaignid, adindex) VALUES (?, ?, ?, ?)");
-					$stmt->bind_param("ssss", $voluumClickID, $ccid, $campaignID, $adindex);
+					$stmt = $mysqli->prepare("INSERT INTO voluumconversions (voluumclickid, voluumcampaignid, ccid, campaignid, adindex) VALUES (?, ?, ?, ?)");
+					$stmt->bind_param("ssss", $voluumClickID, $adConfig["VoluumCampaignID"], $ccid, $campaignID, $adindex);
 					$stmt->execute();
 
 					echo "inserting<br/>";

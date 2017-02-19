@@ -23,6 +23,7 @@
 	//
 
 	require_once("include/adlib.inc");
+	require_once("include/databasehelpers.inc");
 
 	$allowedIspsPerCountry = array("US" => array("AT&T Wireless",
 												 "T-Mobile USA",
@@ -812,7 +813,34 @@
 
 		if ($voluumTotalAds > 0 && $voluumAdDisplayCap > 0)
 		{
-			$calculatedAdIndex = (((int)($adCampVisits / $voluumAdDisplayCap) % $voluumTotalAds) + 1);
+			if ($voluumCampaignID != "")
+			{
+				connectDatabase();
+
+				$availableAdIndices = range(1, $voluumTotalAds); // 1...n
+
+				$stmt = $mysqli->prepare("SELECT * FROM voluumconversions WHERE voluumcampaignid = ? AND ccid = ?");
+				echo $mysqli->error;
+				$stmt->bind_param("ss", $voluumCampaignID, $adVisitorID);
+				$stmt->execute();
+
+				$voluumConversions = $stmt->get_result();
+
+				$usedIndices = array();
+
+				while ($row = $voluumConversions->fetch_assoc())
+				{
+					$usedIndices[] = $row["adindex"];
+				}
+
+				$availableAdIndices = array_diff($availableAdIndices, $usedIndices);
+
+				$calculatedAdIndex = $availableAdIndices[((int)($adCampVisits / $voluumAdDisplayCap) % sizeof($availableAdIndices))];
+			}
+			else
+			{
+				$calculatedAdIndex = (((int)($adCampVisits / $voluumAdDisplayCap) % $voluumTotalAds) + 1);
+			}
 
 			if ($loggingEnabled)
 			{
