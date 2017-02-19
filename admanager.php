@@ -71,6 +71,22 @@
 		exit;
 	}
 
+	function getVoluumCampaignsToVoluumAccountID()
+	{
+		global $mysqli;
+
+		$result = array();
+
+		$voluumCampaignsResult = $mysqli->query("SELECT * FROM voluumcampaigns");
+
+		while ($row = $voluumCampaignsResult->fetch_assoc())
+		{
+			$result[$row["voluumcampaignid"]] = $row["voluumaccountid"];
+		}
+
+		return $result;
+	}
+
 	function getAdTagCode($campaignID)
 	{
 		$adUrl = "http" . (!empty($_SERVER['HTTPS']) ? "s" : "") . "://" . $_SERVER['SERVER_NAME'] . substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], "/") + 1) . "ad.php?$campaignID";
@@ -141,6 +157,8 @@
 
 	function createOrUpdateAd($campaignID, $configArray)
 	{
+		global $mysqli;
+
 		$configFilename  = getAdConfigFilename($campaignID);
 
 		$configFileContents = "";
@@ -148,6 +166,13 @@
 		foreach ($configArray as $key => $value)
 		{
 			$configFileContents .= "$key: $value\r\n";
+
+			if ($key == "VoluumCampaignID")
+			{
+				$stmt = $mysqli->prepare("INSERT INTO voluumcampaigns (voluumaccountid, voluumcampaignid) VALUES (?, ?)");
+				$stmt->bind_param("is", $_SESSION["voluumaccountid"], $value);
+				$stmt->execute();
+			}
 		}
 
 		file_put_contents($configFilename, $configFileContents);
@@ -156,18 +181,9 @@
 	function createOrUpdateAdWithCleanHtml($campaignID, $cleanHtml, $configArray)
 	{
 		$cleanHtmlFilename = getAdCleanHtmlFilename($campaignID);
-		$configFilename  = getAdConfigFilename($campaignID);
-
 		file_put_contents($cleanHtmlFilename, $cleanHtml);
 
-		$configFileContents = "";
-
-		foreach ($configArray as $key => $value)
-		{
-			$configFileContents .= "$key: $value\r\n";
-		}
-
-		file_put_contents($configFilename, $configFileContents);
+		createOrUpdateAd($campaignID, $configArray);
 	}
 
 	function createOrUpdateProfile($profileName, $configArray)
@@ -1238,9 +1254,15 @@
 			<?php
 
 				$ads = getAllAds(__DIR__);
+				$voluumCampaignsToVoluumAccountID = getVoluumCampaignsToVoluumAccountID();
 
-				foreach ($ads as $campaignID => $filenames)
+				foreach ($ads as $campaignID => $data)
 				{
+					if (array_key_exists("VoluumCampaignID", $data["config"]) && $voluumCampaignsToVoluumAccountID[$data["config"]["VoluumCampaignID"]] != $_SESSION["voluumaccountid"])
+					{
+						continue;
+					}
+
 					$adTagCode = getAdTagCode($campaignID);
 
 					echo "<tr>\n";
