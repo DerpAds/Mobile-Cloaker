@@ -367,7 +367,7 @@
 
 	$adVisitorID = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] : null;
 
-	if ($adVisitorID == null)
+	if ($adVisitorID == null || strlen($adVisitorID) <= 2)
 	{
 		$adVisitorID = "V" . uniqid("", true);
 		setcookie("_v", $adVisitorID, strtotime("+1 year"));
