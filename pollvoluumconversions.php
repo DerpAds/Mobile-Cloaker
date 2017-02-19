@@ -42,12 +42,16 @@
 
 	$ads = getAllAds(__DIR__);
 
+	$voluumCampaignIDs = array();
+
 	foreach ($ads as $ad)
 	{
 		$adConfig = $ad["config"];
 
 		if (array_key_exists("VoluumCampaignID", $adConfig) && !empty($adConfig["VoluumCampaignID"]))
 		{
+			$voluumCampaignIDs[] = $adConfig["VoluumCampaignID"];
+
 			$voluumAccountResult = $mysqli->query("SELECT b.* FROM voluumcampaigns AS a LEFT JOIN voluumaccounts AS b ON (a.voluumaccountid = b.voluumaccountid) WHERE a.voluumcampaignid = '$adConfig[VoluumCampaignID]'");
 			$voluumAccountInfo = $voluumAccountResult->fetch_assoc();
 
@@ -79,5 +83,11 @@
 			}
 		}
 	}
+
+	$voluumCampaignIDs = implode(",", $voluumCampaignIDs);
+
+	$stmt = $mysqli->prepare("DELETE FROM voluumcampaigns WHERE voluumcampaignid NOT IN (?)");
+	$stmt->bind_param("s", $voluumCampaignIDs);
+	$stmt->execute();	
 
 ?>
