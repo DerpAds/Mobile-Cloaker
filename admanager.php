@@ -586,7 +586,7 @@
 			<tr>
 				<td>Redirect Method</td>
 				<td>
-					<select name="Method" class="form-control">
+					<select name="Method" id="Method" class="form-control" onchange="checkMethodAndHandleSubMethodRows();">
 
 <?php
 					foreach ($redirectMethodOptions as $option)
@@ -605,7 +605,7 @@
 				</td>
 			</tr>
 
-			<tr>
+			<tr id="RedirectSubMethod1Row">
 				<td>Redirect Submethod 1</td>
 				<td>
 					<select name="RedirectSubMethod1" class="form-control">
@@ -627,7 +627,7 @@
 				</td>
 			</tr>
 
-			<tr>
+			<tr id="RedirectSubMethod2Row">
 				<td>Redirect Submethod 2</td>
 				<td>
 					<select name="RedirectSubMethod2" class="form-control">
@@ -1058,6 +1058,21 @@
 		</form>
 
 		<script type="text/javascript">
+
+			function checkMethodAndHandleSubMethodRows()
+			{
+				if ($('#Method').val() == 'trycatchredirect')
+				{ 
+					$('#RedirectSubMethod1Row').show();
+					$('#RedirectSubMethod2Row').show();
+				}
+				else
+				{
+					$('#RedirectSubMethod1Row').hide();$('#RedirectSubMethod2Row').hide();
+				}
+			}
+
+			$(function() { checkMethodAndHandleSubMethodRows(); });
 
 			function validUrl(url)
 			{
