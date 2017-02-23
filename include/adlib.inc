@@ -9,7 +9,7 @@
 	function getISPInfo($ip)
 	{
 		// If data not available, we can´t do it
-		if (!file_exists('ispipinfo.db'))
+		if (!file_exists('geoip2isp/ispipinfo.db'))
 		{
 			//adlog('getISPInfo: missing DB');
 
@@ -17,7 +17,7 @@
 		}
 		
 		/* Use a lock to prevent parallel updates */
-		$fl = fopen('ispip.lock', 'c+b');
+		$fl = fopen('geoip2isp/ispip.lock', 'c+b');
 
 		if (is_resource($fl))
 		{
@@ -41,8 +41,8 @@
 		asnn = Autonomous System number name
 		*/
 			
-		$last = filesize('ispipinfo.db') / 14; /* 14 bytes per record */
-		$f = fopen('ispipinfo.db','rb');
+		$last = filesize('geoip2isp/ispipinfo.db') / 14; /* 14 bytes per record */
+		$f = fopen('geoip2isp/ispipinfo.db','rb');
 		
 		$lo = 0; 
 		$hi = $last - 1;
@@ -100,19 +100,19 @@
 			$asn_name_code = $cols['g'];
 			
 			/* Find the ISP information */
-			$f = fopen('isps.db','rb');
+			$f = fopen('geoip2isp/isps.db','rb');
 			fseek($f, $isp_code * 54);
 			$isp_name = trim(fread($f, 54));
 			fclose($f);
 			
 			/* Find the Organization information */
-			$f = fopen('organizations.db','rb');
+			$f = fopen('geoip2isp/organizations.db','rb');
 			fseek($f, $org_code * 54);
 			$org_name = trim(fread($f, 54));
 			fclose($f);
 
 			/* Find the ASN nr information */
-			$f = fopen('asnnrs.db','rb');
+			$f = fopen('geoip2isp/asnnrs.db','rb');
 			fseek($f, $asn_nr_code * 3);
 			$r = fread($f, 3);
 			$cols = unpack('v1a/C1b',$r);
@@ -120,7 +120,7 @@
 			fclose($f);
 
 			/* Find the ASN name information */
-			$f = fopen('asnnames.db','rb');
+			$f = fopen('geoip2isp/asnnames.db','rb');
 			fseek($f, $asn_name_code * 93);
 			$asn_name = trim(fread($f, 93));
 			fclose($f);
@@ -154,8 +154,8 @@
 
 	function lookup_subdiv($continent_nr,$country_nr=0,$subdiv1_code="",$subdiv2_code="")
 	{		
-		$last = filesize('subdivisions.db') / 80; /* 80 bytes per record */
-		$f = fopen('subdivisions.db','rb');
+		$last = filesize('geoip2isp/subdivisions.db') / 80; /* 80 bytes per record */
+		$f = fopen('geoip2isp/subdivisions.db','rb');
 		
 		$lo = 0; 
 		$hi = $last - 1;
@@ -251,7 +251,7 @@
 	function getGEOInfo($ip)
 	{
 		// If data not available, fail call
-		if (!file_exists('ipinfo.db'))
+		if (!file_exists('geoip2isp/ipinfo.db'))
 		{
 			//adlog('getGEOInfo: missing DB');
 
@@ -259,7 +259,7 @@
 		}
 		
 		/* Use a lock to prevent parallel updates */
-		$fl = fopen('geoip.lock', 'c+b');
+		$fl = fopen('geoip2isp/geoip.lock', 'c+b');
 		if (is_resource($fl))
 		{
 			if (!flock($fl, LOCK_SH /* Lock for reading */ ))
@@ -275,8 +275,8 @@
 		*/
 		
 			
-		$last = filesize('ipinfo.db') / 24; /* 24 bytes per record */
-		$f = fopen('ipinfo.db','rb');
+		$last = filesize('geoip2isp/ipinfo.db') / 24; /* 24 bytes per record */
+		$f = fopen('geoip2isp/ipinfo.db','rb');
 		
 		$lo = 0; 
 		$hi = $last - 1;
@@ -333,7 +333,7 @@
 			$lon = $cols['g'];
 			
 			/* Find the cityinfo information and unpack it */
-			$f = fopen('cities.db','rb');
+			$f = fopen('geoip2isp/cities.db','rb');
 			fseek($f, $city_code * 54);
 			$r = fread($f, 54);
 			fclose($f);
@@ -344,11 +344,11 @@
 			$city = trim($cols['d']);
 			
 			/* Find the timezone information */
-			$timezones_bynr = unserialize(file_get_contents('timezones.db'));
+			$timezones_bynr = unserialize(file_get_contents('geoip2isp/timezones.db'));
 			$timezone = $timezones_bynr[$timezone_code];
 			
 			/* Find the subdivision associated to the record */
-			$f = fopen('subdivisions.db','rb');
+			$f = fopen('geoip2isp/subdivisions.db','rb');
 			fseek($f, $subdivision_code * 80);
 			$r = fread($f, 80);
 			fclose($f);
@@ -360,12 +360,12 @@
 			$province = trim($cols['e']);
 			
 			/* Find the continent information */
-			$continents_bynr = unserialize(file_get_contents('continents.db'));
+			$continents_bynr = unserialize(file_get_contents('geoip2isp/continents.db'));
 			$continent_code = $continents_bynr[$continent_nr][0];
 			$continent_name = $continents_bynr[$continent_nr][1];
 
 			/* Find the country information */
-			$countries_bynr = unserialize(file_get_contents('countries.db'));
+			$countries_bynr = unserialize(file_get_contents('geoip2isp/countries.db'));
 			$country_code = $countries_bynr[$country_nr][0];
 			$country_name = $countries_bynr[$country_nr][1];
 			
@@ -605,6 +605,19 @@
 	    return null;
 	}
 
+	function emptyArrayValues($array)
+	{
+		foreach ($array as $key => $value)
+		{
+			if (!empty($value))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	function processAdConfig($filename)
 	{
 		$result = array();
@@ -686,6 +699,11 @@
 		            el.border = 0;
 		            document.body.appendChild(el);
 		        }";
+	}
+
+	function getCookieStuffingCode($url)
+	{
+		return "document.write('<iframe src=\"$url\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');";
 	}
 
 	function createUTF8File($filename)

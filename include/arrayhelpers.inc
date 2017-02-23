@@ -33,10 +33,14 @@
 			$jsonDecoded = json_decode($array[$key], true);
 			$jsonKeys = array_keys($jsonDecoded);
 
-			if ($index < sizeof($jsonKeys))
+			if ($index < sizeof($jsonKeys) && is_array($jsonDecoded[$jsonKeys[$index]]))
 			{
 				return implode("|", $jsonDecoded[$jsonKeys[$index]]);
-			}			
+			}
+			else if ($index < sizeof($jsonKeys))
+			{
+				return $jsonDecoded[$jsonKeys[$index]];
+			}
 		}
 
 		return $default;

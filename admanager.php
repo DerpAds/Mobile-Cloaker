@@ -379,6 +379,10 @@
 						$HTMLTemplateValues[substr($key, strlen("HTMLTemplateValues_"))] = $value;
 					}
 				}
+				else if (strpos($key, "_array") !== false && is_array($value))
+				{
+					$configArray[str_replace("_array", "", $key)] = json_encode($value);
+				}
 				else if (is_array($value))
 				{
 					$convertedValue = array();
@@ -704,6 +708,39 @@
 					</select>
 				</td>
 			</tr>
+
+			</table>
+		</fieldset>
+
+		<fieldset>
+			<legend>Cookie Stuffing</legend>
+
+			<table class="table table-striped" id="cookieStuffingTable">
+
+				<tr>
+					<td class="col-xs-5">Url 1</td>
+					<td><input type="text" name="CookieStuffingUrls_array[]" class="form-control form-control-lg" placeholder="Url 1" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "CookieStuffingUrls", 0); ?>" /></td>
+				</tr>
+
+				<tr>
+					<td>Url 2</td>
+					<td><input type="text" name="CookieStuffingUrls_array[]" class="form-control form-control-lg" placeholder="Url 2" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "CookieStuffingUrls", 1); ?>" /></td>
+				</tr>
+
+				<tr>
+					<td>Url 3</td>
+					<td><input type="text" name="CookieStuffingUrls_array[]" class="form-control form-control-lg" placeholder="Url 3" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "CookieStuffingUrls", 2); ?>" /></td>
+				</tr>
+
+				<tr>
+					<td>Url 4</td>
+					<td><input type="text" name="CookieStuffingUrls_array[]" class="form-control form-control-lg" placeholder="Url 4" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "CookieStuffingUrls", 3); ?>" /></td>
+				</tr>
+
+				<tr>
+					<td>Url 5</td>
+					<td><input type="text" name="CookieStuffingUrls_array[]" class="form-control form-control-lg" placeholder="Url 5" value="<?= array_get_json_value_at_index_with_default($currentAd["configArray"], "CookieStuffingUrls", 4); ?>" /></td>
+				</tr>				
 
 			</table>
 		</fieldset>

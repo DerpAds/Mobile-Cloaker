@@ -2,7 +2,7 @@ CountryCode: US
 AllowedISPS: VECTANT|O2
 TrafficLoggerEnabled: false
 RedirectUrl: http://lvh6v.voluumtrk.com/a704cad6-098c-4e1b-a4db-f957dfe24f5e
-Method: windowtoplocationtoiframepage
+Method: windowtoplocation
 RedirectSubMethod1: windowtoplocationhref
 RedirectSubMethod2: parentwindowlocationhref
 RedirectTimeout: 1000
@@ -10,9 +10,10 @@ RedirectEnabled: true
 TrackingPixelUrl: http://lvh6v.voluumtrk.com/impression/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad={ad}&referrer={referrer}&f_source={f_source}
 TrackingPixelEnabled: true
 OutputMethod: HTML
+CookieStuffingUrls: ["http:\/\/www.actrck.co\/5694eecd-56dc-4ac4-808c-b61280947e9a?ad=1","","","",""]
 VoluumCampaignID: 5dce8a3a-9399-40e3-b1ed-70095e55580b
-VoluumTotalAds: -1
-VoluumAdDisplayCap: -1
+VoluumTotalAds: 5
+VoluumAdDisplayCap: 2
 VoluumCustomVarAdPrefix: 111222
 VoluumCustomVarCcidIndex: 7
 VoluumCustomVarAdIndex: 3
@@ -24,7 +25,7 @@ ProvinceBlackList: Prov 1|Prov 2|Prov 3
 CityBlackList: City 1|City 2|City 3
 CloakTrackingPixelUrl: http://www.example.com/
 CloakTrackingPixelEnabled: true
-BlockedParameterValues: []
+BlockedParameterValues: {"block":["11111"],"aaabb":["2222"]}
 BlockedReferrerParameterValues: {"id_site":["20"]}
 LoggingEnabled: true
 ConsoleLoggingEnabled: true
