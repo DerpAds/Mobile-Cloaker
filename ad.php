@@ -1,6 +1,6 @@
 <?php
 
-	$__VERSION = "5.5";
+	$__VERSION = "5.6-rev1";
 
 	if (array_key_exists("version", $_GET))
 	{
@@ -203,69 +203,35 @@
 
 	function adlog($campaignID, $ip, $isp, $txt)
 	{
-		$logFilename = "logs/adlog.$campaignID.log";
-		$line = createLogLine($ip, $isp, $txt);
-
-		if (!file_exists($logFilename))
-		{
-			createUTF8File($logFilename);
-		}
-
-		$f = fopen($logFilename, "a");
-		fwrite($f, $line);
-		fclose($f);
+		$logFilename = "logs/adlog.$campaignID.log.csv";
+		writeLog($logFilename, $ip, $isp, array("Message" => $txt));
 	}
 
 	function mbotlog($campaignID, $ip, $isp, $txt)
 	{
-		$logFilename = "logs/mbotlog.$campaignID.log";
-		$line = createLogLine($ip, $isp, $txt);
-
-		if (!file_exists($logFilename))
-		{
-			createUTF8File($logFilename);
-		}
-
-		$f = fopen($logFilename, "a");
-		fwrite($f, $line);
-		fclose($f);
+		$logFilename = "logs/mbotlog.$campaignID.log.csv";
+		writeLog($logFilename, $ip, $isp, array("Message" => $txt));
 	}
 
 	function allowedTrafficLog($campaignID, $ip, $isp)
 	{
-		$logFilename = "logs/allowed_traffic.$campaignID.log";
-		$line = createLogLine($ip, $isp, "CHECK:ALLOWED_TRAFFIC: Serving dirty ad.");
-
-		if (!file_exists($logFilename))
-		{
-			createUTF8File($logFilename);
-		}
-
-		$f = fopen($logFilename, "a");
-		fwrite($f, $line);
-		fclose($f);
+		$logFilename = "logs/allowed_traffic.$campaignID.log.csv";
+		writeLog($logFilename, $ip, $isp, array("Message" => "CHECK:ALLOWED_TRAFFIC: Serving dirty ad."));
 	}
 
-	function trafficLoggerLog($campaignID, $line)
+	function trafficLoggerLog($campaignID, $extra = array())
 	{
-		$logFilename = "logs/traffic_logger.$campaignID.log";
-
-		if (!file_exists($logFilename))
-		{
-			createUTF8File($logFilename);
-		}
-
-		$f = fopen($logFilename, "a");
-		fwrite($f, $line . "\n");
-		fclose($f);		
-	}
-
-	function createTrafficLoggerLogLine()
-	{
+		$logFilename = "logs/traffic_logger.$campaignID.log.csv";
+		
 		$ip  = getClientIP();
 		$isp = getISPInfo($ip);
-
-		return str_replace("|Message|\n", "|RequestMethod|" . $_SERVER['REQUEST_METHOD'] . "|", createLogLine($ip, $isp["isp"], ""));
+		$items = array(
+				"RequestMethod" => $_SERVER['REQUEST_METHOD']
+				);
+		$items = array_merge($items, $extra);
+		
+		writeLog($logFilename, $ip, $isp["isp"], $items);
+		return;
 
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 
@@ -279,9 +245,12 @@
 	{
 		if ($_SERVER['REQUEST_METHOD'] == "POST" && array_key_exists("data", $_POST))
 		{
-			$decoded = str_replace("^", "|", urldecode($_POST['data']));
+			$decoded = explode("^",urldecode($_POST['data']));
+			$info = array("Type" => $decoded[0],
+						  "Info" => $decoded[1],
+						  "Javascript" => "true");
 			
-			trafficLoggerLog($campaignID, "Type|Info|" . createTrafficLoggerLogLine() . $decoded);
+			trafficLoggerLog($campaignID, $info);
 
 			echo "OK";
 
@@ -293,9 +262,12 @@
 			/* GET method as a way to report information */
 			if (array_key_exists("data", $_GET))
 			{
-				$decoded = str_replace("^", "|", urldecode($_GET['data']));
+				$decoded = explode("^",urldecode($_GET['data']));
+				$info = array("Type" => $decoded[0],
+							  "Info" => $decoded[1],
+							  "Javascript" => "true");
 				
-				trafficLoggerLog($campaignID, "Type|Info|". createTrafficLoggerLogLine() . $decoded);
+				trafficLoggerLog($campaignID, $info);
 				
 				// Create a blank image
 				$im = imagecreatetruecolor(1, 1);
@@ -313,7 +285,11 @@
 			}
 			elseif (array_key_exists("nojs", $_GET) && $_GET['nojs'] == 1)
 			{		
-				trafficLoggerLog($campaignID, "Type|Info|" . createTrafficLoggerLogLine(). "Javascript|false");
+				$info = array("Type" => "",
+							  "Info" => "",
+							  "Javascript" => "false");
+			
+				trafficLoggerLog($campaignID, $info);
 				
 				// Create a blank image
 				$im = imagecreatetruecolor(1, 1);

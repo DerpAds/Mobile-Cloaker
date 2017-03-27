@@ -663,19 +663,67 @@
 		return $redirectCode;
 	}
 
-	function createUTF8File($filename)
-	{
-		file_put_contents($filename, "\xEF\xBB\xBF");
-	}
+	/**
+	  * Formats a line (passed as a fields  array) as CSV and returns the CSV as a string.
+	  * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
+	  */
+	function arrayToCsv( array &$fields, $delimiter = ';', $enclosure = '"', $encloseAll = false, $nullToMysqlNull = false ) {
+		$delimiter_esc = preg_quote($delimiter, '/');
+		$enclosure_esc = preg_quote($enclosure, '/');
 
-	function createLogLine($ip, $isp, $txt)
-	{
+		$output = array();
+		foreach ( $fields as $field ) {
+			if ($field === null && $nullToMysqlNull) {
+				$output[] = 'NULL';
+				continue;
+			}
+
+			// Enclose fields containing $delimiter, $enclosure or whitespace
+			if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ) {
+				$output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
+			}
+			else {
+				$output[] = $field;
+			}
+		}
+
+		return implode( $delimiter, $output );
+	}	
+	
+	function writeLog($logFilename, $ip, $isp, $extra) {
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 		
-		$line = "Date|" . date("Y-m-d H:i:s") . "|IP|" . $ip . "|ProxyFieldsInHeader|" . findProxyFieldsInHeader() . "|AllHeaders|" . urldecode(http_build_query(getallheaders())) . "|RemotePort|" . $_SERVER['REMOTE_PORT'] . "|ISP|" . $isp . "|UserAgent|" . $_SERVER['HTTP_USER_AGENT'] . "|SERVER Referrer|" . urldecode($referrer) . "|QueryString|" . urldecode($_SERVER['QUERY_STRING']) . "|Message|" . $txt . "\n";
+		$items = array(
+				"Date" => date("Y-m-d H:i:s"),
+				"IP" => $ip,
+				"ProxyFieldsInHeader" => findProxyFieldsInHeader(),
+				"AllHeaders" => urldecode(http_build_query(getallheaders())),
+				"RemotePort" => $_SERVER['REMOTE_PORT'],
+				"ISP" => $isp,
+				"UserAgent" => $_SERVER['HTTP_USER_AGENT'],
+				"SERVER Referrer" => urldecode($referrer),
+				"QueryString" => urldecode($_SERVER['QUERY_STRING']));
+				
+		$items = array_replace($items,$extra);
+		/* var_dump($items); */
 
-		return $line;		
-	}	
+		/* Convert to the CSV format */
+		$values = array_values($items);
+		$line = arrayToCsv($values)."\r\n";
+
+		/* Add it to the log */
+		if (!file_exists($logFilename))
+		{
+			// Create the file with the UTF8 marker and the header
+			$headers = array_keys($items);
+			$line = "\xEF\xBB\xBF".
+					arrayToCsv($headers)."\r\n".
+					$line;
+		}
+	
+		// Add to the log locking it if possible
+		file_put_contents($logFilename, $line, FILE_APPEND | LOCK_EX);
+	}
 
 	function getCurrentPageUrl()
 	{
