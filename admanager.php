@@ -1129,6 +1129,7 @@
 		<ul class="nav nav-tabs" id="navtab-container">
 		  <li class="active"><a data-toggle="tab" href="#ads">Ads</a></li>
 		  <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
+		  <li><a data-toggle="tab" href="#tagtemplates">Tag Templates</a></li>
 		</ul>
 
 		<div class="tab-content">
@@ -1253,6 +1254,35 @@
 				}
 			?>
 
+				</tbody>
+			</table>
+		</div>
+		
+		<div id="tagtemplates" class="tab-pane fade">
+			<br/>
+
+			<div>
+				<div style="float: right;">
+					<button type="button" class="btn btn-primary" onclick="window.location = 'admanager.php?newtagtemplate';">
+						New Tag Template
+					</button>
+				</div>
+
+			</div>
+
+			<br/><br/>
+
+			<table class="table table-striped" id="tagTemplateTable">
+
+				<thead>
+					<tr>
+						<th class="col-xs-3">Tag Template Name</th>
+						<th style="width: 50px;"></th>
+						<th style="width: 50px;"></th>
+					</tr>
+				</thead>
+
+				<tbody>
 				</tbody>
 			</table>
 		</div>
