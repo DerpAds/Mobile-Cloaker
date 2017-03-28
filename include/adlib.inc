@@ -554,10 +554,10 @@
 
 	function getAdLogFilenames($root, $campaignID)
 	{
-		$logFilenames = array($root . "/logs/adlog.$campaignID.log",
-							  $root . "/logs/allowed_traffic.$campaignID.log",
-							  $root . "/logs/mbotlog.$campaignID.log",
-							  $root . "/logs/traffic_logger.$campaignID.log");
+		$logFilenames = array($root . "/logs/adlog.$campaignID.log.csv",
+							  $root . "/logs/allowed_traffic.$campaignID.log.csv",
+							  $root . "/logs/mbotlog.$campaignID.log.csv",
+							  $root . "/logs/traffic_logger.$campaignID.log.csv");
 
 		return $logFilenames;
 	}	
@@ -663,33 +663,6 @@
 		return $redirectCode;
 	}
 
-	/**
-	  * Formats a line (passed as a fields  array) as CSV and returns the CSV as a string.
-	  * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
-	  */
-	function arrayToCsv( array &$fields, $delimiter = ';', $enclosure = '"', $encloseAll = false, $nullToMysqlNull = false ) {
-		$delimiter_esc = preg_quote($delimiter, '/');
-		$enclosure_esc = preg_quote($enclosure, '/');
-
-		$output = array();
-		foreach ( $fields as $field ) {
-			if ($field === null && $nullToMysqlNull) {
-				$output[] = 'NULL';
-				continue;
-			}
-
-			// Enclose fields containing $delimiter, $enclosure or whitespace
-			if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ) {
-				$output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
-			}
-			else {
-				$output[] = $field;
-			}
-		}
-
-		return implode( $delimiter, $output );
-	}	
-	
 	function writeLog($logFilename, $ip, $isp, $extra) {
 		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
 		
@@ -709,7 +682,7 @@
 
 		/* Convert to the CSV format */
 		$values = array_values($items);
-		$line = arrayToCsv($values)."\r\n";
+		$line = str_putcsv($values,';','"',"\r\n");
 
 		/* Add it to the log */
 		if (!file_exists($logFilename))
@@ -717,7 +690,7 @@
 			// Create the file with the UTF8 marker and the header
 			$headers = array_keys($items);
 			$line = "\xEF\xBB\xBF".
-					arrayToCsv($headers)."\r\n".
+					str_putcsv($headers,';','"',"\r\n").
 					$line;
 		}
 	

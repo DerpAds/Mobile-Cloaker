@@ -7,7 +7,7 @@
 
 	function processSMSConfig($SMSCampaignID, $root)
 	{
-		return json_decode(file_get_contents(getSMSConfigFilename($SMSCampaignID, $root)), true);
+		return json_decode(file_get_contents_shared_access(getSMSConfigFilename($SMSCampaignID, $root)), true);
 	}
 
 	function getSMSConfigs($root)
@@ -37,7 +37,7 @@
 		{
 			if (strpos($filename, ".config.template") !== false)
 			{			
-				$json = json_decode(file_get_contents("pollconfigtemplates/" . $filename), true);
+				$json = json_decode(file_get_contents_shared_access("pollconfigtemplates/" . $filename), true);
 
 				if ($json["type"] == "GENERAL")
 				{
@@ -63,7 +63,7 @@
 		foreach (array_keys($config) as $key)
 		{
 			$filename = "pollconfigtemplates/$key.config.template";
-			$json = json_decode(file_get_contents($filename), true);
+			$json = json_decode(file_get_contents_shared_access($filename), true);
 
 			if ($json["type"] == "CRM")
 			{
@@ -81,7 +81,7 @@
 		foreach (array_keys($config) as $key)
 		{
 			$filename = "pollconfigtemplates/$key.config.template";
-			$json = json_decode(file_get_contents($filename), true);
+			$json = json_decode(file_get_contents_shared_access($filename), true);
 
 			if ($json["type"] == "SMS")
 			{

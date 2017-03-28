@@ -23,6 +23,8 @@
 	//
 
 	require_once("include/adlib.inc");
+	require_once("include/csvlib.inc");
+	require_once("include/shared_file_access.inc");
 
 	$allowedIspsPerCountry = array("US" => array("AT&T Wireless",
 												 "T-Mobile USA",
@@ -69,30 +71,19 @@
 
 	function getCSVContentAsArray($filename)
 	{
-		$csvDelimiter = "|";
 		$result = array();
 
-		if (file_exists($filename))
+		// Load file
+		$fileContents = file_get_contents_shared_access($filename);
+		if ($fileContents !== false)
 		{
-			$fileContents = file_get_contents($filename);
+			// Parse CSV
+			$parsed = parse_csv($fileContents);
 
-			if (substr_count($fileContents, "\r\n"))
+			// Convert it into an associate array
+			foreach ($parsed as $fields)
 			{
-				$lines = explode("\r\n", $fileContents);
-			}
-			elseif (substr_count($fileContents, "\n"))
-			{
-				$lines = explode("\n", $fileContents);
-			}
-			elseif (substr_count($fileContents, "\r"))
-			{
-				$lines = explode("\r", $fileContents);
-			}
-
-			foreach ($lines as $line)
-			{
-				$elements = explode($csvDelimiter, $line);
-				$result[$elements[0]] = $elements[1];
+				$result[$fields[0]] = $fields[1];
 			}
 		}
 

@@ -93,9 +93,8 @@
 
 		foreach ($logFilenames as $logFilename)
 		{
-			if (file_exists($logFilename))
-			{
-				$log = file_get_contents($logFilename);
+			$log = file_get_contents_shared_access($logFilename);
+			if ($log !== false) {
 
 				if (strpos($logFilename, "mbotlog") !== false)
 				{
@@ -109,8 +108,6 @@
 					$stats["REFERRER_PARAMETER_BLOCKED"] = getAllNextLevelParametersValues($log, "CHECK:REFERRER_PARAMETER_BLOCKED:"); //substr_count($log, "CHECK:REFERRER_PARAMETER_BLOCKED:");
 					$stats["REFERRER_PARAMETER_ALLOWED"] = getAllNextLevelParametersValues($log, "CHECK:REFERRER_PARAMETER_ALLOWED:"); //substr_count($log, "CHECK:REFERRER_PARAMETER_ALLOWED:");
 					$stats["REFERRER_PARAMETER_MISSING"] = getAllNextLevelParametersValues($log, "CHECK:REFERRER_PARAMETER_MISSING:"); //substr_count($log, "CHECK:REFERRER_PARAMETER_MISSING:");
-
-					
 				}
 				elseif (strpos($logFilename, "adlog") !== false)
 				{

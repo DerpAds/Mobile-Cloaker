@@ -35,6 +35,8 @@
 	require_once("include/managersecurity.inc");
 	require_once("include/arrayhelpers.inc");
 	require_once("include/statlib.inc");
+	require_once("include/csvlib.inc");
+	require_once("include/shared_file_access.inc");
 	require_once("admanager_security.php");
 
 	if (array_key_exists("logout", $_GET))
@@ -1069,24 +1071,36 @@
 
 		foreach ($logFilenames as $logFilename)
 		{
-			if (file_exists($logFilename))
+			$fileContents = file_get_contents_shared_access($logFilename);			
+			if ($fileContents !== false)
 			{
+				// Parse the CSV file 
+				$parsed = parse_csv($fileContents,";");
+				
 				echo "<strong>$logFilename</strong><br/>";
 				echo "<div style=\"overflow: scroll; width: 100%; height: 33%;\">\n";
 				echo "<table class=\"table table-bordered table-striped\">\n";
 
-				$fileContents = file_get_contents($logFilename);
-				//$fileContents = iconv("UTF-8", "UTF-8", $fileContents);
+				$firstRow = true;
+				foreach ($parsed as $row) {
+					echo "<tr>\n\t";
+					foreach($row as $field) {
+						if ($firstRow)
+							echo "<th>".$field."</th>";
+						else
+							echo "<td>".$field."</td>";
+					}
+					echo "</tr>\n";
+					$firstRow = false;
+				}
 
-				// this explode will cause duplicate info if querystring contains pipes
-				echo "<tr>\n<td>" . str_replace("\n", "</td></tr>\n<tr><td>", implode("</td><td>", explode("|", $fileContents)));
 				echo "</table>\n";
 				echo "</div>\n";
 				echo "<br/>";
 
 				$filesExist++;
 			}
-		}
+		} 
 
 		if ($filesExist == 0)
 		{
