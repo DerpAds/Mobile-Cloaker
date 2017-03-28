@@ -1,6 +1,6 @@
 <?php
 
-	require_once("shared_file_access.inc");
+	require_once("include/shared_file_access.inc");
 	require_once("include/adlib.inc");
 	require_once("include/statlib.inc");
 
