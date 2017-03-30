@@ -1075,7 +1075,7 @@
 			if ($fileContents !== false)
 			{
 				// Parse the CSV file 
-				$parsed = parse_csv($fileContents,";");
+				$parsed = parse_csv($fileContents,"|");
 				
 				echo "<strong>$logFilename</strong><br/>";
 				echo "<div style=\"overflow: scroll; width: 100%; height: 33%;\">\n";

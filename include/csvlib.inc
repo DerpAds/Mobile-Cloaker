@@ -204,7 +204,7 @@ Also, I took the liberty of replacing fields with certain data types with string
 I am sure some of you out there would appreciate this function.
 */
 
-function str_putcsv($array, $delimiter = ';', $enclosure = '"', $terminator = "\n", $encloseAll = false) { 
+function str_putcsv($array, $delimiter = '|', $enclosure = '"', $terminator = "\n", $encloseAll = false) { 
 
 	$delimiter_esc = preg_quote($delimiter, '/');
 	$enclosure_esc = preg_quote($enclosure, '/');
