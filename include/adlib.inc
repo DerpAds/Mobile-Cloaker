@@ -682,7 +682,7 @@
 
 		/* Convert to the CSV format */
 		$values = array_values($items);
-		$line = str_putcsv($values,'|','"',"\r\n");
+		$line = str_putcsv($values,';','"',"\n");
 
 		/* Add it to the log */
 		if (!file_exists($logFilename))
@@ -690,7 +690,7 @@
 			// Create the file with the UTF8 marker and the header
 			$headers = array_keys($items);
 			$line = "\xEF\xBB\xBF".
-					str_putcsv($headers,'|','"',"\r\n").
+					str_putcsv($headers,'|','"',"\n").
 					$line;
 		}
 	

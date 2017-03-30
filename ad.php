@@ -236,10 +236,18 @@
 	{
 		if ($_SERVER['REQUEST_METHOD'] == "POST" && array_key_exists("data", $_POST))
 		{
+			$info = array("Javascript" => "true");
+						  
+			/* Decompose QueryString into its parts and append them to the log */
+			$count = 0;
 			$decoded = explode("^",urldecode($_POST['data']));
-			$info = array("Type" => $decoded[0],
-						  "Info" => $decoded[1],
-						  "Javascript" => "true");
+			for ($i = 0; $i < count($decoded); $i+=2) {
+				$info[$decoded[$i]] = $decoded[$i+1];
+				$count++;
+			}
+			while ($count < 11) {
+				$info["u".$count] = "";
+			}
 			
 			trafficLoggerLog($campaignID, $info);
 
@@ -253,10 +261,17 @@
 			/* GET method as a way to report information */
 			if (array_key_exists("data", $_GET))
 			{
+				$info = array("Javascript" => "true");
+				
+				/* Decompose QueryString into its parts and append them to the log */
+				$count = 0;
 				$decoded = explode("^",urldecode($_GET['data']));
-				$info = array("Type" => $decoded[0],
-							  "Info" => $decoded[1],
-							  "Javascript" => "true");
+				for ($i = 0; $i < count($decoded); $i+=2) {
+					$info[$decoded[$i]] = $decoded[$i+1];
+				}
+				while ($count < 11) {
+					$info["u".$count] = "";
+				}
 				
 				trafficLoggerLog($campaignID, $info);
 				
@@ -276,9 +291,19 @@
 			}
 			elseif (array_key_exists("nojs", $_GET) && $_GET['nojs'] == 1)
 			{		
-				$info = array("Type" => "",
-							  "Info" => "",
-							  "Javascript" => "false");
+				$info = array("Javascript" => "false",
+							  /* All the following were not found, but lets fill them to avoid missing columns */
+							  "Referrer" => "",
+							  "Browser Res" => "",
+							  "UserAgent" => "",
+							  "AppVersion" => "",
+							  "Platform" => "",
+							  "Is Touch" => "",
+							  "Touch Points" => "",
+							  "Is Sandboxed" => "",
+							  "CanvasFingerPrint" => "",
+							  "Location Hash" => "",
+							  "Location Search" => "");
 			
 				trafficLoggerLog($campaignID, $info);
 				
