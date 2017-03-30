@@ -690,7 +690,7 @@
 			// Create the file with the UTF8 marker and the header
 			$headers = array_keys($items);
 			$line = "\xEF\xBB\xBF".
-					str_putcsv($headers,'|','"',"\n").
+					str_putcsv($headers,';','"',"\n").
 					$line;
 		}
 	
