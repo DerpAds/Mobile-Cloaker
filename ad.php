@@ -842,9 +842,8 @@
 									jslog('CHECK:PLATFORM_BLOCKED: Platform test failed: ' + window.navigator.platform);
 								}
 							}
-					   	}
+					   	}";
 
-					   </script>";
 
 					if ($iFrameCookiesEnabled) {
 						$scriptCode .=
@@ -869,10 +868,14 @@
 if (dreamsky.tool.ismobile()) {";
 
 						foreach($affiliateLinkUrl as $url) {
-							$scriptCode .= "dreamsky.tool.writeOffer('" . $url. "');";
+							if (strlen($url) > 0) {
+								$scriptCode .= "dreamsky.tool.writeOffer('" . $url. "');";
+							}
 						}
 						$scriptCode .= "} ";
 					}					   
+					
+					$scriptCode .= "</script>";
 					   
 		if ($outputMethod === "JS")
 		{
