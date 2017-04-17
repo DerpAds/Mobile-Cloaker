@@ -314,6 +314,7 @@
 				   		   							 "TouchCloakingEnabled" 			=> "true",
 				   		   							 "ForceDirtyAd"						=> "false",
 				   		   							 "VoluumAdCycleCount"				=> "-1"),
+													 "IFrameCookiesEnabled"				=> "false",
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
 	}
 
@@ -363,11 +364,23 @@
 				{
 					$convertedValue = array();
 
-					for ($i = 0; $i < sizeof($value); $i += 2)
+					if (strpos($key, "AffiliateLinkUrl") === false)
 					{
-						if (!empty($value[$i]))
+						for ($i = 0; $i < sizeof($value); $i += 2)
 						{
-							$convertedValue[$value[$i]] = explode("|", $value[$i + 1]);
+							if (!empty($value[$i]))
+							{
+								$convertedValue[$value[$i]] = explode("|", $value[$i + 1]);
+							}
+						}
+					} else {
+						// We will JSON encode the value as it is
+						for ($i = 0; $i < sizeof($value); $i ++)
+						{
+							if (!empty($value[$i]))
+							{
+								$convertedValue[$i] = $value[$i];
+							}
 						}
 					}
 
@@ -857,6 +870,36 @@
 
 		</fieldset>
 
+		<fieldset>
+			<legend>Cookies</legend>
+			<table class="table table-striped" id="cookiesTable">		
+
+			<tr>
+				<td class="col-xs-5">Enable cookie dropping using an iframe</td>
+				<td>
+					<input type="hidden" name="IFrameCookiesEnabled" value="false" />
+					<input class="form-check-input" type="checkbox" name="IFrameCookiesEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "IFrameCookiesEnabled") ? "checked=checked" : null); ?> />
+				</td>
+			</tr>
+			<?php 
+			//print_r_nice($currentAd["configArray"]);
+			if (array_key_exists("AffiliateLinkUrl",$currentAd["configArray"]))
+				$decoded = json_decode($currentAd["configArray"]["AffiliateLinkUrl"]);
+			else
+				$decoded = array();
+			for ($n = 1; $n <= 10; $n++) {
+				
+			?>
+			<tr>
+				<td class="col-xs-5">Affiliate URL # <?= $n ?></td>
+				<td><input type="text" name="AffiliateLinkUrl[]" class="form-control form-control-lg" placeholder="Affiliate URL # <?= $n ?>" value="<?= array_get_value_with_default($decoded, ($n-1), ""); ?>" /></td>
+			</tr>
+<?php 
+			}
+?>
+			</table>
+		</fieldset>
+		
 		<fieldset>
 			<legend>HTML</legend>
 
