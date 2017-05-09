@@ -282,6 +282,8 @@
 		$currentAd["campaignID"] = $_GET['edit'];
 		$currentAd["configArray"] = processAdConfig(getAdConfigFilename($_GET['edit']));
 
+		//print_r_nice($currentAd["configArray"]);
+		
 		if (empty($currentAd["configArray"]["HTMLTemplateValues"]) && !empty($currentAd["configArray"]["HTMLTemplate"]))
 		{
 			$currentAd["configArray"]["HTMLTemplateValues"] = json_encode(getHTMLTemplateValues($currentAd["configArray"]["HTMLTemplate"]));
@@ -313,6 +315,7 @@
 				   		   							 "PluginCloakingEnabled"			=> "true",
 				   		   							 "TouchCloakingEnabled" 			=> "true",
 				   		   							 "ForceDirtyAd"						=> "false",
+													 "HTTPStoHTTP"						=> "false",
 				   		   							 "VoluumAdCycleCount"				=> "-1"),
 													 "IFrameCookiesEnabled"				=> "false",
 				   		   "cleanHtml" 		=> "<html>\n<head>\n\t{script}\n</head>\n<body{onload}>\n</body>\n</html>");
@@ -548,7 +551,7 @@
 				<td>Traffic Logger Enabled</td>
 				<td>
 					<input type="hidden" name="TrafficLoggerEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="TrafficLoggerEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TrafficLoggerEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="TrafficLoggerEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TrafficLoggerEnabled" , false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>			
 
@@ -640,7 +643,7 @@
 				<td>Redirect Enabled</td>
 				<td>
 					<input type="hidden" name="RedirectEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="RedirectEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "RedirectEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="RedirectEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "RedirectEnabled", true) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
 
@@ -667,7 +670,7 @@
 				<td>Tracking Pixel Enabled</td>
 				<td>
 					<input type="hidden" name="TrackingPixelEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="TrackingPixelEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TrackingPixelEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="TrackingPixelEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TrackingPixelEnabled", true) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>			
 
@@ -714,7 +717,7 @@
 				<td>Canvas Fingerprint Check Enabled</td>
 				<td>
 					<input type="hidden" name="CanvasFingerprintCheckEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="CanvasFingerprintCheckEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "CanvasFingerprintCheckEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="CanvasFingerprintCheckEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "CanvasFingerprintCheckEnabled", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
 
@@ -814,7 +817,7 @@
 				<td class="col-xs-5">Logging Enabled (Server side)</td>
 				<td>
 					<input type="hidden" name="LoggingEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="LoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "LoggingEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="LoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "LoggingEnabled", true) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
 
@@ -822,7 +825,7 @@
 				<td class="col-xs-5">Console Logging Enabled (Client side)</td>
 				<td>
 					<input type="hidden" name="ConsoleLoggingEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="ConsoleLoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "ConsoleLoggingEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="ConsoleLoggingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "ConsoleLoggingEnabled", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>			
 
@@ -830,7 +833,7 @@
 				<td>ISP Cloaking Enabled</td>
 				<td>
 					<input type="hidden" name="ISPCloakingEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="ISPCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "ISPCloakingEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="ISPCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "ISPCloakingEnabled", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
 
@@ -838,7 +841,7 @@
 				<td>IFrame Cloaking Enabled</td>
 				<td>
 					<input type="hidden" name="IFrameCloakingEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="IFrameCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "IFrameCloakingEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="IFrameCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "IFrameCloakingEnabled", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
 
@@ -846,7 +849,7 @@
 				<td>Plugin Cloaking Enabled</td>
 				<td>
 					<input type="hidden" name="PluginCloakingEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="PluginCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "PluginCloakingEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="PluginCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "PluginCloakingEnabled", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>			
 
@@ -854,7 +857,7 @@
 				<td>Touch Cloaking Enabled</td>
 				<td>
 					<input type="hidden" name="TouchCloakingEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="TouchCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TouchCloakingEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="TouchCloakingEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "TouchCloakingEnabled", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
 
@@ -862,7 +865,7 @@
 				<td>Force Dirty Ad (Server side)</td>
 				<td>
 					<input type="hidden" name="ForceDirtyAd" value="false" />
-					<input class="form-check-input" type="checkbox" name="ForceDirtyAd" value="true" <?= (array_get_bool($currentAd["configArray"], "ForceDirtyAd") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="ForceDirtyAd" value="true" <?= (array_get_bool($currentAd["configArray"], "ForceDirtyAd", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>			
 
@@ -875,10 +878,18 @@
 			<table class="table table-striped" id="cookiesTable">		
 
 			<tr>
+				<td>Downgrade requests from HTTPS to HTTP</td>
+				<td>
+					<input type="hidden" name="HTTPStoHTTP" value="false" />
+					<input class="form-check-input" type="checkbox" name="HTTPStoHTTP" value="true" <?= (array_get_bool($currentAd["configArray"], "HTTPStoHTTP", false) ? "checked=checked" : null); ?> />
+				</td>
+			</tr>			
+			
+			<tr>
 				<td class="col-xs-5">Enable cookie dropping using an iframe</td>
 				<td>
 					<input type="hidden" name="IFrameCookiesEnabled" value="false" />
-					<input class="form-check-input" type="checkbox" name="IFrameCookiesEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "IFrameCookiesEnabled") ? "checked=checked" : null); ?> />
+					<input class="form-check-input" type="checkbox" name="IFrameCookiesEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "IFrameCookiesEnabled", false) ? "checked=checked" : null); ?> />
 				</td>
 			</tr>
 			<?php 

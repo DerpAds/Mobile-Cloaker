@@ -1,8 +1,10 @@
 <?php
 
-	function array_get_bool($array, $key)
+	function array_get_bool($array, $key, $default = false)
 	{
-		return array_key_exists($key, $array) && $array[$key] === "false" ? false : true;
+		return !array_key_exists($key, $array) 
+			? $default 
+			: ($array[$key] === "false" ? false : true);
 	}
 
 	function array_get_value_with_default($array, $key, $default = null)

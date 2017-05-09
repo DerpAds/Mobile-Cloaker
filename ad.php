@@ -323,39 +323,37 @@
 		}		
 	}
 
-	// Set ad.php click ID cookie
-	$adClickID = uniqid("", true);
-	setcookie("_c", $adClickID, strtotime("+1 year"));
+	/* Function to check if page was served using HTTPS or not */
+	function wasHTTPSServed()
+    {
+		if (array_key_exists('HTTPS',$_SERVER) && $_SERVER['HTTPS'] !== 'off')
+            return true;
 
-	// ad.php visits
-	$adVisits = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] + 1 : 1;
-	setcookie("_v", $adVisits, strtotime("+1 year"));
+        if( !empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' )
+            return true;
 
+        return false;
+    }
+	
+	/* Get the campaign ID and the Query String */
 	$queryString = $_SERVER['QUERY_STRING'];
 	$ampIndex = strpos($queryString, "&");
-
-	if ($ampIndex !== false)
-	{
+	if ($ampIndex !== false) {
 		$campaignID = substr($queryString, 0, $ampIndex);
 		$queryString = substr($queryString, $ampIndex + 1);
-	}
-	else
-	{
+	} else {
 		$campaignID = $queryString;
 		$queryString = "";
 	}
 
-	handleTrafficLoggerData($campaignID);
-
+	/* Load the configuration for that campaign */
 	$configFilename  = "ads/" . $campaignID . ".config.txt";
-
-	if (!file_exists($configFilename))
-	{
+	if (!file_exists($configFilename)) {
 		exit;
 	}
-
 	$adConfig = processAdConfig($configFilename);
 
+	/* Process the configuration */
 	$redirectUrl 					= array_key_exists("RedirectUrl", $adConfig) ? $adConfig["RedirectUrl"] : "";
 	$redirectMethod 				= array_key_exists("Method", $adConfig) ? $adConfig["Method"] : "";
 	$redirectSubMethod1				= array_key_exists("RedirectSubMethod1", $adConfig) ? $adConfig["RedirectSubMethod1"] : "";
@@ -388,7 +386,30 @@
 	$affiliateLinkUrl				= array_key_exists("AffiliateLinkUrl", $adConfig) ? json_decode($adConfig["AffiliateLinkUrl"]) : array();
 	$HTMLTemplate 					= array_key_exists("HTMLTemplate", $adConfig) ? $adConfig["HTMLTemplate"] : "";
 	$HTMLTemplateValues 			= array_key_exists("HTMLTemplateValues", $adConfig) ? json_decode($adConfig["HTMLTemplateValues"]) : "";
+	$HTTPStoHTTP					= array_key_exists("HTTPStoHTTP", $adConfig) && $adConfig["HTTPStoHTTP"] === "true" ? true : false;
+	
+	/* If the page was served as HTTPS and we are asked to downgrade to HTTP ... */
+	if ($HTTPStoHTTP && wasHTTPSServed()) {
+		/* Get the equivalent HTTP URL */
+		$http_url = "http://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
+		
+		/* Perform a redirection to it */
+		header("HTTP/1.1 301 Moved Permanently"); 
+		header("Location: ".$http_url, true, 301); 
+		exit;
+	}
+	
+	// Set ad.php click ID cookie
+	$adClickID = uniqid("", true);
+	setcookie("_c", $adClickID, strtotime("+1 year"));
 
+	// ad.php visits
+	$adVisits = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] + 1 : 1;
+	setcookie("_v", $adVisits, strtotime("+1 year"));
+	
+	/* Perform logging */
+	handleTrafficLoggerData($campaignID);
+	
 	if (!empty($HTMLTemplate))
 	{
 		$resultHtml = renderHTMLTemplate($HTMLTemplate, $HTMLTemplateValues);
