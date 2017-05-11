@@ -2,8 +2,7 @@
 
 	$__VERSION = "5.6-rev1";
 
-	if (array_key_exists("version", $_GET))
-	{
+	if (array_key_exists("version", $_GET)) {
 		echo $__VERSION;
 		exit;
 	}

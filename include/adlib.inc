@@ -664,7 +664,13 @@
 	}
 
 	function writeLog($logFilename, $ip, $isp, $extra) {
-		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
+		/* Get the referrer, either the one specified in the url, or the server detected one */
+		$referrer = ($_SERVER['REQUEST_METHOD'] === 'GET' && array_key_exists("org_referer", $_GET)) 
+			? urldecode($_GET["org_referer"]) 
+			: (array_key_exists('HTTP_REFERER', $_SERVER) 
+				? $_SERVER['HTTP_REFERER'] 
+				: "Unknown"
+			);
 		
 		$items = array(
 				"Date" => date("Y-m-d H:i:s"),
