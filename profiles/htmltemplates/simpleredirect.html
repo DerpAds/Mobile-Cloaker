@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name='viewport' content='width=device-width, initial-scale=1' />
+		<link rel='canonical' href="{{cleanurl}}"/>
+		<noscript>
+			<meta http-equiv='refresh' content="0;URL={{cleanurl}}">
+		</noscript>
+		
+		<!--[if lt IE 9]><script type="text/javascript">var IErefererFix=true;</script><![endif]-->
+		<script type="text/javascript">
+		var url = "{{cleanurl}}";
+		if(typeof IErefererFix != "undefined") {
+			document.write("Redirecting...");
+			var referLink = document.createElement("a");
+			referLink.href = url;
+			document.body.appendChild(referLink);
+			referLink.click();
+		} else { 
+			window.location.replace(url); 
+		}
+		</script>
+	</head>
+</html>
