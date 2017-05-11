@@ -210,6 +210,21 @@
 		writeLog($logFilename, $ip, $isp, array("Message" => "CHECK:ALLOWED_TRAFFIC: Serving dirty ad."));
 	}
 
+	/* Get the page referer or a default value for it */
+	function getReferer($default = "Unknown") 
+	{
+		/* If dealing with a GET request, and an override of the referrer is provided, use it */
+		if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+			if (array_key_exists("org_referer", $_GET)) {
+				return urldecode($_GET["org_referer"]);
+			}
+		}
+		
+		return array_key_exists('HTTP_REFERER', $_SERVER) 
+			? $_SERVER['HTTP_REFERER'] 
+			: $default;
+	}
+	
 	function trafficLoggerLog($campaignID, $extra = array())
 	{
 		$logFilename = "logs/traffic_logger.$campaignID.log.csv";
@@ -224,7 +239,7 @@
 		writeLog($logFilename, $ip, $isp["isp"], $items);
 		return;
 
-		$referrer = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : "Unknown";
+		$referrer = getReferer("Unknown");
 
 		$ip  = getClientIP();
 		$isp = getISPInfo($ip);
@@ -390,11 +405,27 @@
 	
 	/* If the page was served as HTTPS and we are asked to downgrade to HTTP ... */
 	if ($HTTPStoHTTP && wasHTTPSServed()) {
+		
 		/* Get the equivalent HTTP URL */
 		$http_url = "http://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
 		
 		/* Perform a redirection to it */
+		
+		/* Permanent redirection */
 		header("HTTP/1.1 301 Moved Permanently"); 
+		
+		/* Make sure to pass the Referrer to the HTTP version of the site */
+		header("Referrer-Policy: unsafe-url");
+		
+		/* Get the referrer of this site and append it as the last url parameter */
+		$referer = getReferer("");
+		if (strpos($http_url,'?') !== false) {
+			$http_url .= '&org_referer='.urlencode($referer);
+		} else {
+			$http_url .= '?org_referer='.urlencode($referer);
+		}
+		
+		/* And perform the redirection */
 		header("Location: ".$http_url, true, 301); 
 		exit;
 	}
@@ -424,12 +455,6 @@
 	{
 		$adCountry = "US";
 	}
-
-	// Preprocess referrer for usage
-	if (!array_key_exists("HTTP_REFERER", $_SERVER) || $_SERVER['HTTP_REFERER'] === "")
-	{
-		$_SERVER['HTTP_REFERER'] = "_empty_";
-	}	
 
 	$ip  = getClientIP();
 	$geo = getGEOInfo($ip);
@@ -473,13 +498,13 @@
 	{
 		foreach ($blacklistedReferrers as $blackListedReferrer)
 		{
-			if (strpos($_SERVER['HTTP_REFERER'], $blackListedReferrer) !== false)
+			if (strpos(getReferer("_empty_"), $blackListedReferrer) !== false)
 			{
 				$serveCleanAd = true;
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_BLACKLIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in blacklist.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_BLACKLIST_BLOCKED:".getReferer("_empty_").": Referrer ".getReferer("_empty_")." is in blacklist.");
 				}
 
 				break;
@@ -488,7 +513,7 @@
 
 		if (!$serveCleanAd && $loggingEnabled)
 		{
-			mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_BLACKLIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is NOT in blacklist.");
+			mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_BLACKLIST_ALLOWED:".getReferer("_empty_").": Referrer ".getReferer("_empty_")." is NOT in blacklist.");
 		}
 
 		if (!$serveCleanAd && !empty($whitelistedReferrers))
@@ -497,7 +522,7 @@
 
 			foreach ($whitelistedReferrers as $whitelistedReferrer)
 			{
-				if (strpos($_SERVER['HTTP_REFERER'], $whitelistedReferrer) !== false)
+				if (strpos(getReferer("_empty_"), $whitelistedReferrer) !== false)
 				{
 					$matchedWhitelistedReferrer = true;
 
@@ -511,12 +536,12 @@
 
 				if ($loggingEnabled)
 				{
-					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_WHITELIST_BLOCKED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is not in whitelist.");
+					mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_WHITELIST_BLOCKED:".getReferer("_empty_").": Referrer ".getReferer("_empty_")." is not in whitelist.");
 				}
 			}
 			elseif ($loggingEnabled)
 			{
-				mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_WHITELIST_ALLOWED:$_SERVER[HTTP_REFERER]: Referrer $_SERVER[HTTP_REFERER] is in whitelist.");
+				mbotlog($campaignID, $ip, $isp["isp"], "CHECK:REFERRER_WHITELIST_ALLOWED:".getReferer("_empty_").": Referrer ".getReferer("_empty_")." is in whitelist.");
 			}
 		}
 	}
@@ -561,7 +586,7 @@
 	// Check referrer querystring parameters against blocked parameter values
 
 	$referrerParameters = array();
-	parse_str(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_QUERY), $referrerParameters);
+	parse_str(parse_url(getReferer("_empty_"), PHP_URL_QUERY), $referrerParameters);
 
 	if (!$serveCleanAd)
 	{
