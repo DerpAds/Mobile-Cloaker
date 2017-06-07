@@ -379,6 +379,7 @@
 	$allowedIspsPerCountry			= array_key_exists("AllowedISPS", $adConfig) && !empty($adConfig["AllowedISPS"]) ? array($adCountry => preg_split("/\|/", $adConfig["AllowedISPS"], -1, PREG_SPLIT_NO_EMPTY)) : $allowedIspsPerCountry;
 	$blacklistedProvinces 			= array_key_exists("ProvinceBlackList", $adConfig) ? preg_split("/\|/", $adConfig["ProvinceBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
 	$blacklistedCities 				= array_key_exists("CityBlackList", $adConfig) ? preg_split("/\|/", $adConfig["CityBlackList"], -1, PREG_SPLIT_NO_EMPTY) : array();
+	$whitelistedPlatforms			= array_key_exists("PlatformWhiteList", $adConfig) ? preg_split("/\|/", strtolower($adConfig["PlatformWhiteList"]), -1, PREG_SPLIT_NO_EMPTY) : array();
 	$canvasFingerprintCheckEnabled 	= array_key_exists("CanvasFingerprintCheckEnabled", $adConfig) && $adConfig["CanvasFingerprintCheckEnabled"] === "false" ? false : true;
 	$blockedCanvasFingerprints		= array_key_exists("BlockedCanvasFingerprints", $adConfig) ? $adConfig["BlockedCanvasFingerprints"] : "";
 	$outputMethod 					= array_key_exists("OutputMethod", $adConfig) ? $adConfig["OutputMethod"] : "";
@@ -671,6 +672,19 @@
 		}
 	}
 
+	// Check for the platform to be in the whitelist, if any whitelist supplied
+	if (!$serveCleanAd && 
+		count($whitelistedPlatforms) > 0 &&
+		!preg_match( '/('.join('|', $whitelistedPlatforms).')/i', strtolower($_SERVER['HTTP_USER_AGENT']))) {
+		
+		$serveCleanAd = true;
+
+		if ($loggingEnabled)
+		{
+			adlog($campaignID, $ip, $isp["isp"], "CHECK:USERAGENT_MOBILE:$_SERVER[HTTP_USER_AGENT]: Mobile device is not on platform whitelist");
+		}
+	}
+	
 	$referrerDomainScript = "function getReferrerDomain()
 						     {
 					            var topDomain = '';

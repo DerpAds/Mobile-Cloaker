@@ -450,7 +450,7 @@
 	</script>
 
 	<title>
-		Ad Manager - Adcrush Media
+		Ad Manager
 	</title>
 
 </head>
@@ -736,6 +736,11 @@
 				<td><input type="text" name="CityBlackList" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "CityBlackList"); ?>" /></td>
 			</tr>
 
+			<tr>
+				<td>Platform Whitelist (pipe | separated)</td>
+				<td><input type="text" name="PlatformWhiteList" class="form-control form-control-lg" value="<?= array_get_value_with_default($currentAd["configArray"], "PlatformWhiteList"); ?>" /></td>
+			</tr>
+			
 			</table>
 
 		</fieldset>
@@ -874,7 +879,7 @@
 		</fieldset>
 
 		<fieldset>
-			<legend>Cookies</legend>
+			<legend>Ad Rotation</legend>
 			<table class="table table-striped" id="cookiesTable">		
 
 			<tr>
@@ -886,7 +891,7 @@
 			</tr>			
 			
 			<tr>
-				<td class="col-xs-5">Enable cookie dropping using an iframe</td>
+				<td class="col-xs-5">Enable Ad rotation</td>
 				<td>
 					<input type="hidden" name="IFrameCookiesEnabled" value="false" />
 					<input class="form-check-input" type="checkbox" name="IFrameCookiesEnabled" value="true" <?= (array_get_bool($currentAd["configArray"], "IFrameCookiesEnabled", false) ? "checked=checked" : null); ?> />
@@ -894,16 +899,17 @@
 			</tr>
 			<?php 
 			//print_r_nice($currentAd["configArray"]);
-			if (array_key_exists("AffiliateLinkUrl",$currentAd["configArray"]))
-				$decoded = json_decode($currentAd["configArray"]["AffiliateLinkUrl"]);
-			else
+			if (array_key_exists("AffiliateLinkUrl",$currentAd["configArray"])) {
+				$decoded = json_decode($currentAd["configArray"]["AffiliateLinkUrl"], true);
+			} else {
 				$decoded = array();
+			}
 			for ($n = 1; $n <= 10; $n++) {
 				
 			?>
 			<tr>
-				<td class="col-xs-5">Affiliate URL # <?= $n ?></td>
-				<td><input type="text" name="AffiliateLinkUrl[]" class="form-control form-control-lg" placeholder="Affiliate URL # <?= $n ?>" value="<?= array_get_value_with_default($decoded, ($n-1), ""); ?>" /></td>
+				<td class="col-xs-5">Ad URL # <?= $n ?></td>
+				<td><input type="text" name="AffiliateLinkUrl[]" class="form-control form-control-lg" placeholder="Ad URL # <?= $n ?>" value="<?= array_get_value_with_default($decoded, ($n-1), ""); ?>" /></td>
 			</tr>
 <?php 
 			}
@@ -949,7 +955,7 @@
 ?>
 			<input type="hidden" name="HTMLTemplate" value="<?= $currentAd["configArray"]["HTMLTemplate"] ?>" />
 <?php
-			$HTMLTemplateValues = json_decode($currentAd["configArray"]["HTMLTemplateValues"]);
+			$HTMLTemplateValues = json_decode($currentAd["configArray"]["HTMLTemplateValues"], true);
 
 			foreach ($HTMLTemplateValues as $parameter => $parameterValue)
 			{
@@ -1362,7 +1368,7 @@
 ?>
 
 		<div>
-			<small>&copy; <?= date("Y") ?> Adcrush Media</small>
+			<small>&copy; <?= date("Y") ?> (C)</small>
 		</div>
 
 	</div>
