@@ -9,9 +9,7 @@ class User_model extends CI_Model
     function __construct()
     {
         parent::__construct();
-        $this->login_hashes["arthurvanderwal"] = "731161253fafb5236f015e1d5e1c5964";
-        $this->login_hashes["benson"] = "001a487c5c46e41bc7352b97e10359ce";
-        $this->login_hashes["admin"] = md5("admin");
+        $this->login_hashes = $this->config->item("users");
         session_start();
         $this->user_name = array_key_exists("Username", $_SESSION) && !empty($_SESSION['Username'])?$_SESSION['Username']:"";
     }

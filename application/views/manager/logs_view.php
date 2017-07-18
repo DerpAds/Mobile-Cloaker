@@ -26,7 +26,7 @@
         var src = $(div).attr("lazy-load");
         var name = $(div).attr("lazy-load-name");
         $(div).html("<h4>Loading <b>" + name + "</b><br/></h4>");
-        $(div).append($('<img width="50px" src="<?php echo base_url("images/loading.gif");?>"/>'));
+        $(div).append($('<img width="50px" src="<?php echo base_url("assets/admin/images/loading.gif");?>"/>'));
         $.get(src,function(response) {
             $(div).html(response);
         }).fail(function () {

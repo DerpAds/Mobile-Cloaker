@@ -177,13 +177,8 @@ class Ad extends CI_Controller {
                 $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_apps", $f_apps_WeightList);
                 $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_site", $f_site_WeightList);
                 $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_siteid", $f_siteid_WeightList);
-
-                // Append passed in script parameters if outputMethod == JS
-                if ($ad_data->outputMethod === "JS")
-                {
-                    $cookieUrl .= appendParameterPrefix($cookieUrl) . $queryString;
-                }
-
+                $cookieUrl = appendParameterPrefix($cookieUrl) . "campaign_id=" . $id;
+                $cookieUrl = appendParameterPrefix($cookieUrl) . $queryString;
                 // Finally. add the iframe code
                 $scriptCode .= "    dreamsky.tool.writeOffer('" . $cookieUrl. "');";
             }
@@ -192,6 +187,7 @@ class Ad extends CI_Controller {
         $result = $ad_data->popunder_template;
         $result = str_replace("{script}",$scriptCode,$result);
         $result = str_replace("{baseUrl}",base_url(""),$result);
+        $result = str_replace("{assetsUrl}",base_url("assets"),$result);
         echo $result;
 //        $this->load->view("content/landing_view",array("script_code"=>$scriptCode,"content_url"=>base_url("content")));
     }
@@ -365,12 +361,8 @@ class Ad extends CI_Controller {
                 $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_apps", $f_apps_WeightList);
                 $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_site", $f_site_WeightList);
                 $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_siteid", $f_siteid_WeightList);
-
-                // Append passed in script parameters if outputMethod == JS
-                if ($ad_data->outputMethod === "JS")
-                {
-                    $cookieUrl .= appendParameterPrefix($cookieUrl) . $queryString;
-                }
+                $cookieUrl = appendParameterPrefix($cookieUrl) . "campaign_id=" . $id;
+                $cookieUrl = appendParameterPrefix($cookieUrl) . $queryString;
                 // Finally. add the iframe code
                 $affiliate_link_url_list[] = $cookieUrl;
             }
@@ -767,6 +759,8 @@ class Ad extends CI_Controller {
             }
 
             $resultHtml = str_replace("{script}", implode("\n", $scriptElements), $ad_data->resultHtml);
+            $resultHtml = str_replace("{baseUrl}",base_url(""),$resultHtml);
+            $resultHtml = str_replace("{assetsUrl}",base_url("assets"),$resultHtml);
             $resultHtml = str_replace("{onload}", !empty($onloadElements) ? " onload=\"" . implode("", $onloadElements) . "\"" : "", $resultHtml);
 
             if ($ad_data->outputMethod === "JS")
@@ -818,7 +812,7 @@ class Ad extends CI_Controller {
                 // Append passed in script parameters if outputMethod == JS
                 if ($ad_data->outputMethod === "JS")
                 {
-                    $redirectUrl .= appendParameterPrefix($redirectUrl) . $queryString;
+                    $redirectUrl = appendParameterPrefix($redirectUrl) . $queryString;
                 }
 
                 // Append referrer
@@ -852,11 +846,12 @@ class Ad extends CI_Controller {
                         $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_apps", $f_apps_WeightList);
                         $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_site", $f_site_WeightList);
                         $cookieUrl = appendAutoRotateParameter($cookieUrl, "f_siteid", $f_siteid_WeightList);
+                        $cookieUrl = appendParameterPrefix($cookieUrl) . "campaign_id=" . $id;
 
                         // Append passed in script parameters if outputMethod == JS
                         if ($ad_data->outputMethod === "JS")
                         {
-                            $cookieUrl .= appendParameterPrefix($cookieUrl) . $queryString;
+                            $cookieUrl = appendParameterPrefix($cookieUrl) . $queryString;
                         }
                         // Append referrer
                         $cookieUrl = appendReferrerParameter($cookieUrl);
@@ -966,6 +961,8 @@ class Ad extends CI_Controller {
                 $scriptCode .= "\n<script type=\"text/javascript\">go();</script>";
 
                 $resultHtml = str_replace("{script}", $scriptCode, $ad_data->resultHtml);
+                $resultHtml = str_replace("{baseUrl}",base_url(""),$resultHtml);
+                $resultHtml = str_replace("{assetsUrl}",base_url("assets"),$resultHtml);
                 $resultHtml = str_replace("{queryString}", $queryString, $resultHtml);
 
                 $resultHtml = createJSCode($resultHtml);
@@ -976,6 +973,8 @@ class Ad extends CI_Controller {
                 $onloadCode = " onload=\"go();\"";
 
                 $resultHtml = str_replace("{script}", minify($scriptCode), $ad_data->resultHtml);
+                $resultHtml = str_replace("{baseUrl}",base_url(""),$resultHtml);
+                $resultHtml = str_replace("{assetsUrl}",base_url("assets"),$resultHtml);
                 $resultHtml = str_replace("{onload}", $onloadCode, $resultHtml);
             }
         }

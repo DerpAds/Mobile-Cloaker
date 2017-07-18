@@ -421,7 +421,7 @@
                 </tr>
             <?php endfor; ?>
             <tr>
-                <td colspan="2">Popunder HTML code. Use placeholders {script}, {baseUrl}.</td>
+                <td colspan="2">Popunder HTML code. Use placeholders {script}, {baseUrl}, {assetsUrl}.</td>
             </tr>
             <tr>
                 <td colspan="2"><textarea style="width: 100%" rows="20" class="form-check-input" id="PopunderTemplate"
@@ -479,7 +479,7 @@
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="2">Clean HTML code. Use placeholders {script}, {onload} and {queryString}.</td>
+                    <td colspan="2">Clean HTML code. Use placeholders {script},{baseUrl}, {assetsUrl}, {onload} and {queryString}.</td>
                 </tr>
                 <tr>
                     <td colspan="2"><textarea style="width: 100%" rows="20" class="form-check-input" id="cleanHtml"

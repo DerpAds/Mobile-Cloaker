@@ -23,7 +23,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = '';
+$root=(isset($_SERVER['HTTPS']) ? "https://" : "http://").$_SERVER['HTTP_HOST'];
+$root.= str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
+$config['base_url'] = $root;
+//$config['base_url'] = 'http://j2cpower.com/adhost_new/public/';
 
 /*
 |--------------------------------------------------------------------------
@@ -527,14 +530,14 @@ $config['proxy_ips'] = '';
 /*
  * JAVASCRIPT FILES ALIASES
  */
-$excluded = array('.', '..',"minified");
+$excluded = array('.', '..', "minified");
 $fileCount = 0;
-$files = array_diff(scandir(APPPATH."views/js/"), $excluded);
+$files = array_diff(scandir(APPPATH . "views/js/"), $excluded);
 $aliases = array();
-foreach ($files as $file) $aliases[$file] = strtoupper($file[0].$file[1].md5($file)).".js";
+foreach ($files as $file) $aliases[$file] = strtoupper($file[0] . $file[1] . md5($file)) . ".js";
 
 $config["js_aliases"] = $aliases;
 $config["js_aliases_reverse"] = array_flip($config["js_aliases"]);
 
 $config["redirect_method_options"] = array("trycatchredirect", "windowlocation", "windowtoplocation", "windowtoplocationhref", "parentwindowlocationhref", "0x0iframe", "1x1iframe", "fullscreeniframe");
-$config["output_method_options"] =  array("HTML", "JS");
+$config["output_method_options"] = array("HTML", "JS");
