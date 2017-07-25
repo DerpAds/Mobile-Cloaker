@@ -8,6 +8,7 @@
     <li class="active"><a data-toggle="tab" href="#ads">Ads</a></li>
     <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
     <li><a data-toggle="tab" href="#tagtemplates">Tag Templates</a></li>
+    <li><a data-toggle="tab" href="#serverSettings" content-url="<?php echo site_url('ad_manager/view_server_settings'); ?>">Global Settings</a></li>
 </ul>
 
 <div class="tab-content">
@@ -145,9 +146,22 @@
             </tbody>
         </table>
     </div>
+    <div id="serverSettings" class="tab-pane fade">
+    </div>
+
 </div>
 
 <script type="text/javascript">
+
+    $('a[data-toggle="tab"][content-url]').on('shown.bs.tab', function (e) {
+        var div = $($(this).attr("href"));
+        if ($(div).hasClass("content-loaded")) return;
+        var url = $(this).attr("content-url");
+        $(div).addClass("content-loaded");
+        $(div).html("");
+        $(div).append($("<img />").attr("src","<?php echo base_url("assets/admin/images/loading.gif")?>").attr("width","50px"));
+        $(div).load(url);
+    });
 
     $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
         localStorage.setItem('activeTab', $(e.target).attr('href'));
@@ -158,4 +172,5 @@
     if (activeTab) {
         $('#navtab-container a[href="' + activeTab + '"]').tab('show');
     }
+
 </script>

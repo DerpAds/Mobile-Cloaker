@@ -85,9 +85,49 @@ class Ad_manager extends CI_Controller {
         $data["htmlTemplates"] = $this->ad_model->get_templates();
         $data["cookie_dropping_methods"] = $this->get_cookie_dropping_methods();
         $this->load->view("manager/page_view",array("content_view"=>"manager/edit_ad_view","content_data"=>$data));
-
     }
 
+
+    /**
+     * Show the server settings view
+     */
+    public function view_server_settings() {
+        if (!$this->user_model->is_authenticated()) {
+            $this->login_form();
+        }
+        $this->load->model("server_settings_model");
+        $this->load->view("manager/server_settings_view",array("settings"=>$this->server_settings_model->get()));
+    }
+
+    /**
+     * Save the server settings
+     */
+    public function save_server_settings() {
+        $response["result"] = "error";
+        $response["message"] = "Unknown error";
+        if (!$this->user_model->is_authenticated()) {
+            $response["message"] = "unauthorized";
+            echo json_encode($response);
+            return;
+        }
+        $this->load->model("server_settings_model");
+
+        /**
+         * @var server_settings
+         */
+        $settings = new server_settings();
+        $settings->landing_js_referer_blacklist = array_filter(explode("|",$this->input->post("landing_js_referer_blacklist")));
+        $settings->landing_js_referer_whitelist = array_filter(explode("|",$this->input->post("landing_js_referer_whitelist")));
+        $settings->landing_page_referer_blacklist= array_filter(explode("|",$this->input->post("landing_page_referer_blacklist")));
+        $settings->landing_page_referer_whitelist= array_filter(explode("|",$this->input->post("landing_page_referer_whitelist")));
+        $settings->landing_page_cloak_redirect_url = $this->input->post("landing_page_cloak_redirect_url");
+        $redirect_enabled = $this->input->post("landing_page_cloak_redirect_enabled");
+        $settings->landing_page_cloak_redirect_enabled = !empty($redirect_enabled);
+        $this->server_settings_model->save($settings);
+        $response["result"] = "ok";
+        $response["message"] = "Settings saved";
+        echo json_encode($response);
+    }
 
 
     /**

@@ -89,6 +89,7 @@ defined('SITE_COPYRIGHT') OR define("SITE_COPYRIGHT", "&copy; ".date("Y")." Adcr
 
 // Folder Structure
 defined("DBS_PATH") or define("DBS_PATH", APPPATH."data/dbs/");
+defined("SETTINGS_PATH") or define("SETTINGS_PATH", APPPATH."data/");
 defined("ADS_LOGS_PATH") or define("ADS_LOGS_PATH", APPPATH."logs/");
 defined("ADS_CONFIG_PATH") or define("ADS_CONFIG_PATH", APPPATH."data/ads/");
 defined("ADS_TEMPLATES_PATH") or define("ADS_TEMPLATES_PATH", APPPATH."data/profiles/htmltemplates/");

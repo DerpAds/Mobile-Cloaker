@@ -8,6 +8,34 @@ application/logs/*
 !application/logs/index.html
 !application/logs/.htaccess
 
+application/data/ads/*
+!application/data/ads/index.html
+!application/data/ads/.htaccess
+
+application/data/config/*
+!application/data/config/index.html
+!application/data/config/.htaccess
+
+application/data/dbs/*
+!application/data/dbs/index.html
+!application/data/dbs/.htaccess
+
+application/data/profiles/*
+!application/data/profiles/index.html
+!application/data/profiles/.htaccess
+
+application/data/*.json
+
+application/logs/*
+!application/logs/index.html
+!application/logs/.htaccess
+
+public/assets/*
+!public/assets/index.html
+!public/assets/.htaccess
+!public/assets/admin/*
+
+
 composer.lock
 
 user_guide_src/build/*

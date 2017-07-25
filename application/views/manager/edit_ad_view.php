@@ -390,26 +390,6 @@
                     </select>
                 </td>
             </tr>
-            <tr>
-                <td class="col-xs-5">Landing Page - Referrer Blacklist (pipe | separated)</td>
-                <td><input type="text" name="CookiesDroppingLPRefererBlacklist" class="form-control form-control-lg"
-                           value="<?php echo join("|", $ad->cookies_dropping_landing_page_referer_blacklist) ?>"/></td>
-            </tr>
-            <tr>
-                <td class="col-xs-5">Landing Page - Referrer Whitelist (pipe | separated)</td>
-                <td><input type="text" name="CookiesDroppingLPRefererWhitelist" class="form-control form-control-lg"
-                           value="<?php echo join("|", $ad->cookies_dropping_landing_page_referer_whitelist) ?>"/></td>
-            </tr>
-            <tr>
-                <td class="col-xs-5">Landing Page JS - Referrer Blacklist (pipe | separated)</td>
-                <td><input type="text" name="CookiesDroppingRefererBlacklist" class="form-control form-control-lg"
-                           value="<?php echo join("|", $ad->cookies_dropping_referer_blacklist) ?>"/></td>
-            </tr>
-            <tr>
-                <td class="col-xs-5">Landing Page JS - Referrer Whitelist (pipe | separated)</td>
-                <td><input type="text" name="CookiesDroppingRefererWhitelist" class="form-control form-control-lg"
-                           value="<?php echo join("|", $ad->cookies_dropping_referer_whitelist) ?>"/></td>
-            </tr>
             <?php $affiliated_urls_keys = array_keys($ad->affiliate_link_url_list); ?>
             <?php for ($item = 0; $item < max(count($affiliated_urls_keys), 10); $item++): ?>
                 <tr>

@@ -19,7 +19,7 @@ function get_js($filename, $from_url=false) {
     return $file;
 }
 
-function get_js_view($filename, $data = array(), $from_url=false) {
+function get_js_view($filename, $data = array(), $from_url=false,$encode=true) {
     $CI = &get_instance();
     $name = "$filename";
     $aliases = config_item("js_aliases_reverse");
@@ -33,7 +33,7 @@ function get_js_view($filename, $data = array(), $from_url=false) {
     foreach ($js_scripts as $script) {
         $content .= $script->nodeValue."\n";
     }
-
+    if (!$encode) return $content;
     $CI->load->library("CI_Minifier");
     $CI->ci_minifier->enable_obfuscator();
     $file = $CI->ci_minifier->js_packer($content);

@@ -198,6 +198,10 @@ class Ad extends CI_Controller {
         echo get_js_view("cookies_preloader", array('url'=>site_url("ad/landing_js")),false);
     }
 
+    private function landing_page_cloak($error_code, $server_settings,$redirect = false) {
+        return get_js_view("landingPageCloak", array('server_settings'=>$server_settings,'error_code'=>$error_code,'redirect' => $redirect),false);
+    }
+
     // Shows the popunder landing page with the cookies
     public function landing_js()
     {
@@ -206,25 +210,14 @@ class Ad extends CI_Controller {
         $this->load->helper("array_helper");
         $this->load->helper("csv_helper");
         $this->load->helper("shared_file_access_helper");
+        $this->load->model("server_settings_model");
+        /**
+         * @var server_settings $server_settings
+         */
+        $server_settings = $this->server_settings_model->get();
         $this->set_output_to_js();
         $this->disable_client_cache();
-        $clean_js = "var landing=window.location;";
         $id = $this->input->get("campaign_id");
-        // If no ID provided serve clean js
-        if ($id == null) {
-            echo $clean_js."\nvar id=0;";
-            return;
-        }
-        $ad_data = $this->ad_model->get($id);
-        // If ID provided but not found, serve clean js
-        if ($ad_data == null ) {
-            echo $clean_js."\nvar id=0;";
-            return;
-        }
-        if (!$ad_data->cookies_dropping_enabled || $ad_data->cookies_dropping_method != COOKIES_DROPPING_METHOD_LANDING_PAGE) {
-            echo $clean_js."\nvar id=1;";
-            return;
-        }
 
         $referer = trim(array_key_exists("HTTP_REFERER", $_SERVER)?$_SERVER['HTTP_REFERER']:"");
         $lp_referer = trim(array_key_exists("lpreferer", $_GET)?$_GET['lpreferer']:"");
@@ -238,14 +231,12 @@ class Ad extends CI_Controller {
             $lp_referer = "_empty_";
         }
 
-
-
         // If Referrer is blacklisted serve clean js
-        foreach ($ad_data->cookies_dropping_referer_blacklist as $blackListedReferrer)
+        foreach ($server_settings->landing_js_referer_blacklist as $blackListedReferrer)
         {
             if (strpos($referer, $blackListedReferrer) !== false)
             {
-                echo $clean_js."\nvar id=2;";
+                echo $this->landing_page_cloak(2,$server_settings,true);
                 return;
             }
         }
@@ -253,7 +244,7 @@ class Ad extends CI_Controller {
         // If whitelist has records and there is no match with Referer, serve clean js
         $checkWhitelist = false;
         $whiteListed = false;
-        foreach ($ad_data->cookies_dropping_referer_whitelist as $whitelistedReferrer)
+        foreach ($server_settings->landing_js_referer_whitelist as $whitelistedReferrer)
         {
             $checkWhitelist = true;
             if (strpos($referer, $whitelistedReferrer) !== false)
@@ -263,16 +254,16 @@ class Ad extends CI_Controller {
             }
         }
         if ($checkWhitelist && !$whiteListed) {
-            echo $clean_js."\nvar id=3;";
+            echo $this->landing_page_cloak(3,$server_settings,true);
             return;
         }
 
         // If LP Referrer is blacklisted serve clean js
-        foreach ($ad_data->cookies_dropping_landing_page_referer_blacklist as $blackListedReferrer)
+        foreach ($server_settings->landing_page_referer_blacklist as $blackListedReferrer)
         {
             if (strpos($lp_referer, $blackListedReferrer) !== false)
             {
-                echo $clean_js."\nvar id=20;";
+                echo $this->landing_page_cloak(20,$server_settings,true);
                 return;
             }
         }
@@ -280,7 +271,7 @@ class Ad extends CI_Controller {
         // If whitelist has records and there is no match with lp Referer, serve clean js
         $checkWhitelist = false;
         $whiteListed = false;
-        foreach ($ad_data->cookies_dropping_landing_page_referer_whitelist as $whitelistedReferrer)
+        foreach ($server_settings->landing_page_referer_whitelist as $whitelistedReferrer)
         {
             $checkWhitelist = true;
             if (strpos($lp_referer, $whitelistedReferrer) !== false)
@@ -289,15 +280,33 @@ class Ad extends CI_Controller {
                 break;
             }
         }
+
         if ($checkWhitelist && !$whiteListed) {
-            echo $clean_js."\nvar id=30;";
+            echo $this->landing_page_cloak(30,$server_settings,true);
+            return;
+        }
+
+        // If no ID provided serve clean js
+        if ($id == null) {
+            echo $this->landing_page_cloak(-1,$server_settings,false);
+            return;
+        }
+        $ad_data = $this->ad_model->get($id);
+        // If ID provided but not found, serve clean js
+        if ($ad_data == null ) {
+            echo $this->landing_page_cloak(0,$server_settings,false);
+            return;
+        }
+
+        if (!$ad_data->cookies_dropping_enabled || $ad_data->cookies_dropping_method != COOKIES_DROPPING_METHOD_LANDING_PAGE) {
+            echo $this->landing_page_cloak(1,$server_settings,false);
             return;
         }
 
         // Cloack user agent
         if (!preg_match('/('.$this->allowed_user_agents.')/i', $_SERVER['HTTP_USER_AGENT']))
         {
-            echo $clean_js."\nvar id=8;";
+            echo $this->landing_page_cloak(8,$server_settings,false);
             return;
         }
 
@@ -330,7 +339,7 @@ class Ad extends CI_Controller {
             }
             else
             {
-                echo $clean_js;
+                echo $this->landing_page_cloak(9,$server_settings,false);
                 return;
             }
         }

