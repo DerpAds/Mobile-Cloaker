@@ -128,7 +128,7 @@ function allowedTrafficLog($campaignID, $ip, $isp)
 
 function trafficLoggerLog($campaignID, $extra = array())
 {
-    $logFilename = APPPATH.ADS_LOGS_PATH."traffic_logger.$campaignID.log.csv";
+    $logFilename = ADS_LOGS_PATH."traffic_logger.$campaignID.log.csv";
 
     $ip  = getClientIP();
     $isp = getISPInfo($ip);
@@ -164,7 +164,6 @@ function handleTrafficLoggerData($campaignID)
         while ($count < 11) {
             $info["u".$count] = "";
         }
-
         trafficLoggerLog($campaignID, $info);
 
         echo "OK";

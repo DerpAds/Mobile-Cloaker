@@ -92,7 +92,7 @@ class Ad_data {
 		$this->ispCloakingEnabled 			= array_key_exists("ISPCloakingEnabled", $config) && $config["ISPCloakingEnabled"] === "false" ? false : $this->ispCloakingEnabled;
 		$this->iframeCloakingEnabled 			= array_key_exists("IFrameCloakingEnabled", $config) && $config["IFrameCloakingEnabled"] === "false" ? false : $this->iframeCloakingEnabled;
 		$this->pluginCloakingEnabled 			= array_key_exists("PluginCloakingEnabled", $config) && $config["PluginCloakingEnabled"] === "false" ? false : $this->pluginCloakingEnabled;
-		$this->touchCloakingEnabled 			= array_key_exists("TouchCloakingEnabled", $config) && $config["TouchCloakingEnabled"] === "false" ? false : $this->touchCloakingEnabled;
+		$this->touchCloakingEnabled 			= !array_key_exists("TouchCloakingEnabled", $config)?$this->touchCloakingEnabled:($config["TouchCloakingEnabled"] === "true" ? true : false);
 		$this->motionCloakingEnabled 			= array_key_exists("MotionCloakingEnabled", $config) && $config["MotionCloakingEnabled"] === "false" ? false : $this->motionCloakingEnabled;
 		$this->orientationCloakingEnabled     = array_key_exists("OrientationCloakingEnabled", $config) && $config["OrientationCloakingEnabled"] === "false" ? false : $this->orientationCloakingEnabled;
 		$this->blockedParameterValues			= array_key_exists("BlockedParameterValues", $config) ? json_decode($config["BlockedParameterValues"],true) : $this->blockedParameterValues;

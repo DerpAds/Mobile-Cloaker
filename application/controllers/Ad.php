@@ -28,8 +28,7 @@ class Ad extends CI_Controller {
 	    header("X-Frame-Options: SAMEORIGIN");
 	    echo "USER AGENT: ".$_SERVER['HTTP_USER_AGENT'];
         $this->allowed_user_agents = "iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10|Chrome";
-        $data = $this->input->post();
-        if (!empty($data)) {
+        if (!empty($this->input->get_post("data"))) {
             $this->load->helper("ad_helper");
             $this->load->helper("csv_helper");
             $this->load->helper("array_helper");
@@ -49,7 +48,7 @@ class Ad extends CI_Controller {
         $ad_data->platform_whitelist = array("iphone","linux armv","Win32");
         $ad_data->redirectMethod = "windowlocation";
 //        $ad_data->forceDirtyAd = true;
-        $this->_view($id,$ad_data, $data);
+        $this->_view($id,$ad_data);
     }
 
     public function show($id) {
@@ -61,8 +60,7 @@ class Ad extends CI_Controller {
     public function force_view($id=null)
     {
         $this->allowed_user_agents = "iPhone|iPod|iPad|Android|BlackBerry|IEMobile|MIDP|BB10|Chrome";
-        $data = $this->input->post();
-        if (!empty($data)) {
+        if (!empty($this->input->get_post("data"))) {
             $this->load->helper("ad_helper");
             $this->load->helper("csv_helper");
             $this->load->helper("array_helper");
@@ -82,7 +80,7 @@ class Ad extends CI_Controller {
         $ad_data->platform_whitelist = array("iphone","linux armv","Win32");
 //        $ad_data->forceDirtyAd = true;
         $ad_data->iframeCloakingEnabled = false;
-        $this->_view($id,$ad_data, $data);
+        $this->_view($id,$ad_data);
     }
 
     private function handle_js_log_data($id) {
@@ -128,8 +126,7 @@ class Ad extends CI_Controller {
             $this->handle_js_log_data($id);
             return;
         }
-        $data = $this->input->post();
-        if (!empty($data)) {
+        if (!empty($this->input->get_post("data"))) {
             $this->load->helper("ad_helper");
             $this->load->helper("csv_helper");
             $this->load->helper("array_helper");
@@ -145,7 +142,7 @@ class Ad extends CI_Controller {
             $this->show_not_found();
             return;
         }
-        $this->_view($id,$ad_data, $data);
+        $this->_view($id,$ad_data);
     }
 
 
@@ -475,7 +472,7 @@ class Ad extends CI_Controller {
     }
 
 
-    private function _view($id, $ad_data, $data)
+    private function _view($id, $ad_data)
     {
         $debug = $this->input->get("debug") == "true"?true:false;
         if ($debug) {
