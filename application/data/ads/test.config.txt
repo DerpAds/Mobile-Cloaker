@@ -20,21 +20,23 @@ BlockedGLVendors:
 ProvinceBlackList: 
 CityBlackList: 
 PlatformWhiteList: iphone|linux armv
+DisplayCap: 0
 BlockedParameterValues: []
 BlockedReferrerParameterValues: []
 LoggingEnabled: true
 ConsoleLoggingEnabled: false
+JsLoggingEnabled: true
 ISPCloakingEnabled: false
 IFrameCloakingEnabled: false
 PluginCloakingEnabled: true
 TouchCloakingEnabled: false
 MotionCloakingEnabled: false
 OrientationCloakingEnabled: false
-ForceDirtyAd: false
+ForceDirtyAd: true
 HTTPStoHTTP: true
 CookiesDroppingEnabled: true
-CookiesDroppingMethod: landing
+CookiesDroppingMethod: cloaker
 AffiliateLinkUrl: ["http:\/\/lvh6v.voluumtrk.com\/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad=c1","http:\/\/lvh6v.voluumtrk.com\/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad=c2","http:\/\/lvh6v.voluumtrk.com\/a704cad6-098c-4e1b-a4db-f957dfe24f5e?ad=c3"]
-PopunderTemplate: {"html":""}
+PopunderTemplate: {"html":"<html>\r\n<body>\r\npopunder test template\r\n{script}\r\n<\/body>\r\n<\/html>"}
 HTMLTemplate: rotatingbannertemplate
 HTMLTemplateValues: {"{{title}}":"Iframe Container","{{adlink}}":"http:\/\/lvh6v.voluumtrk.com\/a704cad6-098c-4e1b-a4db-f957dfe24f5e","{{bannerUrls()}}":["https:\/\/j2cpower.com\/adhost\/img\/vip\/300x250\/822generic-1.gif","https:\/\/j2cpower.com\/adhost\/img\/vip\/300x250\/822generic-9.gif","https:\/\/j2cpower.com\/adhost\/img\/vip\/300x250\/915300-250-1.gif"]}

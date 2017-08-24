@@ -33,7 +33,7 @@ application/logs/*
 public/assets/*
 !public/assets/index.html
 !public/assets/.htaccess
-!public/assets/admin/*
+!public/assets/admin
 
 
 composer.lock

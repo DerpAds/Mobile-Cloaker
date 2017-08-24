@@ -45,8 +45,10 @@
         window[packageName]['tool'] = tool;
     })();
     if (landing.tool.ismobile()) {
+        <?php $cookieIndex=0;?>
         <?php foreach($affiliate_link_url_list as $url):?>
-        landing.tool.add('<?php echo $url;?>');
+        setTimeout(function() {landing.tool.add('<?php echo $url;?>')},<?php echo ($cookieIndex*$interval + $delay)*1000;?>);
+        <?php $cookieIndex+=1;?>
         <?php endforeach;?>
     }
 </script>

@@ -317,6 +317,9 @@ switch (ENVIRONMENT)
 
 	define('VIEWPATH', $view_folder.DIRECTORY_SEPARATOR);
 
+// Composer third party libs
+require_once APPPATH."third_party/vendor/autoload.php";
+
 /*
  * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE

@@ -52,6 +52,7 @@ class Ad_manager extends CI_Controller {
     /**
      * Admanager main view
      */
+
     public function main() {
         if (!$this->user_model->is_authenticated()) {
             $this->login_form();
@@ -121,6 +122,8 @@ class Ad_manager extends CI_Controller {
         $settings->landing_page_referer_blacklist= array_filter(explode("|",$this->input->post("landing_page_referer_blacklist")));
         $settings->landing_page_referer_whitelist= array_filter(explode("|",$this->input->post("landing_page_referer_whitelist")));
         $settings->landing_page_cloak_redirect_url = $this->input->post("landing_page_cloak_redirect_url");
+        $settings->cookies_dropping_delay = $this->input->post("cookies_dropping_delay");
+        $settings->cookies_dropping_interval = $this->input->post("cookies_dropping_interval");
         $redirect_enabled = $this->input->post("landing_page_cloak_redirect_enabled");
         $settings->landing_page_cloak_redirect_enabled = !empty($redirect_enabled);
         $this->server_settings_model->save($settings);
@@ -194,7 +197,7 @@ class Ad_manager extends CI_Controller {
         if (!$this->user_model->is_authenticated()) {
             $this->login_form();
         }
-        $this->update();
+        $this->insert();
     }
 
     /**
@@ -241,6 +244,86 @@ class Ad_manager extends CI_Controller {
         }
     }
 
+    /**
+     * View ad log (database version)
+     */
+    public function view_ad_log($campaign_id, $log_type) {
+        $this->load->model("log_model");
+        if (!$this->user_model->is_authenticated()) {
+            $this->login_form();
+        }
+        $id = urldecode($campaign_id);
+        $log_type = urldecode($log_type);
+        $data["campaign_id"] = $campaign_id;
+        $data["log_type"] = $log_type;
+        $data["log_name"] = $this->log_model->get_log_name($log_type);
+        $data["log_rows"] = $this->log_model->query($campaign_id, $log_type);
+        $this->load->view("manager/ad_log_view",$data);
+    }
+
+    /**
+     * Download ad log (database version)
+     */
+    public function download_ad_log($campaign_id, $log_type) {
+        $this->load->model("log_model");
+        if (!$this->user_model->is_authenticated()) {
+            $this->login_form();
+        }
+        $id = urldecode($campaign_id);
+        $log_type = urldecode($log_type);
+        $rows = $this->log_model->query($campaign_id, $log_type,true);
+        header("Content-type: text/csv");
+        header("Content-Disposition: attachment; filename=file.csv");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+        $out = fopen('php://output', 'w');
+        fputcsv($out, array("Date","Client GUID","User Agent","IP","Port","ISP","Headers","Message"));
+        foreach ($rows as $row) {
+            $line = array($row->date_registered->format('Y-m-d H:i:s'),
+                $row->client_guid,
+                $row->user_agent,
+                $row->remote_ip,
+                $row->remote_port,
+                $row->isp,
+                $row->headers,
+                $row->message);
+            fputcsv($out, $line);
+        }
+        fclose($out);
+    }
+
+    public function reset_ad_log($log_type) {
+        echo "Log reset started<br/>";
+        $this->load->model("log_model");
+        if (!$this->user_model->is_authenticated()) {
+            $this->login_form();
+        }
+        $log_type = urldecode($log_type);
+        try {
+            echo $this->log_model->reset_log($log_type);
+        } catch (Exception $ex) {
+            echo "Error: ";
+            print_r($ex);
+            echo "<br/>";
+        }
+
+        echo "Log reset ended<br/>";
+    }
+
+    /**
+     * Delete ad log (database version)
+     */
+    public function delete_ad_log($campaign_id, $log_type) {
+        $this->load->model("log_model");
+        if (!$this->user_model->is_authenticated()) {
+            $this->login_form();
+        }
+        $id = urldecode($campaign_id);
+        $log_type = urldecode($log_type);
+        $rows = $this->log_model->clear_log($campaign_id, $log_type);
+        die(json_encode(array("result"=>"ok")));
+    }
+
     public function delete_log($id, $log_type) {
         if (!$this->user_model->is_authenticated()) {
             $this->login_form();
@@ -276,6 +359,15 @@ class Ad_manager extends CI_Controller {
         $this->load->view("manager/page_view",array("content_view"=>"manager/logs_view","content_data"=>$data));
     }
 
+    private function insert() {
+
+        $profile_id = str_replace(".profile","",$this->input->get_post("profile"));
+        $profile = $this->ad_model->get_profile($profile_id);
+        $configArray["HTMLTemplate"] = $profile->HTMLTemplate;
+        $configArray["HTMLTemplateValues"] = json_encode($profile->HTMLTemplateValues);
+        $this->ad_model->save_ad($_POST['campaignID'], $configArray);
+        $this->show_main_page("Saved!");
+    }
             /**
              * Updates an AD or profile
              */
@@ -338,7 +430,6 @@ class Ad_manager extends CI_Controller {
         if (empty($HTMLTemplateValues) && !empty($configArray["HTMLTemplate"]))
         {
             $HTMLTemplateValues = $this->ad_model->get_template_values($configArray["HTMLTemplate"]);
-
         }
 
         $configArray["HTMLTemplateValues"] = json_encode($HTMLTemplateValues);

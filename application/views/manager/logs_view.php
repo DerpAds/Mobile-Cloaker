@@ -2,6 +2,7 @@
     <div lazy-load="<?php echo site_url("ad_manager/view_log/$id/stats")?>" lazy-load-name="stats" delete-url="<?php echo site_url("ad_manager/delete_logs/$id")?>">
     </div>
     <br/><br/>
+
     <?php if (isset($logs) && count($logs) > 0):?>
         <?php foreach ($logs as $log_filename):?>
             <div lazy-load="<?php echo site_url("ad_manager/view_log/$id")."/".urlencode("$log_filename")?>" lazy-load-name="<?php echo $log_filename?>" delete-url="<?php echo site_url("ad_manager/delete_log/$id")."/".urlencode("$log_filename")?>">
@@ -10,7 +11,14 @@
         <?php endforeach;?>
     <?php else:?>
         No log files found.<br/>
+        <br/><br/>
     <?php endif;?>
+    <div lazy-load="<?php echo site_url("ad_manager/view_ad_log/$id/1")?>" lazy-load-name="JS Log"
+         delete-url="<?php echo site_url("ad_manager/delete_ad_log/$id/1")?>"
+         download-url="<?php echo site_url("ad_manager/download_ad_log/$id/1")?>">
+    </div>
+    <br/><br/>
+
     <div>
         <button type="button" class="btn btn-primary" onclick="window.location = '<?php echo site_url("ad_manager/main")."/".mt_rand();?>';">
             Back
@@ -50,6 +58,13 @@
             $(div).unblock();
             alert("Error processing request");
         });
+    }
+
+    function download_link(link) {
+        var div = $(link).closest('div[lazy-load]');
+        var name = $(div).attr("lazy-load-name");
+        var url = $(div).attr("download-url");
+        window.open(url);
     }
 
     function delete_all_link(link) {

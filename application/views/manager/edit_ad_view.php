@@ -231,6 +231,11 @@
                 <td>Platform Whitelist (pipe | separated)</td>
                 <td><input type="text" name="PlatformWhiteList" class="form-control form-control-lg" value="<?php echo join("|", $ad->platform_whitelist) ?>" /></td>
             </tr>
+            <tr>
+                <td>Display Cap (0 to disable)</td>
+                <td><input type="text" name="DisplayCap" id="DisplayCap"
+                           class="form-control form-control-lg" value="<?php echo $ad->display_cap ?>"/></td>
+            </tr>
 
         </table>
 
@@ -297,6 +302,14 @@
                     <input type="hidden" name="ConsoleLoggingEnabled" value="false"/>
                     <input class="form-check-input" type="checkbox" name="ConsoleLoggingEnabled" value="true"
                            <?php if ($ad->consoleLoggingEnabled): ?>checked=checked"<?php endif; ?>/>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-xs-5">JS Logging Enabled (Client side sent to server)</td>
+                <td>
+                    <input type="hidden" name="JsLoggingEnabled" value="false"/>
+                    <input class="form-check-input" type="checkbox" name="JsLoggingEnabled" value="true"
+                           <?php if ($ad->js_logging): ?>checked=checked"<?php endif; ?>/>
                 </td>
             </tr>
             <tr>
@@ -463,7 +476,7 @@
                 </tr>
                 <tr>
                     <td colspan="2"><textarea style="width: 100%" rows="20" class="form-check-input" id="cleanHtml"
-                                              name="cleanHtml"><?php echo $ad->resultHTML; ?></textarea></td>
+                                              name="cleanHtml"><?php echo $ad->resultHtml; ?></textarea></td>
                 </tr>
             <?php endif; ?>
         </table>

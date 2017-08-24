@@ -6,8 +6,12 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
         <script src="<?php echo base_url("assets/admin/js/blockui.js");?>"></script>
+        <script src="<?php echo base_url("assets/admin/js/bootstrap-slider.js");?>"></script>
+        <script src="<?php echo base_url("assets/admin/js/jquery.bootstrap-touchspin.min.js");?>"></script>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
         <link rel="stylesheet" href="<?php echo base_url("assets/admin/css/manager.css");?>">
+        <link rel="stylesheet" href="<?php echo base_url("assets/admin/css/bootstrap-slider.css");?>">
+        <link rel="stylesheet" href="<?php echo base_url("assets/admin/css/jquery.bootstrap-touchspin.min.css");?>">
         <title>Ad Manager - Adcrush Media</title>
     </head>
 

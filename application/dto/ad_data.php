@@ -61,6 +61,8 @@ class Ad_data {
 
     public $platform_whitelist = array('iphone','linux armv');
     public $user_agent_whitelist = array('iphone','linux armv');
+    public $display_cap = 0;
+    public $js_logging = false;
 
     function __construct($id = "", $config = null) {
 		if ($config == null) return;
@@ -109,6 +111,9 @@ class Ad_data {
         $this->cookies_dropping_method				= array_key_exists("CookiesDroppingMethod", $config) ? $config["CookiesDroppingMethod"] : $this->cookies_dropping_method;
         $this->platform_whitelist 			= array_key_exists("PlatformWhiteList", $config) ? preg_split("/\|/", $config["PlatformWhiteList"], -1, PREG_SPLIT_NO_EMPTY) : $this->platform_whitelist;
         $this->user_agent_whitelist 		= $this->platform_whitelist; //	= array_key_exists("UserAgentWhiteList", $config) ? preg_split("/\|/", $config["UserAgentWhiteList"], -1, PREG_SPLIT_NO_EMPTY) : $this->user_agent_whitelist;
+        $this->display_cap				= array_key_exists("DisplayCap", $config) ? $config["DisplayCap"] : $this->display_cap;
+        $this->js_logging 					= !array_key_exists("JsLoggingEnabled", $config)?$this->js_logging:($config["JsLoggingEnabled"] === "true" ? true : false);
+        
 	}
 }
 

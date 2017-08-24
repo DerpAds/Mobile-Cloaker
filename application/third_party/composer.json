@@ -1,0 +1,5 @@
+{
+    "require": {
+        "rhumsaa/uuid": "^2.8"
+    }
+}
